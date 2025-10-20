@@ -47,7 +47,7 @@
 
 	<properties>
 		<junit.version>5.13.4</junit.version>
-		<spotbugs.version>4.9.6</spotbugs.version>
+		<spotbugs.version>4.9.8</spotbugs.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.release>21</maven.compiler.release>
 		<gpg.skip>true</gpg.skip>
