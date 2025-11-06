@@ -7,8 +7,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.sitepark.ies.security.core.usecase.SetUserPasswordRequest;
-import com.sitepark.ies.security.core.usecase.SetUserPasswordUseCase;
+import com.sitepark.ies.security.core.usecase.password.SetUserPasswordRequest;
+import com.sitepark.ies.security.core.usecase.password.SetUserPasswordUseCase;
 import com.sitepark.ies.sharedkernel.audit.AuditLogService;
 import com.sitepark.ies.sharedkernel.audit.CreateAuditLogRequest;
 import com.sitepark.ies.sharedkernel.patch.PatchDocument;

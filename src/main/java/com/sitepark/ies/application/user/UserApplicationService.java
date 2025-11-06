@@ -1,7 +1,7 @@
 package com.sitepark.ies.application.user;
 
-import com.sitepark.ies.security.core.usecase.SetUserPasswordRequest;
-import com.sitepark.ies.security.core.usecase.SetUserPasswordUseCase;
+import com.sitepark.ies.security.core.usecase.password.SetUserPasswordRequest;
+import com.sitepark.ies.security.core.usecase.password.SetUserPasswordUseCase;
 import com.sitepark.ies.sharedkernel.audit.AuditLogService;
 import com.sitepark.ies.sharedkernel.audit.CreateAuditLogRequest;
 import com.sitepark.ies.userrepository.core.domain.value.AuditLogAction;
