@@ -65,16 +65,18 @@ public final class CreateUserWithPasswordService {
           request.roleIdentifiers().size());
     }
 
-    // 1. Create user (without password) via userrepository-core
     String userId =
         this.createUserService.createUser(
-            CreateUserRequest.builder()
-                .user(request.user())
-                .roleIdentifiers(b -> b.identifiers(request.roleIdentifiers()))
+            CreateUserServiceRequest.builder()
+                .createUserRequest(
+                    com.sitepark.ies.userrepository.core.usecase.user.CreateUserRequest.builder()
+                        .user(request.user())
+                        .roleIdentifiers(b -> b.identifiers(request.roleIdentifiers()))
+                        .build())
+                .labelIdentifiers(b -> b.identifiers(request.labelIdentifiers()))
                 .auditParentId(request.auditParentId())
                 .build());
 
-    // 2. Set password (if provided) via security-core
     String password = request.password();
     if (password != null && !password.isBlank()) {
       if (LOGGER.isDebugEnabled()) {

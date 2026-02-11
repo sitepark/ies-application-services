@@ -18,7 +18,10 @@
 module com.sitepark.ies.application {
   exports com.sitepark.ies.application.user;
   exports com.sitepark.ies.application.label;
+  exports com.sitepark.ies.application.role;
+  exports com.sitepark.ies.application.privilege;
 
+  requires com.google.guice;
   requires com.sitepark.ies.userrepository.core;
   requires com.sitepark.ies.security.core;
   requires com.sitepark.ies.label.core;
@@ -29,4 +32,5 @@ module com.sitepark.ies.application {
   requires static org.jetbrains.annotations;
   requires java.desktop;
   requires com.fasterxml.jackson.databind;
+  requires com.sitepark.ies.audit.core;
 }

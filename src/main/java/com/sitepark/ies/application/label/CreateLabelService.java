@@ -1,16 +1,13 @@
 package com.sitepark.ies.application.label;
 
+import com.sitepark.ies.application.ApplicationAuditLogService;
+import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
+import com.sitepark.ies.application.audit.AuditLogAction;
 import com.sitepark.ies.label.core.domain.entity.Label;
-import com.sitepark.ies.label.core.domain.value.AuditLogAction;
-import com.sitepark.ies.label.core.domain.value.AuditLogEntityType;
-import com.sitepark.ies.label.core.usecase.CreateLabelRequest;
 import com.sitepark.ies.label.core.usecase.CreateLabelResult;
 import com.sitepark.ies.label.core.usecase.CreateLabelUseCase;
-import com.sitepark.ies.sharedkernel.audit.AuditLogService;
-import com.sitepark.ies.sharedkernel.audit.CreateAuditLogEntryFailedException;
-import com.sitepark.ies.sharedkernel.audit.CreateAuditLogRequest;
+import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import jakarta.inject.Inject;
-import java.io.IOException;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -30,12 +27,14 @@ import org.jetbrains.annotations.NotNull;
 public final class CreateLabelService {
 
   private final CreateLabelUseCase createLabelUseCase;
-  private final AuditLogService auditLogService;
+  private final ApplicationAuditLogServiceFactory auditLogServiceFactory;
 
   @Inject
-  CreateLabelService(CreateLabelUseCase createLabelUseCase, AuditLogService auditLogService) {
+  CreateLabelService(
+      CreateLabelUseCase createLabelUseCase,
+      ApplicationAuditLogServiceFactory auditLogServiceFactory) {
     this.createLabelUseCase = createLabelUseCase;
-    this.auditLogService = auditLogService;
+    this.auditLogServiceFactory = auditLogServiceFactory;
   }
 
   /**
@@ -56,39 +55,25 @@ public final class CreateLabelService {
    * @throws com.sitepark.ies.sharedkernel.anchor.AnchorAlreadyExistsException if anchor already
    *     exists
    */
-  public String createLabel(@NotNull CreateLabelRequest request) {
+  public String createLabel(@NotNull CreateLabelServiceRequest request) {
 
-    // 1. Create label via label-core
-    CreateLabelResult result = this.createLabelUseCase.createLabel(request);
-
-    // 2. Create audit log for label creation
-    this.createLabelCreationAuditLog(result);
+    CreateLabelResult result = this.createLabelUseCase.createLabel(request.createLabelRequest());
+    this.createLabelCreationAuditLog(result, request.auditParentId());
 
     return result.labelId();
   }
 
-  private void createLabelCreationAuditLog(CreateLabelResult result) {
+  protected void createLabelCreationAuditLog(CreateLabelResult result, String auditLogParentId) {
+
+    ApplicationAuditLogService auditLogService =
+        this.auditLogServiceFactory.create(result.timestamp(), auditLogParentId);
 
     Label label = result.snapshot().label();
-    String forwardData;
-    try {
-      forwardData = this.auditLogService.serialize(result.snapshot());
-    } catch (IOException e) {
-      throw new CreateAuditLogEntryFailedException(
-          AuditLogEntityType.LABEL.name(), result.labelId(), label.name(), e);
-    }
-
-    CreateAuditLogRequest auditRequest =
-        new CreateAuditLogRequest(
-            AuditLogEntityType.LABEL.name(),
-            result.labelId(),
-            label.name(),
-            AuditLogAction.CREATE.name(),
-            null,
-            forwardData,
-            result.timestamp(),
-            null);
-
-    this.auditLogService.createAuditLog(auditRequest);
+    auditLogService.createLog(
+        EntityRef.of(Label.class, result.labelId()),
+        label.name(),
+        AuditLogAction.CREATE,
+        null,
+        result.snapshot());
   }
 }

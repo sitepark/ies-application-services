@@ -31,7 +31,7 @@ class CreateUserWithPasswordServiceTest {
 
     User user = User.builder().login("testuser").lastName("Test").build();
 
-    when(createUserService.createUser(any(CreateUserRequest.class))).thenReturn("123");
+    when(createUserService.createUser(any(CreateUserServiceRequest.class))).thenReturn("123");
 
     CreateUserWithPasswordRequest request =
         CreateUserWithPasswordRequest.builder()
@@ -50,7 +50,7 @@ class CreateUserWithPasswordServiceTest {
 
     User user = User.builder().login("testuser").lastName("Test").build();
 
-    when(createUserService.createUser(any(CreateUserRequest.class))).thenReturn("123");
+    when(createUserService.createUser(any(CreateUserServiceRequest.class))).thenReturn("123");
 
     CreateUserWithPasswordRequest request =
         CreateUserWithPasswordRequest.builder()
@@ -61,7 +61,7 @@ class CreateUserWithPasswordServiceTest {
 
     service.createUserWithPassword(request);
 
-    verify(createUserService).createUser(any(CreateUserRequest.class));
+    verify(createUserService).createUser(any(CreateUserServiceRequest.class));
   }
 
   @Test
@@ -69,7 +69,7 @@ class CreateUserWithPasswordServiceTest {
 
     User user = User.builder().login("testuser").lastName("Test").build();
 
-    when(createUserService.createUser(any(CreateUserRequest.class))).thenReturn("123");
+    when(createUserService.createUser(any(CreateUserServiceRequest.class))).thenReturn("123");
 
     CreateUserWithPasswordRequest request =
         CreateUserWithPasswordRequest.builder()
@@ -88,7 +88,7 @@ class CreateUserWithPasswordServiceTest {
 
     User user = User.builder().login("testuser").lastName("Test").build();
 
-    when(createUserService.createUser(any(CreateUserRequest.class))).thenReturn("456");
+    when(createUserService.createUser(any(CreateUserServiceRequest.class))).thenReturn("456");
 
     CreateUserWithPasswordRequest request =
         CreateUserWithPasswordRequest.builder().user(user).build();
@@ -103,7 +103,7 @@ class CreateUserWithPasswordServiceTest {
 
     User user = User.builder().login("testuser").lastName("Test").build();
 
-    when(createUserService.createUser(any(CreateUserRequest.class))).thenReturn("456");
+    when(createUserService.createUser(any(CreateUserServiceRequest.class))).thenReturn("456");
 
     CreateUserWithPasswordRequest request =
         CreateUserWithPasswordRequest.builder().user(user).build();
@@ -118,7 +118,7 @@ class CreateUserWithPasswordServiceTest {
 
     User user = User.builder().login("testuser").lastName("Test").build();
 
-    when(createUserService.createUser(any(CreateUserRequest.class))).thenReturn("789");
+    when(createUserService.createUser(any(CreateUserServiceRequest.class))).thenReturn("789");
 
     CreateUserWithPasswordRequest request =
         CreateUserWithPasswordRequest.builder().user(user).password("").build();
@@ -133,7 +133,7 @@ class CreateUserWithPasswordServiceTest {
 
     User user = User.builder().login("testuser").lastName("Test").build();
 
-    when(createUserService.createUser(any(CreateUserRequest.class))).thenReturn("789");
+    when(createUserService.createUser(any(CreateUserServiceRequest.class))).thenReturn("789");
 
     CreateUserWithPasswordRequest request =
         CreateUserWithPasswordRequest.builder().user(user).password("").build();

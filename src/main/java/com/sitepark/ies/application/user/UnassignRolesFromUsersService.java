@@ -1,18 +1,19 @@
 package com.sitepark.ies.application.user;
 
-import com.sitepark.ies.sharedkernel.audit.AuditLogService;
-import com.sitepark.ies.sharedkernel.audit.CreateAuditLogEntryFailedException;
-import com.sitepark.ies.sharedkernel.audit.CreateAuditLogRequest;
+import com.sitepark.ies.application.ApplicationAuditLogService;
+import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
+import com.sitepark.ies.application.MultiEntityNameResolver;
+import com.sitepark.ies.application.audit.AuditBatchLogAction;
+import com.sitepark.ies.application.audit.AuditLogAction;
+import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import com.sitepark.ies.userrepository.core.domain.entity.User;
-import com.sitepark.ies.userrepository.core.domain.value.AuditLogAction;
-import com.sitepark.ies.userrepository.core.domain.value.AuditLogEntityType;
-import com.sitepark.ies.userrepository.core.port.UserRepository;
 import com.sitepark.ies.userrepository.core.usecase.user.UnassignRolesFromUsersRequest;
 import com.sitepark.ies.userrepository.core.usecase.user.UnassignRolesFromUsersResult;
 import com.sitepark.ies.userrepository.core.usecase.user.UnassignRolesFromUsersUseCase;
 import jakarta.inject.Inject;
-import java.io.IOException;
-import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,17 +35,17 @@ import org.jetbrains.annotations.Nullable;
 public final class UnassignRolesFromUsersService {
 
   private final UnassignRolesFromUsersUseCase unassignRolesFromUsersUseCase;
-  private final UserRepository userRepository;
-  private final AuditLogService auditLogService;
+  private final MultiEntityNameResolver multiEntityNameResolver;
+  private final ApplicationAuditLogServiceFactory auditLogServiceFactory;
 
   @Inject
   UnassignRolesFromUsersService(
       UnassignRolesFromUsersUseCase unassignRolesFromUsersUseCase,
-      UserRepository userRepository,
-      AuditLogService auditLogService) {
+      MultiEntityNameResolver multiEntityNameResolver,
+      ApplicationAuditLogServiceFactory auditLogServiceFactory) {
     this.unassignRolesFromUsersUseCase = unassignRolesFromUsersUseCase;
-    this.userRepository = userRepository;
-    this.auditLogService = auditLogService;
+    this.multiEntityNameResolver = multiEntityNameResolver;
+    this.auditLogServiceFactory = auditLogServiceFactory;
   }
 
   /**
@@ -80,61 +81,38 @@ public final class UnassignRolesFromUsersService {
   }
 
   private void createAuditLogs(
-      UnassignRolesFromUsersResult.Unassigned unassigned, @Nullable String auditParentId) {
+      UnassignRolesFromUsersResult.Unassigned result, @Nullable String auditParentId) {
 
-    var unassignments = unassigned.unassignments();
-    var timestamp = unassigned.timestamp();
+    ApplicationAuditLogService auditLogService =
+        this.auditLogServiceFactory.create(result.timestamp(), auditParentId);
+
+    Map<String, String> userDisplayNames = resolveUserDisplayNames(result);
+
+    var unassignments = result.unassignments();
 
     String parentId =
         unassignments.size() > 1
-            ? this.createBatchUnassignmentLog(timestamp, auditParentId)
+            ? auditLogService.createBatchLog(User.class, AuditBatchLogAction.BATCH_UNASSIGN_ROLES)
             : auditParentId;
+    auditLogService.updateParentId(parentId);
 
     unassignments
         .userIds()
         .forEach(
             userId -> {
-              CreateAuditLogRequest createAuditLogRequest =
-                  this.buildCreateAuditLogRequest(
-                      userId, unassignments.roleIds(userId), timestamp, parentId);
-              this.auditLogService.createAuditLog(createAuditLogRequest);
+              List<String> roleIds = unassignments.roleIds(userId);
+              auditLogService.createLog(
+                  EntityRef.of(User.class, userId),
+                  userDisplayNames.get(userId),
+                  AuditLogAction.UNASSIGN_ROLES,
+                  roleIds,
+                  roleIds);
             });
   }
 
-  private String createBatchUnassignmentLog(Instant timestamp, @Nullable String parentId) {
-    return this.auditLogService.createAuditLog(
-        new CreateAuditLogRequest(
-            AuditLogEntityType.USER.name(),
-            null,
-            null,
-            AuditLogAction.BATCH_UNASSIGN_ROLES.name(),
-            null,
-            null,
-            timestamp,
-            parentId));
-  }
-
-  private CreateAuditLogRequest buildCreateAuditLogRequest(
-      String userId, java.util.List<String> roleIds, Instant timestamp, @Nullable String parentId) {
-
-    String userDisplayName = this.userRepository.get(userId).map(User::toDisplayName).orElse(null);
-
-    String rolesJsonArray;
-    try {
-      rolesJsonArray = this.auditLogService.serialize(roleIds);
-    } catch (IOException e) {
-      throw new CreateAuditLogEntryFailedException(
-          AuditLogEntityType.USER.name(), userId, userDisplayName, e);
-    }
-
-    return new CreateAuditLogRequest(
-        AuditLogEntityType.USER.name(),
-        userId,
-        userDisplayName,
-        AuditLogAction.UNASSIGN_ROLES.name(),
-        rolesJsonArray,
-        rolesJsonArray,
-        timestamp,
-        parentId);
+  private Map<String, String> resolveUserDisplayNames(
+      UnassignRolesFromUsersResult.Unassigned result) {
+    return multiEntityNameResolver.resolveDisplayUserNames(
+        Set.copyOf(result.unassignments().userIds()));
   }
 }

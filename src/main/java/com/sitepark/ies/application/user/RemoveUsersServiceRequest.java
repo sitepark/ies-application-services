@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
  * @param identifiers the identifiers (IDs or anchors) of the users to remove
  * @param auditParentId optional parent audit log ID for grouping related operations
  */
-public record RemoveUsersRequest(
+public record RemoveUsersServiceRequest(
     @SuppressFBWarnings(
             value = "EI_EXPOSE_REP",
             justification = "List.copyOf() in canonical constructor ensures immutability")
@@ -24,12 +24,12 @@ public record RemoveUsersRequest(
         List<Identifier> identifiers,
     @Nullable String auditParentId) {
 
-  public RemoveUsersRequest {
+  public RemoveUsersServiceRequest {
     identifiers = identifiers != null ? List.copyOf(identifiers) : Collections.emptyList();
   }
 
   /**
-   * Creates a new builder for RemoveUsersRequest.
+   * Creates a new builder for RemoveUsersServiceRequest.
    *
    * @return a new builder instance
    */
@@ -46,7 +46,7 @@ public record RemoveUsersRequest(
     return this.identifiers.isEmpty();
   }
 
-  /** Builder for RemoveUsersRequest. */
+  /** Builder for RemoveUsersServiceRequest. */
   public static final class Builder {
 
     private List<Identifier> identifiers = Collections.emptyList();
@@ -88,14 +88,14 @@ public record RemoveUsersRequest(
     }
 
     /**
-     * Builds the RemoveUsersRequest.
+     * Builds the RemoveUsersServiceRequest.
      *
      * @return the request instance
      * @throws NullPointerException if identifiers is null
      */
-    public RemoveUsersRequest build() {
+    public RemoveUsersServiceRequest build() {
       Objects.requireNonNull(this.identifiers, "identifiers must not be null");
-      return new RemoveUsersRequest(this.identifiers, this.auditParentId);
+      return new RemoveUsersServiceRequest(this.identifiers, this.auditParentId);
     }
   }
 }

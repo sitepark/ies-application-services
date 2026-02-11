@@ -7,8 +7,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.sitepark.ies.sharedkernel.audit.AuditLogService;
-import com.sitepark.ies.sharedkernel.audit.CreateAuditLogRequest;
+import com.sitepark.ies.application.ApplicationAuditLogService;
+import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
+import com.sitepark.ies.application.MultiEntityNameResolver;
+import com.sitepark.ies.application.label.ReassignLabelsToEntitiesService;
 import com.sitepark.ies.sharedkernel.patch.PatchDocument;
 import com.sitepark.ies.userrepository.core.domain.entity.User;
 import com.sitepark.ies.userrepository.core.usecase.user.ReassignRolesToUsersResult;
@@ -22,14 +24,34 @@ import org.junit.jupiter.api.Test;
 class UpdateUserServiceTest {
 
   private UpdateUserUseCase updateUserUseCase;
-  private AuditLogService auditLogService;
+
+  @SuppressWarnings("PMD.SingularField")
+  private ReassignLabelsToEntitiesService reassignLabelsToEntitiesService;
+
+  @SuppressWarnings("PMD.SingularField")
+  private MultiEntityNameResolver multiEntityNameResolver;
+
+  @SuppressWarnings("PMD.SingularField")
+  private ApplicationAuditLogServiceFactory auditLogServiceFactory;
+
+  private ApplicationAuditLogService auditLogService;
+
   private UpdateUserService service;
 
   @BeforeEach
   void setUp() {
     this.updateUserUseCase = mock();
+    this.reassignLabelsToEntitiesService = mock();
+    this.multiEntityNameResolver = mock();
+    this.auditLogServiceFactory = mock();
     this.auditLogService = mock();
-    this.service = new UpdateUserService(updateUserUseCase, auditLogService);
+    this.service =
+        new UpdateUserService(
+            updateUserUseCase,
+            reassignLabelsToEntitiesService,
+            multiEntityNameResolver,
+            auditLogServiceFactory);
+    when(auditLogServiceFactory.create(any(), any())).thenReturn(auditLogService);
   }
 
   @Test
@@ -53,7 +75,13 @@ class UpdateUserServiceTest {
             any(com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest.class)))
         .thenReturn(result);
 
-    UpdateUserRequest request = UpdateUserRequest.builder().user(user).build();
+    UpdateUserServiceRequest request =
+        UpdateUserServiceRequest.builder()
+            .updateUserRequest(
+                com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest.builder()
+                    .user(user)
+                    .build())
+            .build();
 
     String userId = service.updateUser(request);
 
@@ -81,7 +109,13 @@ class UpdateUserServiceTest {
             any(com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest.class)))
         .thenReturn(result);
 
-    UpdateUserRequest request = UpdateUserRequest.builder().user(user).build();
+    UpdateUserServiceRequest request =
+        UpdateUserServiceRequest.builder()
+            .updateUserRequest(
+                com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest.builder()
+                    .user(user)
+                    .build())
+            .build();
 
     service.updateUser(request);
 
@@ -110,11 +144,17 @@ class UpdateUserServiceTest {
             any(com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest.class)))
         .thenReturn(result);
 
-    UpdateUserRequest request = UpdateUserRequest.builder().user(user).build();
+    UpdateUserServiceRequest request =
+        UpdateUserServiceRequest.builder()
+            .updateUserRequest(
+                com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest.builder()
+                    .user(user)
+                    .build())
+            .build();
 
     service.updateUser(request);
 
-    verify(auditLogService).createAuditLog(any(CreateAuditLogRequest.class));
+    verify(auditLogService).createLog(any(), any(), any(), any(), any());
   }
 
   @Test
@@ -132,11 +172,17 @@ class UpdateUserServiceTest {
             any(com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest.class)))
         .thenReturn(result);
 
-    UpdateUserRequest request = UpdateUserRequest.builder().user(user).build();
+    UpdateUserServiceRequest request =
+        UpdateUserServiceRequest.builder()
+            .updateUserRequest(
+                com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest.builder()
+                    .user(user)
+                    .build())
+            .build();
 
     service.updateUser(request);
 
-    verify(auditLogService, never()).createAuditLog(any(CreateAuditLogRequest.class));
+    verify(auditLogService, never()).createLog(any(), any(), any(), any(), any());
   }
 
   @Test
@@ -160,11 +206,17 @@ class UpdateUserServiceTest {
             any(com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest.class)))
         .thenReturn(result);
 
-    UpdateUserRequest request =
-        UpdateUserRequest.builder().user(user).auditParentId("parent-audit-123").build();
+    UpdateUserServiceRequest request =
+        UpdateUserServiceRequest.builder()
+            .updateUserRequest(
+                com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest.builder()
+                    .user(user)
+                    .build())
+            .auditParentId("parent-audit-123")
+            .build();
 
     service.updateUser(request);
 
-    verify(auditLogService).createAuditLog(any(CreateAuditLogRequest.class));
+    verify(auditLogService).createLog(any(), any(), any(), any(), any());
   }
 }

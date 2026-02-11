@@ -1,12 +1,9 @@
-package com.sitepark.ies.application.label;
+package com.sitepark.ies.application.user;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sitepark.ies.sharedkernel.base.Identifier;
 import com.sitepark.ies.sharedkernel.base.IdentifierListBuilder;
-import com.sitepark.ies.sharedkernel.base.ListBuilder;
-import com.sitepark.ies.sharedkernel.domain.EntityRef;
-import com.sitepark.ies.userrepository.core.usecase.user.AssignRolesToUsersRequest.Builder;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -15,32 +12,29 @@ import java.util.function.Consumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-@JsonDeserialize(builder = ReassignLabelsToEntitiesRequest.Builder.class)
+@JsonDeserialize(builder = CreateUserServiceRequest.Builder.class)
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName"})
-public final class ReassignLabelsToEntitiesRequest {
+public final class CreateUserServiceRequest {
 
-  @NotNull private final List<EntityRef> entityRefs;
+  @NotNull
+  private final com.sitepark.ies.userrepository.core.usecase.user.CreateUserRequest
+      createUserRequest;
 
   @NotNull private final List<Identifier> labelIdentifiers;
-
   @Nullable private final String auditParentId;
 
-  private ReassignLabelsToEntitiesRequest(Builder builder) {
-    this.entityRefs = List.copyOf(builder.entityRefs);
+  private CreateUserServiceRequest(Builder builder) {
+    this.createUserRequest = builder.createUserRequest;
     this.labelIdentifiers = List.copyOf(builder.labelIdentifiers);
     this.auditParentId = builder.auditParentId;
-  }
-
-  public boolean isEmpty() {
-    return this.entityRefs.isEmpty() || this.labelIdentifiers.isEmpty();
   }
 
   public static Builder builder() {
     return new Builder();
   }
 
-  public List<EntityRef> entityRefs() {
-    return this.entityRefs;
+  public com.sitepark.ies.userrepository.core.usecase.user.CreateUserRequest createUserRequest() {
+    return this.createUserRequest;
   }
 
   public List<Identifier> labelIdentifiers() {
@@ -55,32 +49,25 @@ public final class ReassignLabelsToEntitiesRequest {
     return new Builder(this);
   }
 
-  public com.sitepark.ies.label.core.usecase.ReassignLabelsToEntitiesRequest toUseCaseRequest() {
-    return com.sitepark.ies.label.core.usecase.ReassignLabelsToEntitiesRequest.builder()
-        .entityRefs(listBuilder -> listBuilder.addAll(this.entityRefs))
-        .labelIdentifiers(listBuilder -> listBuilder.identifiers(this.labelIdentifiers))
-        .build();
-  }
-
   @Override
   public int hashCode() {
-    return Objects.hash(this.labelIdentifiers, this.entityRefs, this.auditParentId);
+    return Objects.hash(this.createUserRequest, this.labelIdentifiers, this.auditParentId);
   }
 
   @Override
   public boolean equals(Object o) {
-    return (o instanceof ReassignLabelsToEntitiesRequest that)
-        && Objects.equals(this.entityRefs, that.entityRefs)
+    return (o instanceof CreateUserServiceRequest that)
+        && Objects.equals(this.createUserRequest, that.createUserRequest)
         && Objects.equals(this.labelIdentifiers, that.labelIdentifiers)
         && Objects.equals(this.auditParentId, that.auditParentId);
   }
 
   @Override
   public String toString() {
-    return "AssignPrivilegesToRolesRequest{"
-        + ", entityRefs="
-        + entityRefs
-        + "labelIdentifiers="
+    return "CreateUserServiceRequest{"
+        + "createUserRequest="
+        + createUserRequest
+        + ", labelIdentifiers="
         + labelIdentifiers
         + ", auditParentId='"
         + auditParentId
@@ -91,23 +78,21 @@ public final class ReassignLabelsToEntitiesRequest {
   @JsonPOJOBuilder(withPrefix = "")
   public static final class Builder {
 
-    private final Set<EntityRef> entityRefs = new TreeSet<>();
+    private com.sitepark.ies.userrepository.core.usecase.user.CreateUserRequest createUserRequest;
     private final Set<Identifier> labelIdentifiers = new TreeSet<>();
     private String auditParentId;
 
     private Builder() {}
 
-    private Builder(ReassignLabelsToEntitiesRequest request) {
-      this.entityRefs.addAll(request.entityRefs);
+    private Builder(CreateUserServiceRequest request) {
+      this.createUserRequest = request.createUserRequest;
       this.labelIdentifiers.addAll(request.labelIdentifiers);
       this.auditParentId = request.auditParentId;
     }
 
-    public Builder entityRefs(Consumer<ListBuilder<EntityRef>> configurer) {
-      ListBuilder<EntityRef> listBuilder = new ListBuilder<>();
-      configurer.accept(listBuilder);
-      this.entityRefs.clear();
-      this.entityRefs.addAll(listBuilder.build());
+    public Builder createUserRequest(
+        com.sitepark.ies.userrepository.core.usecase.user.CreateUserRequest createUserRequest) {
+      this.createUserRequest = createUserRequest;
       return this;
     }
 
@@ -124,8 +109,9 @@ public final class ReassignLabelsToEntitiesRequest {
       return this;
     }
 
-    public ReassignLabelsToEntitiesRequest build() {
-      return new ReassignLabelsToEntitiesRequest(this);
+    public CreateUserServiceRequest build() {
+      Objects.requireNonNull(this.createUserRequest, "createUserRequest must not be null");
+      return new CreateUserServiceRequest(this);
     }
   }
 }

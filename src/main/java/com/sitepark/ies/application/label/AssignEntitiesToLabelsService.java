@@ -1,22 +1,22 @@
 package com.sitepark.ies.application.label;
 
+import com.sitepark.ies.application.ApplicationAuditLogService;
+import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
 import com.sitepark.ies.application.MultiEntityAuthorizationService;
-import com.sitepark.ies.label.core.domain.entity.Label;
-import com.sitepark.ies.label.core.domain.value.AuditLogAction;
-import com.sitepark.ies.label.core.domain.value.AuditLogEntityType;
-import com.sitepark.ies.label.core.port.LabelRepository;
+import com.sitepark.ies.application.MultiEntityNameResolver;
+import com.sitepark.ies.application.audit.AuditBatchLogAction;
+import com.sitepark.ies.application.audit.AuditLogAction;
+import com.sitepark.ies.label.core.usecase.AssignEntitiesToLabelsRequest;
 import com.sitepark.ies.label.core.usecase.AssignEntitiesToLabelsResult;
 import com.sitepark.ies.label.core.usecase.AssignEntitiesToLabelsUseCase;
-import com.sitepark.ies.sharedkernel.audit.AuditLogService;
-import com.sitepark.ies.sharedkernel.audit.CreateAuditLogEntryFailedException;
-import com.sitepark.ies.sharedkernel.audit.CreateAuditLogRequest;
 import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import com.sitepark.ies.sharedkernel.security.AccessDeniedException;
 import jakarta.inject.Inject;
-import java.io.IOException;
-import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Application Service that orchestrates entity-to-label assignment operations with cross-cutting
@@ -38,19 +38,19 @@ public final class AssignEntitiesToLabelsService {
 
   private final AssignEntitiesToLabelsUseCase assignEntitiesToLabelsUseCase;
   private final MultiEntityAuthorizationService authorizationService;
-  private final LabelRepository labelRepository;
-  private final AuditLogService auditLogService;
+  private final MultiEntityNameResolver multiEntityNameResolver;
+  private final ApplicationAuditLogServiceFactory auditLogServiceFactory;
 
   @Inject
   AssignEntitiesToLabelsService(
       AssignEntitiesToLabelsUseCase assignEntitiesToLabelsUseCase,
       MultiEntityAuthorizationService entityAccessControlService,
-      LabelRepository labelRepository,
-      AuditLogService auditLogService) {
+      MultiEntityNameResolver multiEntityNameResolver,
+      ApplicationAuditLogServiceFactory auditLogServiceFactory) {
     this.assignEntitiesToLabelsUseCase = assignEntitiesToLabelsUseCase;
+    this.multiEntityNameResolver = multiEntityNameResolver;
     this.authorizationService = entityAccessControlService;
-    this.labelRepository = labelRepository;
-    this.auditLogService = auditLogService;
+    this.auditLogServiceFactory = auditLogServiceFactory;
   }
 
   /**
@@ -74,15 +74,16 @@ public final class AssignEntitiesToLabelsService {
    * @throws com.sitepark.ies.label.core.domain.exception.LabelNotFoundException if a label does not
    *     exist
    */
-  public int assignEntitiesToLabels(@NotNull AssignEntitiesToLabelsRequest request) {
+  public int assignEntitiesToLabels(@NotNull AssignEntitiesToLabelsServiceRequest request) {
 
-    this.checkAuthorization(request);
+    this.checkAuthorization(request.assignEntitiesToLabelsRequest());
 
     AssignEntitiesToLabelsResult result =
-        this.assignEntitiesToLabelsUseCase.assignEntitiesToLabels(request.toUseCaseRequest());
+        this.assignEntitiesToLabelsUseCase.assignEntitiesToLabels(
+            request.assignEntitiesToLabelsRequest());
 
     if (result instanceof AssignEntitiesToLabelsResult.Assigned assigned) {
-      this.createAuditLogs(request, assigned);
+      this.createAuditLogs(assigned, request.auditParentId());
     }
 
     return result.assignments().entityRefs().size();
@@ -97,65 +98,36 @@ public final class AssignEntitiesToLabelsService {
     }
   }
 
-  private void createAuditLogs(
-      AssignEntitiesToLabelsRequest request, AssignEntitiesToLabelsResult.Assigned assigned) {
+  private void createAuditLogs(AssignEntitiesToLabelsResult.Assigned result, String auditParentId) {
 
-    var assignments = assigned.assignments();
-    var timestamp = assigned.timestamp();
+    Map<EntityRef, String> entityNames = resolveEntityNames(result);
 
-    String parentId =
-        assignments.size() > 1
-            ? this.createBatchAssignmentLog(timestamp, request.auditParentId())
-            : null;
+    var assignments = result.assignments();
+
+    Map<String, ApplicationAuditLogService> auditLogServiceMap =
+        this.auditLogServiceFactory.createForBatchPerType(
+            result.timestamp(),
+            auditParentId,
+            AuditBatchLogAction.BATCH_ASSIGN_ENTITIES_TO_LABEL,
+            assignments.entityRefs().stream().map(EntityRef::type).collect(Collectors.toSet()));
 
     assignments
-        .labelIds()
+        .entityRefs()
         .forEach(
-            labelId -> {
-              CreateAuditLogRequest createAuditLogRequest =
-                  this.buildCreateAuditLogRequest(
-                      labelId, assignments.entityRefs(labelId), timestamp, parentId);
-              this.auditLogService.createAuditLog(createAuditLogRequest);
+            entityRef -> {
+              List<String> labelIds = assignments.labelIds();
+              auditLogServiceMap
+                  .get(entityRef.type())
+                  .createLog(
+                      entityRef,
+                      entityNames.get(entityRef),
+                      AuditLogAction.ASSIGN_ENTITIES_TO_LABEL,
+                      labelIds,
+                      labelIds);
             });
   }
 
-  private String createBatchAssignmentLog(Instant timestamp, @Nullable String parentId) {
-    return this.auditLogService.createAuditLog(
-        new CreateAuditLogRequest(
-            AuditLogEntityType.LABEL.name(),
-            null,
-            null,
-            AuditLogAction.BATCH_ASSIGN_ENTITIES_TO_LABEL.name(),
-            null,
-            null,
-            timestamp,
-            parentId));
-  }
-
-  private CreateAuditLogRequest buildCreateAuditLogRequest(
-      String labelId,
-      java.util.List<EntityRef> entityRefs,
-      Instant timestamp,
-      @Nullable String parentId) {
-
-    String labelDisplayName = this.labelRepository.get(labelId).map(Label::name).orElse(null);
-
-    String entitiesJsonArray;
-    try {
-      entitiesJsonArray = this.auditLogService.serialize(entityRefs);
-    } catch (IOException e) {
-      throw new CreateAuditLogEntryFailedException(
-          AuditLogEntityType.LABEL.name(), labelId, labelDisplayName, e);
-    }
-
-    return new CreateAuditLogRequest(
-        AuditLogEntityType.LABEL.name(),
-        labelId,
-        labelDisplayName,
-        AuditLogAction.ASSIGN_ENTITIES_TO_LABEL.name(),
-        entitiesJsonArray,
-        entitiesJsonArray,
-        timestamp,
-        parentId);
+  private Map<EntityRef, String> resolveEntityNames(AssignEntitiesToLabelsResult.Assigned result) {
+    return multiEntityNameResolver.resolveNames(Set.copyOf(result.assignments().entityRefs()));
   }
 }

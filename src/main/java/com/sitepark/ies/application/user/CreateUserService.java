@@ -1,18 +1,19 @@
 package com.sitepark.ies.application.user;
 
-import com.sitepark.ies.sharedkernel.audit.AuditLogService;
-import com.sitepark.ies.sharedkernel.audit.CreateAuditLogEntryFailedException;
-import com.sitepark.ies.sharedkernel.audit.CreateAuditLogRequest;
+import com.sitepark.ies.application.ApplicationAuditLogService;
+import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
+import com.sitepark.ies.application.audit.AuditBatchLogAction;
+import com.sitepark.ies.application.audit.AuditLogAction;
+import com.sitepark.ies.application.label.ReassignLabelsToEntitiesService;
+import com.sitepark.ies.application.label.ReassignLabelsToEntitiesServiceRequest;
+import com.sitepark.ies.label.core.usecase.ReassignLabelsToEntitiesRequest;
+import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import com.sitepark.ies.userrepository.core.domain.entity.User;
-import com.sitepark.ies.userrepository.core.domain.value.AuditLogAction;
-import com.sitepark.ies.userrepository.core.domain.value.AuditLogEntityType;
-import com.sitepark.ies.userrepository.core.port.UserRepository;
+import com.sitepark.ies.userrepository.core.domain.value.UserSnapshot;
 import com.sitepark.ies.userrepository.core.usecase.user.AssignRolesToUsersResult;
 import com.sitepark.ies.userrepository.core.usecase.user.CreateUserResult;
 import com.sitepark.ies.userrepository.core.usecase.user.CreateUserUseCase;
 import jakarta.inject.Inject;
-import java.io.IOException;
-import java.time.Instant;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,17 +35,17 @@ import org.jetbrains.annotations.Nullable;
 public final class CreateUserService {
 
   private final CreateUserUseCase createUserUseCase;
-  private final UserRepository userRepository;
-  private final AuditLogService auditLogService;
+  private final ReassignLabelsToEntitiesService reassignLabelsToEntitiesService;
+  private final ApplicationAuditLogServiceFactory auditLogServiceFactory;
 
   @Inject
   CreateUserService(
       CreateUserUseCase createUserUseCase,
-      UserRepository userRepository,
-      AuditLogService auditLogService) {
+      ReassignLabelsToEntitiesService reassignLabelsToEntitiesService,
+      ApplicationAuditLogServiceFactory auditLogServiceFactory) {
     this.createUserUseCase = createUserUseCase;
-    this.userRepository = userRepository;
-    this.auditLogService = auditLogService;
+    this.reassignLabelsToEntitiesService = reassignLabelsToEntitiesService;
+    this.auditLogServiceFactory = auditLogServiceFactory;
   }
 
   /**
@@ -68,104 +69,68 @@ public final class CreateUserService {
    * @throws com.sitepark.ies.sharedkernel.anchor.AnchorAlreadyExistsException if anchor already
    *     exists
    */
-  public String createUser(@NotNull CreateUserRequest request) {
+  public String createUser(@NotNull CreateUserServiceRequest request) {
 
-    // 1. Create user via userrepository-core
-    CreateUserResult result = this.createUserUseCase.createUser(request.toUseCaseRequest());
+    CreateUserResult result = this.createUserUseCase.createUser(request.createUserRequest());
 
-    // 2. Create audit log for user creation
-    CreateAuditLogRequest userAuditRequest = this.buildUserCreationAuditLogRequest(result);
-    this.auditLogService.createAuditLog(userAuditRequest);
+    this.createCreationAuditLog(result, request.auditParentId());
 
-    // 3. Create audit logs for role assignments if present
     if (result.roleAssignmentResult() != null
         && result.roleAssignmentResult() instanceof AssignRolesToUsersResult.Assigned assigned) {
-      this.createRoleAssignmentAuditLogs(assigned, request.auditParentId());
+      this.createRoleAssignmentAuditLogs(assigned, result.snapshot(), request.auditParentId());
+    }
+
+    if (!request.labelIdentifiers().isEmpty()) {
+      ReassignLabelsToEntitiesServiceRequest labelRequest =
+          ReassignLabelsToEntitiesServiceRequest.builder()
+              .reassignLabelsToEntitiesRequest(
+                  ReassignLabelsToEntitiesRequest.builder()
+                      .entityRefs(
+                          configure -> configure.set(EntityRef.of(User.class, result.userId())))
+                      .labelIdentifiers(
+                          configure -> configure.identifiers(request.labelIdentifiers()))
+                      .build())
+              .auditParentId(request.auditParentId())
+              .build();
+      this.reassignLabelsToEntitiesService.reassignEntitiesFromLabels(labelRequest);
     }
 
     return result.userId();
   }
 
-  private CreateAuditLogRequest buildUserCreationAuditLogRequest(CreateUserResult result) {
+  protected void createCreationAuditLog(CreateUserResult result, String auditParentId) {
 
-    String forwardData;
-    try {
-      forwardData = this.auditLogService.serialize(result.snapshot());
-    } catch (IOException e) {
-      throw new CreateAuditLogEntryFailedException(
-          AuditLogEntityType.USER.name(),
-          result.userId(),
-          result.snapshot().user().toDisplayName(),
-          e);
-    }
-
-    return new CreateAuditLogRequest(
-        AuditLogEntityType.USER.name(),
-        result.userId(),
+    ApplicationAuditLogService auditLogService =
+        this.auditLogServiceFactory.create(result.timestamp(), auditParentId);
+    auditLogService.createLog(
+        EntityRef.of(User.class, result.userId()),
         result.snapshot().user().toDisplayName(),
-        AuditLogAction.CREATE.name(),
+        AuditLogAction.CREATE,
         null,
-        forwardData,
-        result.timestamp(),
-        null);
+        result.snapshot());
   }
 
-  private void createRoleAssignmentAuditLogs(
-      AssignRolesToUsersResult.Assigned assigned, @Nullable String parentId) {
+  protected void createRoleAssignmentAuditLogs(
+      AssignRolesToUsersResult.Assigned result,
+      UserSnapshot snapshot,
+      @Nullable String auditParentId) {
 
-    var assignments = assigned.assignments();
-    var timestamp = assigned.timestamp();
+    ApplicationAuditLogService auditLogService =
+        this.auditLogServiceFactory.create(result.timestamp(), auditParentId);
 
-    // Create batch parent if multiple users (in practice, CreateUser only has 1 user)
-    String auditParentId =
-        assignments.size() > 1 ? this.createBatchAssignmentLog(timestamp, parentId) : parentId;
+    var assignments = result.assignments();
 
-    // Create individual audit logs for each user
-    assignments
-        .userIds()
-        .forEach(
-            userId -> {
-              CreateAuditLogRequest createAuditLogRequest =
-                  this.buildRoleAssignmentAuditLogRequest(
-                      userId, assignments.roleIds(userId), timestamp, auditParentId);
-              this.auditLogService.createAuditLog(createAuditLogRequest);
-            });
-  }
+    String parentId =
+        assignments.size() > 1
+            ? auditLogService.createBatchLog(User.class, AuditBatchLogAction.BATCH_ASSIGN_ROLES)
+            : auditParentId;
+    auditLogService.updateParentId(parentId);
 
-  private String createBatchAssignmentLog(Instant timestamp, @Nullable String parentId) {
-    return this.auditLogService.createAuditLog(
-        new CreateAuditLogRequest(
-            AuditLogEntityType.USER.name(),
-            null,
-            null,
-            AuditLogAction.BATCH_ASSIGN_ROLES.name(),
-            null,
-            null,
-            timestamp,
-            parentId));
-  }
-
-  private CreateAuditLogRequest buildRoleAssignmentAuditLogRequest(
-      String userId, java.util.List<String> roleIds, Instant timestamp, @Nullable String parentId) {
-
-    String userDisplayName = this.userRepository.get(userId).map(User::toDisplayName).orElse(null);
-
-    String rolesJsonArray;
-    try {
-      rolesJsonArray = this.auditLogService.serialize(roleIds);
-    } catch (IOException e) {
-      throw new CreateAuditLogEntryFailedException(
-          AuditLogEntityType.ROLE.name(), userId, userDisplayName, e);
-    }
-
-    return new CreateAuditLogRequest(
-        AuditLogEntityType.USER.name(),
-        userId,
-        userDisplayName,
-        AuditLogAction.ASSIGN_ROLES.name(),
-        rolesJsonArray,
-        rolesJsonArray,
-        timestamp,
-        parentId);
+    auditLogService.createLog(
+        EntityRef.of(User.class, snapshot.user().id()),
+        snapshot.user().toDisplayName(),
+        AuditLogAction.ASSIGN_ROLES,
+        assignments.roleIds(),
+        assignments.roleIds());
   }
 }

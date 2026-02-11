@@ -7,10 +7,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.sitepark.ies.sharedkernel.audit.AuditLogService;
-import com.sitepark.ies.sharedkernel.audit.CreateAuditLogRequest;
+import com.sitepark.ies.application.ApplicationAuditLogService;
+import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
 import com.sitepark.ies.userrepository.core.domain.entity.User;
-import com.sitepark.ies.userrepository.core.usecase.audit.UserSnapshot;
+import com.sitepark.ies.userrepository.core.domain.value.UserSnapshot;
 import com.sitepark.ies.userrepository.core.usecase.user.RemoveUserRequest;
 import com.sitepark.ies.userrepository.core.usecase.user.RemoveUserResult;
 import com.sitepark.ies.userrepository.core.usecase.user.RemoveUserUseCase;
@@ -24,16 +24,23 @@ import org.junit.jupiter.api.Test;
 class RemoveUsersServiceTest {
 
   private RemoveUserUseCase removeUserUseCase;
-  private AuditLogService auditLogService;
+
+  @SuppressWarnings("PMD.SingularField")
+  private ApplicationAuditLogServiceFactory auditLogServiceFactory;
+
+  private ApplicationAuditLogService auditLogService;
   private Clock clock;
   private RemoveUsersService service;
 
   @BeforeEach
   void setUp() {
     this.removeUserUseCase = mock();
+    this.auditLogServiceFactory = mock();
     this.auditLogService = mock();
     this.clock = mock();
-    this.service = new RemoveUsersService(removeUserUseCase, auditLogService, clock);
+    this.service = new RemoveUsersService(removeUserUseCase, auditLogServiceFactory, clock);
+
+    when(auditLogServiceFactory.create(any(), any())).thenReturn(auditLogService);
   }
 
   @Test
@@ -50,7 +57,8 @@ class RemoveUsersServiceTest {
     when(clock.instant()).thenReturn(timestamp);
     when(clock.getZone()).thenReturn(ZoneId.systemDefault());
 
-    RemoveUsersRequest request = RemoveUsersRequest.builder().identifiers(b -> b.id("123")).build();
+    RemoveUsersServiceRequest request =
+        RemoveUsersServiceRequest.builder().identifiers(b -> b.id("123")).build();
 
     service.removeUsers(request);
 
@@ -70,13 +78,13 @@ class RemoveUsersServiceTest {
     when(removeUserUseCase.removeUser(any(RemoveUserRequest.class))).thenReturn(removedResult);
     when(clock.instant()).thenReturn(timestamp);
     when(clock.getZone()).thenReturn(ZoneId.systemDefault());
-    when(auditLogService.serialize(any())).thenReturn("{\"snapshot\":\"data\"}");
 
-    RemoveUsersRequest request = RemoveUsersRequest.builder().identifiers(b -> b.id("123")).build();
+    RemoveUsersServiceRequest request =
+        RemoveUsersServiceRequest.builder().identifiers(b -> b.id("123")).build();
 
     service.removeUsers(request);
 
-    verify(auditLogService).createAuditLog(any(CreateAuditLogRequest.class));
+    verify(auditLogService).createLog(any(), any(), any(), any(), any());
   }
 
   @Test
@@ -87,11 +95,12 @@ class RemoveUsersServiceTest {
 
     when(removeUserUseCase.removeUser(any(RemoveUserRequest.class))).thenReturn(skippedResult);
 
-    RemoveUsersRequest request = RemoveUsersRequest.builder().identifiers(b -> b.id("1")).build();
+    RemoveUsersServiceRequest request =
+        RemoveUsersServiceRequest.builder().identifiers(b -> b.id("1")).build();
 
     service.removeUsers(request);
 
-    verify(auditLogService, never()).createAuditLog(any(CreateAuditLogRequest.class));
+    verify(auditLogService, never()).createLog(any(), any(), any(), any(), any());
   }
 
   @Test
@@ -114,15 +123,14 @@ class RemoveUsersServiceTest {
         .thenReturn(removedResult1, removedResult2);
     when(clock.instant()).thenReturn(timestamp);
     when(clock.getZone()).thenReturn(ZoneId.systemDefault());
-    when(auditLogService.serialize(any())).thenReturn("{\"snapshot\":\"data\"}");
-    when(auditLogService.createAuditLog(any(CreateAuditLogRequest.class)))
+    when(auditLogService.createBatchLog(any(), any()))
         .thenReturn("batch-parent-id", "audit-1", "audit-2");
 
-    RemoveUsersRequest request =
-        RemoveUsersRequest.builder().identifiers(b -> b.id("123").id("456")).build();
+    RemoveUsersServiceRequest request =
+        RemoveUsersServiceRequest.builder().identifiers(b -> b.id("123").id("456")).build();
 
     service.removeUsers(request);
 
-    verify(auditLogService, times(3)).createAuditLog(any(CreateAuditLogRequest.class));
+    verify(auditLogService, times(2)).createLog(any(), any(), any(), any(), any());
   }
 }

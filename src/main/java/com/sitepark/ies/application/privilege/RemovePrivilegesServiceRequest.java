@@ -1,4 +1,4 @@
-package com.sitepark.ies.application.label;
+package com.sitepark.ies.application.privilege;
 
 import com.sitepark.ies.sharedkernel.base.Identifier;
 import com.sitepark.ies.sharedkernel.base.IdentifierListBuilder;
@@ -11,12 +11,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Request to remove one or more labels.
+ * Request to remove one or more privileges.
  *
- * @param identifiers the identifiers (IDs or anchors) of the labels to remove
+ * @param identifiers the identifiers (IDs or anchors) of the privileges to remove
  * @param auditParentId optional parent audit log ID for grouping related operations
  */
-public record RemoveLabelsRequest(
+public record RemovePrivilegesServiceRequest(
     @SuppressFBWarnings(
             value = "EI_EXPOSE_REP",
             justification = "List.copyOf() in canonical constructor ensures immutability")
@@ -24,12 +24,12 @@ public record RemoveLabelsRequest(
         List<Identifier> identifiers,
     @Nullable String auditParentId) {
 
-  public RemoveLabelsRequest {
+  public RemovePrivilegesServiceRequest {
     identifiers = identifiers != null ? List.copyOf(identifiers) : Collections.emptyList();
   }
 
   /**
-   * Creates a new builder for RemoveLabelsRequest.
+   * Creates a new builder for RemovePrivilegesServiceRequest.
    *
    * @return a new builder instance
    */
@@ -46,14 +46,14 @@ public record RemoveLabelsRequest(
     return this.identifiers.isEmpty();
   }
 
-  /** Builder for RemoveLabelsRequest. */
+  /** Builder for RemovePrivilegesServiceRequest. */
   public static final class Builder {
 
     private List<Identifier> identifiers = Collections.emptyList();
     private String auditParentId;
 
     /**
-     * Sets the identifiers for the labels to remove using a configurator.
+     * Sets the identifiers for the privileges to remove using a configurator.
      *
      * @param configurer a consumer that configures the identifier list
      * @return this builder
@@ -66,9 +66,9 @@ public record RemoveLabelsRequest(
     }
 
     /**
-     * Sets the identifiers for the labels to remove.
+     * Sets the identifiers for the privileges to remove.
      *
-     * @param identifiers the list of label identifiers
+     * @param identifiers the list of privilege identifiers
      * @return this builder
      */
     public Builder identifiers(List<Identifier> identifiers) {
@@ -88,14 +88,14 @@ public record RemoveLabelsRequest(
     }
 
     /**
-     * Builds the RemoveLabelsRequest.
+     * Builds the RemovePrivilegesServiceRequest.
      *
      * @return the request instance
      * @throws NullPointerException if identifiers is null
      */
-    public RemoveLabelsRequest build() {
+    public RemovePrivilegesServiceRequest build() {
       Objects.requireNonNull(this.identifiers, "identifiers must not be null");
-      return new RemoveLabelsRequest(this.identifiers, this.auditParentId);
+      return new RemovePrivilegesServiceRequest(this.identifiers, this.auditParentId);
     }
   }
 }

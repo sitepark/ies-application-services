@@ -1,22 +1,21 @@
 package com.sitepark.ies.application.label;
 
-import com.sitepark.ies.label.core.domain.value.AuditLogAction;
-import com.sitepark.ies.label.core.domain.value.AuditLogEntityType;
+import com.sitepark.ies.application.ApplicationAuditLogService;
+import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
+import com.sitepark.ies.application.audit.AuditBatchLogAction;
+import com.sitepark.ies.application.audit.AuditLogAction;
+import com.sitepark.ies.label.core.domain.entity.Label;
 import com.sitepark.ies.label.core.usecase.RemoveLabelRequest;
 import com.sitepark.ies.label.core.usecase.RemoveLabelResult;
 import com.sitepark.ies.label.core.usecase.RemoveLabelUseCase;
-import com.sitepark.ies.sharedkernel.audit.AuditLogService;
-import com.sitepark.ies.sharedkernel.audit.CreateAuditLogEntryFailedException;
-import com.sitepark.ies.sharedkernel.audit.CreateAuditLogRequest;
 import com.sitepark.ies.sharedkernel.base.Identifier;
+import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import jakarta.inject.Inject;
-import java.io.IOException;
 import java.time.Clock;
 import java.time.Instant;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Application Service that orchestrates label removal operations with cross-cutting concerns.
@@ -37,14 +36,16 @@ public final class RemoveLabelsService {
   private static final Logger LOGGER = LogManager.getLogger();
 
   private final RemoveLabelUseCase removeLabelUseCase;
-  private final AuditLogService auditLogService;
+  private final ApplicationAuditLogServiceFactory auditLogServiceFactory;
   private final Clock clock;
 
   @Inject
   RemoveLabelsService(
-      RemoveLabelUseCase removeLabelUseCase, AuditLogService auditLogService, Clock clock) {
+      RemoveLabelUseCase removeLabelUseCase,
+      ApplicationAuditLogServiceFactory auditLogServiceFactory,
+      Clock clock) {
     this.removeLabelUseCase = removeLabelUseCase;
-    this.auditLogService = auditLogService;
+    this.auditLogServiceFactory = auditLogServiceFactory;
     this.clock = clock;
   }
 
@@ -69,9 +70,9 @@ public final class RemoveLabelsService {
    * @throws com.sitepark.ies.sharedkernel.anchor.AnchorNotFoundException if an anchor does not
    *     exist
    */
-  public int removeLabels(@NotNull RemoveLabelsRequest request) {
+  public int removeLabels(@NotNull RemoveLabelsServiceRequest request) {
 
-    if (request.isEmpty()) {
+    if (request.identifiers().isEmpty()) {
       return 0;
     }
 
@@ -79,26 +80,32 @@ public final class RemoveLabelsService {
       LOGGER.debug("Removing {} label(s)", request.identifiers().size());
     }
 
-    // Create batch parent entry if multiple labels
-    Instant now = Instant.now(this.clock);
+    Instant timestamp = Instant.now(this.clock);
+
+    ApplicationAuditLogService auditLogService =
+        this.auditLogServiceFactory.create(timestamp, request.auditParentId());
     String parentId =
         request.identifiers().size() > 1
-            ? this.createBatchRemoveLog(now, request.auditParentId())
+            ? auditLogService.createBatchLog(Label.class, AuditBatchLogAction.BATCH_REMOVE)
             : request.auditParentId();
+    auditLogService.updateParentId(parentId);
 
     int removedCount = 0;
     int skippedCount = 0;
 
-    // Loop through identifiers and call use case for each
     for (Identifier identifier : request.identifiers()) {
       RemoveLabelResult result =
           this.removeLabelUseCase.removeLabel(
               RemoveLabelRequest.builder().identifier(identifier).build());
 
-      // Handle result
       switch (result) {
         case RemoveLabelResult.Removed removed -> {
-          this.createRemoveAuditLog(removed, parentId);
+          auditLogService.createLog(
+              EntityRef.of(Label.class, removed.labelId()),
+              removed.labelName(),
+              AuditLogAction.REMOVE,
+              removed.snapshot(),
+              null);
           removedCount++;
         }
         case RemoveLabelResult.Skipped skipped -> {
@@ -115,41 +122,5 @@ public final class RemoveLabelsService {
     }
 
     return removedCount;
-  }
-
-  private String createBatchRemoveLog(Instant timestamp, String auditParentId) {
-    return this.auditLogService.createAuditLog(
-        new CreateAuditLogRequest(
-            AuditLogEntityType.LABEL.name(),
-            null,
-            null,
-            com.sitepark.ies.userrepository.core.domain.value.AuditLogAction.BATCH_REMOVE.name(),
-            null,
-            null,
-            timestamp,
-            auditParentId));
-  }
-
-  private void createRemoveAuditLog(RemoveLabelResult.Removed removed, @Nullable String parentId) {
-    try {
-      String backwardData = this.auditLogService.serialize(removed.snapshot());
-
-      CreateAuditLogRequest auditRequest =
-          new CreateAuditLogRequest(
-              AuditLogEntityType.LABEL.name(),
-              removed.labelId(),
-              removed.displayName(),
-              AuditLogAction.REMOVE.name(),
-              backwardData,
-              null,
-              removed.timestamp(),
-              parentId);
-
-      this.auditLogService.createAuditLog(auditRequest);
-
-    } catch (IOException e) {
-      throw new CreateAuditLogEntryFailedException(
-          AuditLogEntityType.LABEL.name(), removed.labelId(), removed.displayName(), e);
-    }
   }
 }

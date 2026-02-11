@@ -23,12 +23,15 @@ public final class CreateUserWithPasswordRequest {
 
   private final List<Identifier> roleIdentifiers;
 
+  private final List<Identifier> labelIdentifiers;
+
   @Nullable private final String auditParentId;
 
   private CreateUserWithPasswordRequest(Builder builder) {
     this.user = builder.user;
     this.password = builder.password;
     this.roleIdentifiers = List.copyOf(builder.roleIdentifiers);
+    this.labelIdentifiers = List.copyOf(builder.labelIdentifiers);
     this.auditParentId = builder.auditParentId;
   }
 
@@ -43,6 +46,10 @@ public final class CreateUserWithPasswordRequest {
 
   public List<Identifier> roleIdentifiers() {
     return roleIdentifiers;
+  }
+
+  public List<Identifier> labelIdentifiers() {
+    return labelIdentifiers;
   }
 
   @Nullable
@@ -60,12 +67,14 @@ public final class CreateUserWithPasswordRequest {
         && Objects.equals(this.user, that.user)
         && Objects.equals(this.password, that.password)
         && Objects.equals(this.roleIdentifiers, that.roleIdentifiers)
+        && Objects.equals(this.labelIdentifiers, that.labelIdentifiers)
         && Objects.equals(this.auditParentId, that.auditParentId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(this.user, this.password, this.roleIdentifiers, this.auditParentId);
+    return Objects.hash(
+        this.user, this.password, this.roleIdentifiers, this.labelIdentifiers, this.auditParentId);
   }
 
   @Override
@@ -77,6 +86,8 @@ public final class CreateUserWithPasswordRequest {
         + (password != null ? "***" : null)
         + ", roleIdentifiers="
         + roleIdentifiers
+        + ", labelIdentifiers="
+        + labelIdentifiers
         + ", auditParentId='"
         + auditParentId
         + '\''
@@ -88,6 +99,7 @@ public final class CreateUserWithPasswordRequest {
     private User user;
     private String password;
     private final List<Identifier> roleIdentifiers = new ArrayList<>();
+    private final List<Identifier> labelIdentifiers = new ArrayList<>();
     private String auditParentId;
 
     private Builder() {}
@@ -107,6 +119,14 @@ public final class CreateUserWithPasswordRequest {
       configurer.accept(listBuilder);
       this.roleIdentifiers.clear();
       this.roleIdentifiers.addAll(listBuilder.build());
+      return this;
+    }
+
+    public Builder labelIdentifiers(Consumer<IdentifierListBuilder> configurer) {
+      IdentifierListBuilder listBuilder = new IdentifierListBuilder();
+      configurer.accept(listBuilder);
+      this.labelIdentifiers.clear();
+      this.labelIdentifiers.addAll(listBuilder.build());
       return this;
     }
 
