@@ -8,6 +8,7 @@ import com.sitepark.ies.application.MultiEntityAuthorizationService;
 import com.sitepark.ies.application.MultiEntityNameResolver;
 import com.sitepark.ies.application.audit.AuditBatchLogAction;
 import com.sitepark.ies.application.audit.AuditLogAction;
+import com.sitepark.ies.application.value.ReassignResult;
 import com.sitepark.ies.label.core.usecase.ReassignLabelsToEntitiesRequest;
 import com.sitepark.ies.label.core.usecase.ReassignLabelsToEntitiesResult;
 import com.sitepark.ies.label.core.usecase.ReassignLabelsToEntitiesUseCase;
@@ -74,7 +75,8 @@ public final class ReassignLabelsToEntitiesService {
    * @throws com.sitepark.ies.label.core.domain.exception.LabelNotFoundException if a label does not
    *     exist
    */
-  public int reassignEntitiesFromLabels(@NotNull ReassignLabelsToEntitiesServiceRequest request) {
+  public ReassignResult reassignEntitiesFromLabels(
+      @NotNull ReassignLabelsToEntitiesServiceRequest request) {
 
     this.checkAuthorization(request.reassignLabelsToEntitiesRequest());
 
@@ -84,9 +86,9 @@ public final class ReassignLabelsToEntitiesService {
 
     if (result instanceof ReassignLabelsToEntitiesResult.Reassigned reassigned) {
       this.createAuditLogs(request, reassigned);
-      return reassigned.assignments().countAssignments();
+      return new ReassignResult(reassigned.assignments().size(), reassigned.unassignments().size());
     } else {
-      return 0;
+      return ReassignResult.empty();
     }
   }
 

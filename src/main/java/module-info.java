@@ -19,6 +19,7 @@ module com.sitepark.ies.application {
   exports com.sitepark.ies.application.user;
   exports com.sitepark.ies.application.label;
   exports com.sitepark.ies.application.role;
+  exports com.sitepark.ies.application.value;
   exports com.sitepark.ies.application.privilege;
 
   requires com.google.guice;

@@ -3,11 +3,14 @@ package com.sitepark.ies.application.audit.revert.role;
 import com.sitepark.ies.application.ApplicationAuditLogService;
 import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
 import com.sitepark.ies.application.audit.AuditBatchLogAction;
+import com.sitepark.ies.application.audit.AuditLogAction;
 import com.sitepark.ies.application.audit.revert.RevertEntityActionHandler;
 import com.sitepark.ies.application.audit.revert.RevertFailedException;
 import com.sitepark.ies.audit.core.service.AuditLogService;
 import com.sitepark.ies.audit.core.service.RevertRequest;
+import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import com.sitepark.ies.userrepository.core.domain.entity.Role;
+import com.sitepark.ies.userrepository.core.domain.entity.User;
 import com.sitepark.ies.userrepository.core.domain.value.RoleSnapshot;
 import com.sitepark.ies.userrepository.core.usecase.role.RestoreRoleRequest;
 import com.sitepark.ies.userrepository.core.usecase.role.RestoreRoleUseCase;
@@ -46,7 +49,8 @@ public class RevertRoleBatchRemoveActionHandler implements RevertEntityActionHan
     }
 
     Instant timestamp = Instant.now(this.clock);
-    String auditLogParentId = this.createRevertBatchRemoveLog(timestamp, request.parentId());
+    ApplicationAuditLogService auditLogService =
+        this.createRevertBatchRemoveLog(timestamp, request.parentId());
 
     for (String childId : childIds) {
       RoleSnapshot restoreData;
@@ -60,13 +64,23 @@ public class RevertRoleBatchRemoveActionHandler implements RevertEntityActionHan
         throw new RevertFailedException(request, "Failed to deserialize role-snapshot", e);
       }
 
-      this.restoreRoleUseCase.restoreRole(new RestoreRoleRequest(restoreData, auditLogParentId));
+      this.restoreRoleUseCase.restoreRole(new RestoreRoleRequest(restoreData));
+      auditLogService.createLog(
+          EntityRef.of(User.class, restoreData.role().id()),
+          restoreData.role().name(),
+          AuditLogAction.RESTORE,
+          null,
+          restoreData);
     }
   }
 
-  private String createRevertBatchRemoveLog(Instant timestamp, String auditParentId) {
+  private ApplicationAuditLogService createRevertBatchRemoveLog(
+      Instant timestamp, String auditParentId) {
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(timestamp, auditParentId);
-    return auditLogService.createBatchLog(Role.class, AuditBatchLogAction.REVERT_BATCH_REMOVE);
+    String batchId =
+        auditLogService.createBatchLog(Role.class, AuditBatchLogAction.REVERT_BATCH_REMOVE);
+    auditLogService.updateParentId(batchId);
+    return auditLogService;
   }
 }

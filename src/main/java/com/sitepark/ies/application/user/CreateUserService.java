@@ -9,13 +9,11 @@ import com.sitepark.ies.application.label.ReassignLabelsToEntitiesServiceRequest
 import com.sitepark.ies.label.core.usecase.ReassignLabelsToEntitiesRequest;
 import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import com.sitepark.ies.userrepository.core.domain.entity.User;
-import com.sitepark.ies.userrepository.core.domain.value.UserSnapshot;
 import com.sitepark.ies.userrepository.core.usecase.user.AssignRolesToUsersResult;
 import com.sitepark.ies.userrepository.core.usecase.user.CreateUserResult;
 import com.sitepark.ies.userrepository.core.usecase.user.CreateUserUseCase;
 import jakarta.inject.Inject;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Application Service that orchestrates user creation operations with cross-cutting concerns.
@@ -73,12 +71,7 @@ public final class CreateUserService {
 
     CreateUserResult result = this.createUserUseCase.createUser(request.createUserRequest());
 
-    this.createCreationAuditLog(result, request.auditParentId());
-
-    if (result.roleAssignmentResult() != null
-        && result.roleAssignmentResult() instanceof AssignRolesToUsersResult.Assigned assigned) {
-      this.createRoleAssignmentAuditLogs(assigned, result.snapshot(), request.auditParentId());
-    }
+    this.createAuditLogs(result, request.auditParentId());
 
     if (!request.labelIdentifiers().isEmpty()) {
       ReassignLabelsToEntitiesServiceRequest labelRequest =
@@ -98,7 +91,12 @@ public final class CreateUserService {
     return result.userId();
   }
 
-  protected void createCreationAuditLog(CreateUserResult result, String auditParentId) {
+  protected void createAuditLogs(CreateUserResult result, String auditParentId) {
+    this.createCreationAuditLog(result, auditParentId);
+    this.createRoleAssignmentAuditLogs(result, auditParentId);
+  }
+
+  private void createCreationAuditLog(CreateUserResult result, String auditParentId) {
 
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(result.timestamp(), auditParentId);
@@ -110,15 +108,16 @@ public final class CreateUserService {
         result.snapshot());
   }
 
-  protected void createRoleAssignmentAuditLogs(
-      AssignRolesToUsersResult.Assigned result,
-      UserSnapshot snapshot,
-      @Nullable String auditParentId) {
+  private void createRoleAssignmentAuditLogs(CreateUserResult result, String auditParentId) {
+
+    if (!(result.roleAssignmentResult() instanceof AssignRolesToUsersResult.Assigned assigned)) {
+      return;
+    }
 
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(result.timestamp(), auditParentId);
 
-    var assignments = result.assignments();
+    var assignments = assigned.assignments();
 
     String parentId =
         assignments.size() > 1
@@ -127,8 +126,8 @@ public final class CreateUserService {
     auditLogService.updateParentId(parentId);
 
     auditLogService.createLog(
-        EntityRef.of(User.class, snapshot.user().id()),
-        snapshot.user().toDisplayName(),
+        EntityRef.of(User.class, result.snapshot().user().id()),
+        result.snapshot().user().toDisplayName(),
         AuditLogAction.ASSIGN_ROLES,
         assignments.roleIds(),
         assignments.roleIds());

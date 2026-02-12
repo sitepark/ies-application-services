@@ -28,7 +28,7 @@ public class RevertRoleRemoveActionHandler implements RevertEntityActionHandler 
     try {
       RoleSnapshot restoreData =
           this.auditLogService.deserialize(request.backwardData(), RoleSnapshot.class);
-      this.restoreRoleUseCase.restoreRole(new RestoreRoleRequest(restoreData, null));
+      this.restoreRoleUseCase.restoreRole(new RestoreRoleRequest(restoreData));
     } catch (IOException e) {
       throw new RevertFailedException(request, "Failed to deserialize role-snapshot", e);
     }

@@ -39,7 +39,7 @@ public class RevertUserRemoveActionHandler implements RevertEntityActionHandler 
           this.auditLogService.deserialize(request.backwardData(), UserSnapshot.class);
 
       RestoreUserResult result =
-          this.restoreUserUseCase.restoreUser(new RestoreUserRequest(restoreData, null));
+          this.restoreUserUseCase.restoreUser(new RestoreUserRequest(restoreData));
 
       if (result instanceof RestoreUserResult.Restored restored) {
         this.createRestoreAuditLog(restored, request.parentId());

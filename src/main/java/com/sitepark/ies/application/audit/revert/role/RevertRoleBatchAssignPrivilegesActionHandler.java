@@ -3,6 +3,7 @@ package com.sitepark.ies.application.audit.revert.role;
 import com.sitepark.ies.application.ApplicationAuditLogService;
 import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
 import com.sitepark.ies.application.audit.AuditBatchLogAction;
+import com.sitepark.ies.application.audit.AuditLogAction;
 import com.sitepark.ies.application.audit.revert.RevertEntityActionHandler;
 import com.sitepark.ies.application.audit.revert.RevertFailedException;
 import com.sitepark.ies.audit.core.service.AuditLogService;
@@ -43,12 +44,13 @@ public class RevertRoleBatchAssignPrivilegesActionHandler implements RevertEntit
     }
 
     Instant timestamp = Instant.now(this.clock);
-    String auditLogParentId = this.createRevertBatchAssignRolesLog(timestamp, request.parentId());
+    ApplicationAuditLogService auditLogService =
+        this.createRevertBatchAssignRolesLog(timestamp, request.parentId());
 
     for (String childId : childIds) {
-      List<String> privilegesIds;
+      List<String> privilegeIds;
       try {
-        privilegesIds = this.auditLogService.getBackwardDataList(childId, String.class);
+        privilegeIds = this.auditLogService.getBackwardDataList(childId, String.class);
       } catch (IOException e) {
         throw new RevertFailedException(request, "Failed to deserialize privilegeIds", e);
       }
@@ -56,16 +58,21 @@ public class RevertRoleBatchAssignPrivilegesActionHandler implements RevertEntit
       this.unassignPrivilegesFromRolesUseCase.unassignPrivilegesFromRoles(
           UnassignPrivilegesFromRolesRequest.builder()
               .roleIdentifiers(b -> b.id(request.target().id()))
-              .privilegeIdentifiers(b -> b.ids(privilegesIds))
-              .auditParentId(auditLogParentId)
+              .privilegeIdentifiers(b -> b.ids(privilegeIds))
               .build());
+      auditLogService.createLog(
+          request.target(), AuditLogAction.UNASSIGN_PRIVILEGES, privilegeIds, privilegeIds);
     }
   }
 
-  private String createRevertBatchAssignRolesLog(Instant timestamp, String auditParentId) {
+  private ApplicationAuditLogService createRevertBatchAssignRolesLog(
+      Instant timestamp, String auditParentId) {
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(timestamp, auditParentId);
-    return auditLogService.createBatchLog(
-        Role.class, AuditBatchLogAction.REVERT_BATCH_ASSIGN_PRIVILEGES);
+    String batchId =
+        auditLogService.createBatchLog(
+            Role.class, AuditBatchLogAction.REVERT_BATCH_ASSIGN_PRIVILEGES);
+    auditLogService.updateParentId(batchId);
+    return auditLogService;
   }
 }

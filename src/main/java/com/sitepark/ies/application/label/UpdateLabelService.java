@@ -87,7 +87,12 @@ public final class UpdateLabelService {
     return result.hasAnyChanges();
   }
 
-  protected void createAuditLogForLabelUpdate(UpdateLabelResult result, String auditParentId) {
+  protected void createAuditLogs(UpdateLabelResult result, String auditParentId) {
+    this.createAuditLogForLabelUpdate(result, auditParentId);
+    this.createAuditLogsForScopeReassignment(result, auditParentId);
+  }
+
+  private void createAuditLogForLabelUpdate(UpdateLabelResult result, String auditParentId) {
 
     Updated updated = result.getLabelUpdate();
     if (updated == null) {

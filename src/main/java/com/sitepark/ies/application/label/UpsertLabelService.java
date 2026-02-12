@@ -1,5 +1,6 @@
 package com.sitepark.ies.application.label;
 
+import com.sitepark.ies.application.value.UpsertResult;
 import com.sitepark.ies.label.core.usecase.UpsertLabelResult;
 import com.sitepark.ies.label.core.usecase.UpsertLabelUseCase;
 import jakarta.inject.Inject;
@@ -35,23 +36,21 @@ public final class UpsertLabelService {
     this.updateLabelService = updateLabelService;
   }
 
-  public boolean upsertLabel(@NotNull UpsertLabelServiceRequest request) {
+  public UpsertResult upsertLabel(@NotNull UpsertLabelServiceRequest request) {
 
     UpsertLabelResult result = this.upsertLabelUseCase.upsertLabel(request.upsertLabelRequest());
 
     if (result instanceof UpsertLabelResult.Updated updated) {
       if (!updated.updateLabelResult().hasAnyChanges()) {
-        return false;
+        return UpsertResult.updated(false);
       }
-      this.updateLabelService.createAuditLogForLabelUpdate(
-          updated.updateLabelResult(), request.auditParentId());
-      return true;
+      this.updateLabelService.createAuditLogs(updated.updateLabelResult(), request.auditParentId());
+      return UpsertResult.updated(true);
     } else if (result instanceof UpsertLabelResult.Created created) {
-      this.createLabelService.createLabelCreationAuditLog(
-          created.updateLabelResult(), request.auditParentId());
-      return true;
+      this.createLabelService.createAuditLogs(created.createLabelResult(), request.auditParentId());
+      return UpsertResult.created(created.labelId());
     }
 
-    return false;
+    return UpsertResult.updated(false);
   }
 }

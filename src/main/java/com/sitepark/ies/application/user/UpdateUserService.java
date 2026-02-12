@@ -88,8 +88,7 @@ public final class UpdateUserService {
 
     UpdateUserResult result = this.updateUserUseCase.updateUser(request.updateUserRequest());
 
-    this.createAuditLogForUserUpdate(result, request.auditParentId());
-    this.createAuditLogsForRoleReassignment(result, request.auditParentId());
+    this.createAuditLogs(result, request.auditParentId());
 
     if (!request.labelIdentifiers().isEmpty()) {
       ReassignLabelsToEntitiesServiceRequest labelRequest =
@@ -111,6 +110,11 @@ public final class UpdateUserService {
     }
 
     return result.userId();
+  }
+
+  protected void createAuditLogs(UpdateUserResult result, String auditParentId) {
+    this.createAuditLogForUserUpdate(result, auditParentId);
+    this.createAuditLogsForRoleReassignment(result, auditParentId);
   }
 
   private void createAuditLogForUserUpdate(UpdateUserResult result, String auditParentId) {

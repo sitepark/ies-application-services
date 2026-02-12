@@ -3,14 +3,18 @@ package com.sitepark.ies.application.audit.revert.privilege;
 import com.sitepark.ies.application.ApplicationAuditLogService;
 import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
 import com.sitepark.ies.application.audit.AuditBatchLogAction;
+import com.sitepark.ies.application.audit.AuditLogAction;
 import com.sitepark.ies.application.audit.revert.RevertEntityActionHandler;
 import com.sitepark.ies.application.audit.revert.RevertFailedException;
 import com.sitepark.ies.audit.core.service.AuditLogService;
 import com.sitepark.ies.audit.core.service.RevertRequest;
+import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import com.sitepark.ies.userrepository.core.domain.entity.Privilege;
+import com.sitepark.ies.userrepository.core.domain.entity.User;
 import com.sitepark.ies.userrepository.core.domain.value.PrivilegeSnapshot;
 import com.sitepark.ies.userrepository.core.usecase.privilege.RestorePrivilegeRequest;
 import com.sitepark.ies.userrepository.core.usecase.privilege.RestorePrivilegeUseCase;
+import com.sitepark.ies.userrepository.core.usecase.user.CreateUserResult;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.time.Clock;
@@ -45,8 +49,9 @@ public class RevertPrivilegeBatchRemoveActionHandler implements RevertEntityActi
       return;
     }
 
-    Instant now = Instant.now(this.clock);
-    String auditLogParentId = this.createRevertBatchRemoveLog(now, request.parentId());
+    Instant timestamp = Instant.now(this.clock);
+    ApplicationAuditLogService auditLogService =
+        this.createRevertBatchRemoveLog(timestamp, request.parentId());
 
     for (String childId : childIds) {
       PrivilegeSnapshot restoreData;
@@ -60,14 +65,35 @@ public class RevertPrivilegeBatchRemoveActionHandler implements RevertEntityActi
         throw new RevertFailedException(request, "Failed to deserialize privilege-snapshot", e);
       }
 
-      this.restorePrivilegeUseCase.restorePrivilege(
-          new RestorePrivilegeRequest(restoreData, auditLogParentId));
+      this.restorePrivilegeUseCase.restorePrivilege(new RestorePrivilegeRequest(restoreData));
+      auditLogService.createLog(
+          EntityRef.of(User.class, restoreData.privilege().id()),
+          restoreData.privilege().name(),
+          AuditLogAction.RESTORE,
+          null,
+          restoreData);
     }
   }
 
-  private String createRevertBatchRemoveLog(Instant timestamp, String auditParentId) {
+  private ApplicationAuditLogService createRevertBatchRemoveLog(
+      Instant timestamp, String auditParentId) {
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(timestamp, auditParentId);
-    return auditLogService.createBatchLog(Privilege.class, AuditBatchLogAction.REVERT_BATCH_REMOVE);
+    String batchId =
+        auditLogService.createBatchLog(Privilege.class, AuditBatchLogAction.REVERT_BATCH_REMOVE);
+    auditLogService.updateParentId(batchId);
+    return auditLogService;
+  }
+
+  protected void createCreationAuditLog(CreateUserResult result, String auditParentId) {
+
+    ApplicationAuditLogService auditLogService =
+        this.auditLogServiceFactory.create(result.timestamp(), auditParentId);
+    auditLogService.createLog(
+        EntityRef.of(User.class, result.userId()),
+        result.snapshot().user().toDisplayName(),
+        AuditLogAction.CREATE,
+        null,
+        result.snapshot());
   }
 }

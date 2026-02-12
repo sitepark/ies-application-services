@@ -71,7 +71,7 @@ public final class AssignPrivilegesToRolesService {
    * @throws com.sitepark.ies.userrepository.core.domain.exception.PrivilegeNotFoundException if a
    *     privilege does not exist
    */
-  public void assignPrivilegesToRoles(@NotNull AssignPrivilegesToRolesServiceRequest request) {
+  public int assignPrivilegesToRoles(@NotNull AssignPrivilegesToRolesServiceRequest request) {
 
     AssignPrivilegesToRolesResult result =
         this.assignPrivilegesToRolesUseCase.assignPrivilegesToRoles(
@@ -80,6 +80,8 @@ public final class AssignPrivilegesToRolesService {
     if (result instanceof AssignPrivilegesToRolesResult.Assigned assigned) {
       this.createAuditLogs(assigned, request.auditParentId());
     }
+
+    return result.assignments().size();
   }
 
   private void createAuditLogs(

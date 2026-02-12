@@ -30,18 +30,17 @@ public final class CreateRoleService {
 
     CreateRoleResult result = this.createRoleUseCase.createRole(request.createRoleRequest());
 
-    this.createCreationAuditLog(result, request.auditParentId());
-
-    if (result.privilegeAssignmentResult() != null
-        && result.privilegeAssignmentResult()
-            instanceof AssignPrivilegesToRolesResult.Assigned assigned) {
-      this.createPrivilegeAssignmentAuditLogs(assigned, result, request.auditParentId());
-    }
+    this.createAuditLogs(result, request.auditParentId());
 
     return result.roleId();
   }
 
-  protected void createCreationAuditLog(CreateRoleResult result, String auditParentId) {
+  protected void createAuditLogs(CreateRoleResult result, String auditParentId) {
+    this.createCreationAuditLog(result, auditParentId);
+    this.createPrivilegeAssignmentAuditLogs(result, auditParentId);
+  }
+
+  private void createCreationAuditLog(CreateRoleResult result, String auditParentId) {
 
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(result.timestamp(), auditParentId);
@@ -53,15 +52,18 @@ public final class CreateRoleService {
         result.snapshot());
   }
 
-  protected void createPrivilegeAssignmentAuditLogs(
-      AssignPrivilegesToRolesResult.Assigned result,
-      CreateRoleResult createResult,
-      @Nullable String auditParentId) {
+  private void createPrivilegeAssignmentAuditLogs(
+      CreateRoleResult result, @Nullable String auditParentId) {
+
+    if (!(result.privilegeAssignmentResult()
+        instanceof AssignPrivilegesToRolesResult.Assigned assigned)) {
+      return;
+    }
 
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(result.timestamp(), auditParentId);
 
-    var assignments = result.assignments();
+    var assignments = assigned.assignments();
 
     String parentId =
         assignments.size() > 1
@@ -72,8 +74,8 @@ public final class CreateRoleService {
 
     for (String roleId : assignments.roleIds()) {
       auditLogService.createLog(
-          EntityRef.of(Role.class, createResult.roleId()),
-          createResult.snapshot().role().name(),
+          EntityRef.of(Role.class, result.roleId()),
+          result.snapshot().role().name(),
           AuditLogAction.ASSIGN_PRIVILEGES,
           assignments.privilegeIds(roleId),
           assignments.privilegeIds(roleId));

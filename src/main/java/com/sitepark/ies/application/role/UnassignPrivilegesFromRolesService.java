@@ -70,7 +70,7 @@ public final class UnassignPrivilegesFromRolesService {
    * @throws com.sitepark.ies.userrepository.core.domain.exception.PrivilegeNotFoundException if a
    *     privilege does not exist
    */
-  public void unassignPrivilegesFromRoles(
+  public int unassignPrivilegesFromRoles(
       @NotNull UnassignPrivilegesFromRolesServiceRequest request) {
 
     UnassignPrivilegesFromRolesResult result =
@@ -80,6 +80,8 @@ public final class UnassignPrivilegesFromRolesService {
     if (result instanceof UnassignPrivilegesFromRolesResult.Unassigned unassigned) {
       this.createAuditLogs(unassigned, request.auditParentId());
     }
+
+    return result.unassignments().size();
   }
 
   private void createAuditLogs(

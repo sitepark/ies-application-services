@@ -2,6 +2,7 @@ package com.sitepark.ies.application.role;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import com.sitepark.ies.userrepository.core.usecase.role.UnassignPrivilegesFromRolesRequest;
 import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -10,9 +11,7 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName"})
 public final class UnassignPrivilegesFromRolesServiceRequest {
 
-  @NotNull
-  private final com.sitepark.ies.userrepository.core.usecase.role.UnassignPrivilegesFromRolesRequest
-      unassignPrivilegesFromRolesRequest;
+  @NotNull private final UnassignPrivilegesFromRolesRequest unassignPrivilegesFromRolesRequest;
 
   @Nullable private final String auditParentId;
 

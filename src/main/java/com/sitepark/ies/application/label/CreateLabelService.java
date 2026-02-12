@@ -4,6 +4,7 @@ import com.sitepark.ies.application.ApplicationAuditLogService;
 import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
 import com.sitepark.ies.application.audit.AuditLogAction;
 import com.sitepark.ies.label.core.domain.entity.Label;
+import com.sitepark.ies.label.core.usecase.AssignScopesToLabelsResult;
 import com.sitepark.ies.label.core.usecase.CreateLabelResult;
 import com.sitepark.ies.label.core.usecase.CreateLabelUseCase;
 import com.sitepark.ies.sharedkernel.domain.EntityRef;
@@ -58,12 +59,17 @@ public final class CreateLabelService {
   public String createLabel(@NotNull CreateLabelServiceRequest request) {
 
     CreateLabelResult result = this.createLabelUseCase.createLabel(request.createLabelRequest());
-    this.createLabelCreationAuditLog(result, request.auditParentId());
+    this.createAuditLogs(result, request.auditParentId());
 
     return result.labelId();
   }
 
-  protected void createLabelCreationAuditLog(CreateLabelResult result, String auditLogParentId) {
+  protected void createAuditLogs(CreateLabelResult result, String auditLogParentId) {
+    createAuditLogForLabelUpdate(result, auditLogParentId);
+    createAuditLogsForScopeReassignment(result, auditLogParentId);
+  }
+
+  private void createAuditLogForLabelUpdate(CreateLabelResult result, String auditLogParentId) {
 
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(result.timestamp(), auditLogParentId);
@@ -75,5 +81,25 @@ public final class CreateLabelService {
         AuditLogAction.CREATE,
         null,
         result.snapshot());
+  }
+
+  private void createAuditLogsForScopeReassignment(CreateLabelResult result, String auditParentId) {
+
+    if (!(result.scopeAssignmentResult() instanceof AssignScopesToLabelsResult.Assigned assign)) {
+      return;
+    }
+
+    String labelName = result.snapshot().label().name();
+
+    ApplicationAuditLogService auditLogService =
+        this.auditLogServiceFactory.create(result.timestamp(), auditParentId);
+
+    var assignments = assign.assignments().scopes();
+    auditLogService.createLog(
+        EntityRef.of(Label.class, result.labelId()),
+        labelName,
+        AuditLogAction.ASSIGN_SCOPES_TO_LABEL,
+        assignments,
+        assignments);
   }
 }

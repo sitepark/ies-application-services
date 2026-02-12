@@ -79,14 +79,18 @@ public final class UpdateRoleService {
 
     UpdateRoleResult result = this.updateRoleUseCase.updateRole(request.updateRoleRequest());
 
-    this.createAuditLogForRoleUpdate(result, request.auditParentId());
-    this.createAuditLogsForPrivilegeReassignment(result, request.auditParentId());
+    this.createAuditLogs(result, request.auditParentId());
 
     if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Successfully processed role update for '{}'", result.roleId());
     }
 
     return result.roleId();
+  }
+
+  protected void createAuditLogs(UpdateRoleResult result, String auditParentId) {
+    this.createAuditLogForRoleUpdate(result, auditParentId);
+    this.createAuditLogsForPrivilegeReassignment(result, auditParentId);
   }
 
   private void createAuditLogForRoleUpdate(UpdateRoleResult result, String auditParentId) {

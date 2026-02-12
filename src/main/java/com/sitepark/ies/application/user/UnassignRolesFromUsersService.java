@@ -7,7 +7,6 @@ import com.sitepark.ies.application.audit.AuditBatchLogAction;
 import com.sitepark.ies.application.audit.AuditLogAction;
 import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import com.sitepark.ies.userrepository.core.domain.entity.User;
-import com.sitepark.ies.userrepository.core.usecase.user.UnassignRolesFromUsersRequest;
 import com.sitepark.ies.userrepository.core.usecase.user.UnassignRolesFromUsersResult;
 import com.sitepark.ies.userrepository.core.usecase.user.UnassignRolesFromUsersUseCase;
 import jakarta.inject.Inject;
@@ -70,14 +69,17 @@ public final class UnassignRolesFromUsersService {
    * @throws com.sitepark.ies.userrepository.core.domain.exception.RoleNotFoundException if a role
    *     does not exist
    */
-  public void unassignRolesFromUsers(@NotNull UnassignRolesFromUsersRequest request) {
+  public int unassignRolesFromUsers(@NotNull UnassignRoleFromUserServiceRequest request) {
 
     UnassignRolesFromUsersResult result =
-        this.unassignRolesFromUsersUseCase.unassignRolesFromUsers(request);
+        this.unassignRolesFromUsersUseCase.unassignRolesFromUsers(
+            request.unassignRolesFromUsersRequest());
 
     if (result instanceof UnassignRolesFromUsersResult.Unassigned unassigned) {
       this.createAuditLogs(unassigned, request.auditParentId());
     }
+
+    return result.unassignments().size();
   }
 
   private void createAuditLogs(

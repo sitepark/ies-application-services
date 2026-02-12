@@ -58,10 +58,13 @@ class UnassignRolesFromUsersServiceTest {
             any(UnassignRolesFromUsersRequest.class)))
         .thenReturn(unassignedResult);
 
-    UnassignRolesFromUsersRequest request =
-        UnassignRolesFromUsersRequest.builder()
-            .userIdentifiers(b -> b.id("123"))
-            .roleIdentifiers(b -> b.id("101").id("102"))
+    UnassignRoleFromUserServiceRequest request =
+        UnassignRoleFromUserServiceRequest.builder()
+            .unassignRolesFromUsersRequest(
+                UnassignRolesFromUsersRequest.builder()
+                    .userIdentifiers(b -> b.id("123"))
+                    .roleIdentifiers(b -> b.id("101").id("102"))
+                    .build())
             .build();
 
     service.unassignRolesFromUsers(request);
@@ -84,10 +87,13 @@ class UnassignRolesFromUsersServiceTest {
             any(UnassignRolesFromUsersRequest.class)))
         .thenReturn(unassignedResult);
 
-    UnassignRolesFromUsersRequest request =
-        UnassignRolesFromUsersRequest.builder()
-            .userIdentifiers(b -> b.id("123"))
-            .roleIdentifiers(b -> b.id("101").id("102"))
+    UnassignRoleFromUserServiceRequest request =
+        UnassignRoleFromUserServiceRequest.builder()
+            .unassignRolesFromUsersRequest(
+                UnassignRolesFromUsersRequest.builder()
+                    .userIdentifiers(b -> b.id("123"))
+                    .roleIdentifiers(b -> b.id("101").id("102"))
+                    .build())
             .build();
 
     service.unassignRolesFromUsers(request);
@@ -106,10 +112,13 @@ class UnassignRolesFromUsersServiceTest {
             any(UnassignRolesFromUsersRequest.class)))
         .thenReturn(skippedResult);
 
-    UnassignRolesFromUsersRequest request =
-        UnassignRolesFromUsersRequest.builder()
-            .userIdentifiers(b -> b.id("123"))
-            .roleIdentifiers(b -> b.id("101"))
+    UnassignRoleFromUserServiceRequest request =
+        UnassignRoleFromUserServiceRequest.builder()
+            .unassignRolesFromUsersRequest(
+                UnassignRolesFromUsersRequest.builder()
+                    .userIdentifiers(b -> b.id("123"))
+                    .roleIdentifiers(b -> b.id("101"))
+                    .build())
             .build();
 
     service.unassignRolesFromUsers(request);
@@ -133,10 +142,13 @@ class UnassignRolesFromUsersServiceTest {
             any(UnassignRolesFromUsersRequest.class)))
         .thenReturn(unassignedResult);
 
-    UnassignRolesFromUsersRequest request =
-        UnassignRolesFromUsersRequest.builder()
-            .userIdentifiers(b -> b.id("123").id("456"))
-            .roleIdentifiers(b -> b.id("101"))
+    UnassignRoleFromUserServiceRequest request =
+        UnassignRoleFromUserServiceRequest.builder()
+            .unassignRolesFromUsersRequest(
+                UnassignRolesFromUsersRequest.builder()
+                    .userIdentifiers(b -> b.id("123").id("456"))
+                    .roleIdentifiers(b -> b.id("101"))
+                    .build())
             .build();
 
     service.unassignRolesFromUsers(request);

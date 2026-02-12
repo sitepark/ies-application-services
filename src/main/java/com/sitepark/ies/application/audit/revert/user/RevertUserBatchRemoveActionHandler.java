@@ -64,7 +64,7 @@ public class RevertUserBatchRemoveActionHandler implements RevertEntityActionHan
       }
 
       RestoreUserResult result =
-          this.restoreUserUseCase.restoreUser(new RestoreUserRequest(restoreData, null));
+          this.restoreUserUseCase.restoreUser(new RestoreUserRequest(restoreData));
 
       if (result instanceof RestoreUserResult.Restored restored) {
         this.createRestoreAuditLog(restored, auditLogParentId);

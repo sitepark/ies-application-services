@@ -80,14 +80,18 @@ public final class UpdatePrivilegeService {
     UpdatePrivilegeResult result =
         this.updatePrivilegeUseCase.updatePrivilege(request.updatePrivilegeRequest());
 
-    this.createAuditLogForPrivilegeUpdate(result, request.auditParentId());
-    this.createAuditLogsForRoleReassignment(result, request.auditParentId());
+    this.createAuditLogs(result, request.auditParentId());
 
     if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Successfully processed privilege update for '{}'", result.privilegeId());
     }
 
     return result.privilegeId();
+  }
+
+  protected void createAuditLogs(UpdatePrivilegeResult result, String auditParentId) {
+    this.createAuditLogForPrivilegeUpdate(result, auditParentId);
+    this.createAuditLogsForRoleReassignment(result, auditParentId);
   }
 
   private void createAuditLogForPrivilegeUpdate(

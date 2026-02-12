@@ -3,6 +3,7 @@ package com.sitepark.ies.application.audit.revert.user;
 import com.sitepark.ies.application.ApplicationAuditLogService;
 import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
 import com.sitepark.ies.application.audit.AuditBatchLogAction;
+import com.sitepark.ies.application.audit.AuditLogAction;
 import com.sitepark.ies.application.audit.revert.RevertEntityActionHandler;
 import com.sitepark.ies.application.audit.revert.RevertFailedException;
 import com.sitepark.ies.audit.core.service.AuditLogService;
@@ -43,7 +44,8 @@ public class RevertUserBatchAssignRolesActionHandler implements RevertEntityActi
     }
 
     Instant timestamp = Instant.now(this.clock);
-    String auditLogParentId = this.createRevertBatchAssignRolesLog(timestamp, request.parentId());
+    ApplicationAuditLogService auditLogService =
+        this.createRevertBatchAssignRolesLog(timestamp, request.parentId());
 
     for (String childId : childIds) {
       List<String> roleIds;
@@ -57,15 +59,18 @@ public class RevertUserBatchAssignRolesActionHandler implements RevertEntityActi
           UnassignRolesFromUsersRequest.builder()
               .userIdentifiers(b -> b.id(request.target().id()))
               .roleIdentifiers(b -> b.ids(roleIds))
-              .auditParentId(auditLogParentId)
               .build());
+      auditLogService.createLog(request.target(), AuditLogAction.UNASSIGN_ROLES, roleIds, roleIds);
     }
   }
 
-  private String createRevertBatchAssignRolesLog(Instant timestamp, String auditParentId) {
+  private ApplicationAuditLogService createRevertBatchAssignRolesLog(
+      Instant timestamp, String auditParentId) {
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(timestamp, auditParentId);
-    return auditLogService.createBatchLog(
-        User.class, AuditBatchLogAction.REVERT_BATCH_ASSIGN_ROLES);
+    String batchId =
+        auditLogService.createBatchLog(User.class, AuditBatchLogAction.REVERT_BATCH_ASSIGN_ROLES);
+    auditLogService.updateParentId(batchId);
+    return auditLogService;
   }
 }

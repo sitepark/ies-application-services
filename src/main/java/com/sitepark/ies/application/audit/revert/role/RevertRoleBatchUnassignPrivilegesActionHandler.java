@@ -3,6 +3,7 @@ package com.sitepark.ies.application.audit.revert.role;
 import com.sitepark.ies.application.ApplicationAuditLogService;
 import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
 import com.sitepark.ies.application.audit.AuditBatchLogAction;
+import com.sitepark.ies.application.audit.AuditLogAction;
 import com.sitepark.ies.application.audit.revert.RevertEntityActionHandler;
 import com.sitepark.ies.application.audit.revert.RevertFailedException;
 import com.sitepark.ies.audit.core.service.AuditLogService;
@@ -43,7 +44,8 @@ public class RevertRoleBatchUnassignPrivilegesActionHandler implements RevertEnt
     }
 
     Instant timestamp = Instant.now(this.clock);
-    String auditLogParentId = this.createRevertBatchUnassignRolesLog(timestamp, request.parentId());
+    ApplicationAuditLogService auditLogService =
+        this.createRevertBatchUnassignRolesLog(timestamp, request.parentId());
 
     for (String childId : childIds) {
       List<String> privilegeIds;
@@ -57,15 +59,20 @@ public class RevertRoleBatchUnassignPrivilegesActionHandler implements RevertEnt
           AssignPrivilegesToRolesRequest.builder()
               .roleIdentifiers(b -> b.id(request.target().id()))
               .privilegeIdentifiers(b -> b.ids(privilegeIds))
-              .auditParentId(auditLogParentId)
               .build());
+      auditLogService.createLog(
+          request.target(), AuditLogAction.ASSIGN_PRIVILEGES, privilegeIds, privilegeIds);
     }
   }
 
-  private String createRevertBatchUnassignRolesLog(Instant timestamp, String auditParentId) {
+  private ApplicationAuditLogService createRevertBatchUnassignRolesLog(
+      Instant timestamp, String auditParentId) {
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(timestamp, auditParentId);
-    return auditLogService.createBatchLog(
-        Role.class, AuditBatchLogAction.REVERT_BATCH_UNASSIGN_PRIVILEGES);
+    String batchId =
+        auditLogService.createBatchLog(
+            Role.class, AuditBatchLogAction.REVERT_BATCH_UNASSIGN_PRIVILEGES);
+    auditLogService.updateParentId(batchId);
+    return auditLogService;
   }
 }

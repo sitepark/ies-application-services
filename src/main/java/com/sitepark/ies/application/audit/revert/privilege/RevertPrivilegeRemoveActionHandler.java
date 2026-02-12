@@ -28,7 +28,7 @@ public class RevertPrivilegeRemoveActionHandler implements RevertEntityActionHan
     try {
       PrivilegeSnapshot restoreData =
           this.auditLogService.deserialize(request.backwardData(), PrivilegeSnapshot.class);
-      this.restorePrivilegeUseCase.restorePrivilege(new RestorePrivilegeRequest(restoreData, null));
+      this.restorePrivilegeUseCase.restorePrivilege(new RestorePrivilegeRequest(restoreData));
     } catch (IOException e) {
       throw new RevertFailedException(request, "Failed to deserialize privilege-snapshot", e);
     }

@@ -1,22 +1,22 @@
-package com.sitepark.ies.application.label;
+package com.sitepark.ies.application.role;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
-import com.sitepark.ies.label.core.usecase.UpsertLabelRequest;
+import com.sitepark.ies.userrepository.core.usecase.role.UpsertRoleRequest;
 import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-@JsonDeserialize(builder = UpsertLabelServiceRequest.Builder.class)
+@JsonDeserialize(builder = UpsertRoleServiceRequest.Builder.class)
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName"})
-public final class UpsertLabelServiceRequest {
+public final class UpsertRoleServiceRequest {
 
-  @NotNull private final UpsertLabelRequest upsertLabelRequest;
+  @NotNull private final UpsertRoleRequest upsertRoleRequest;
   @Nullable private final String auditParentId;
 
-  private UpsertLabelServiceRequest(Builder builder) {
-    Objects.requireNonNull(builder.upsertLabelRequest, "upsertLabelRequest must not be null");
-    this.upsertLabelRequest = builder.upsertLabelRequest;
+  private UpsertRoleServiceRequest(Builder builder) {
+    Objects.requireNonNull(builder.upsertRoleRequest, "upsertRoleRequest must not be null");
+    this.upsertRoleRequest = builder.upsertRoleRequest;
     this.auditParentId = builder.auditParentId;
   }
 
@@ -24,8 +24,8 @@ public final class UpsertLabelServiceRequest {
     return new Builder();
   }
 
-  public UpsertLabelRequest upsertLabelRequest() {
-    return this.upsertLabelRequest;
+  public UpsertRoleRequest upsertRoleRequest() {
+    return this.upsertRoleRequest;
   }
 
   public String auditParentId() {
@@ -38,22 +38,22 @@ public final class UpsertLabelServiceRequest {
 
   @Override
   public int hashCode() {
-    return Objects.hash(this.upsertLabelRequest, this.auditParentId);
+    return Objects.hash(this.upsertRoleRequest, this.auditParentId);
   }
 
   @Override
   public boolean equals(Object o) {
     return super.equals(o)
-        && (o instanceof UpsertLabelServiceRequest that)
-        && Objects.equals(this.upsertLabelRequest, that.upsertLabelRequest)
+        && (o instanceof UpsertRoleServiceRequest that)
+        && Objects.equals(this.upsertRoleRequest, that.upsertRoleRequest)
         && Objects.equals(this.auditParentId, that.auditParentId);
   }
 
   @Override
   public String toString() {
-    return "UpsertLabelServiceRequest{"
-        + "upsertLabelRequest="
-        + upsertLabelRequest
+    return "UpsertRoleServiceRequest{"
+        + "upsertRoleRequest="
+        + upsertRoleRequest
         + ", auditParentId='"
         + auditParentId
         + '\''
@@ -63,18 +63,18 @@ public final class UpsertLabelServiceRequest {
   @JsonPOJOBuilder(withPrefix = "")
   public static final class Builder {
 
-    private UpsertLabelRequest upsertLabelRequest;
+    private UpsertRoleRequest upsertRoleRequest;
 
     private String auditParentId;
 
     private Builder() {}
 
-    private Builder(UpsertLabelServiceRequest request) {
+    private Builder(UpsertRoleServiceRequest request) {
       this.auditParentId = request.auditParentId;
     }
 
-    public Builder upsertLabelRequest(UpsertLabelRequest upsertLabelRequest) {
-      this.upsertLabelRequest = upsertLabelRequest;
+    public Builder upsertRoleRequest(UpsertRoleRequest upsertRoleRequest) {
+      this.upsertRoleRequest = upsertRoleRequest;
       return this;
     }
 
@@ -83,8 +83,8 @@ public final class UpsertLabelServiceRequest {
       return this;
     }
 
-    public UpsertLabelServiceRequest build() {
-      return new UpsertLabelServiceRequest(this);
+    public UpsertRoleServiceRequest build() {
+      return new UpsertRoleServiceRequest(this);
     }
   }
 }
