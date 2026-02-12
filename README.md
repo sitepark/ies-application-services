@@ -1,3 +1,6 @@
+[![codecov](https://codecov.io/gh/sitepark/ies-application-services/graph/badge.svg?token=qPY5pw6qvM)](https://codecov.io/gh/sitepark/ies-application-services)
+[![Known Vulnerabilities](https://snyk.io/test/github/sitepark/ies-application-services/badge.svg)](https://snyk.io/test/github/sitepark/ies-application-services/)
+
 # IES Application Services
 
 This module contains the **Application Layer** of the IES system, following Clean Architecture and Domain-Driven Design principles.
