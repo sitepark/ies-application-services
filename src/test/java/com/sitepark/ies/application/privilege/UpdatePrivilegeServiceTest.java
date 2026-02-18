@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import com.sitepark.ies.application.ApplicationAuditLogService;
 import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
 import com.sitepark.ies.application.MultiEntityNameResolver;
+import com.sitepark.ies.application.label.ReassignLabelsToEntitiesService;
 import com.sitepark.ies.sharedkernel.patch.PatchDocument;
 import com.sitepark.ies.userrepository.core.domain.entity.Privilege;
 import com.sitepark.ies.userrepository.core.usecase.privilege.UpdatePrivilegeResult;
@@ -28,6 +29,9 @@ class UpdatePrivilegeServiceTest {
   @SuppressWarnings("PMD.SingularField")
   private ApplicationAuditLogServiceFactory auditLogServiceFactory;
 
+  @SuppressWarnings("PMD.SingularField")
+  private ReassignLabelsToEntitiesService reassignLabelsToEntitiesService;
+
   private ApplicationAuditLogService auditLogService;
 
   private UpdatePrivilegeService service;
@@ -35,12 +39,16 @@ class UpdatePrivilegeServiceTest {
   @BeforeEach
   void setUp() {
     this.updatePrivilegeUseCase = mock();
+    this.reassignLabelsToEntitiesService = mock();
     this.multiEntityNameResolver = mock();
     this.auditLogServiceFactory = mock();
     this.auditLogService = mock();
     this.service =
         new UpdatePrivilegeService(
-            updatePrivilegeUseCase, multiEntityNameResolver, auditLogServiceFactory);
+            updatePrivilegeUseCase,
+            reassignLabelsToEntitiesService,
+            multiEntityNameResolver,
+            auditLogServiceFactory);
     when(auditLogServiceFactory.create(any(), any())).thenReturn(auditLogService);
   }
 

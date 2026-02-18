@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import com.sitepark.ies.application.ApplicationAuditLogService;
 import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
 import com.sitepark.ies.application.MultiEntityNameResolver;
+import com.sitepark.ies.application.label.ReassignLabelsToEntitiesService;
 import com.sitepark.ies.sharedkernel.patch.PatchDocument;
 import com.sitepark.ies.userrepository.core.domain.entity.Role;
 import com.sitepark.ies.userrepository.core.usecase.role.UpdateRoleResult;
@@ -28,6 +29,9 @@ class UpdateRoleServiceTest {
   @SuppressWarnings("PMD.SingularField")
   private ApplicationAuditLogServiceFactory auditLogServiceFactory;
 
+  @SuppressWarnings("PMD.SingularField")
+  private ReassignLabelsToEntitiesService reassignLabelsToEntitiesService;
+
   private ApplicationAuditLogService auditLogService;
 
   private UpdateRoleService service;
@@ -35,11 +39,16 @@ class UpdateRoleServiceTest {
   @BeforeEach
   void setUp() {
     this.updateRoleUseCase = mock();
+    this.reassignLabelsToEntitiesService = mock();
     this.multiEntityNameResolver = mock();
     this.auditLogServiceFactory = mock();
     this.auditLogService = mock();
     this.service =
-        new UpdateRoleService(updateRoleUseCase, multiEntityNameResolver, auditLogServiceFactory);
+        new UpdateRoleService(
+            updateRoleUseCase,
+            reassignLabelsToEntitiesService,
+            multiEntityNameResolver,
+            auditLogServiceFactory);
     when(auditLogServiceFactory.create(any(), any())).thenReturn(auditLogService);
   }
 

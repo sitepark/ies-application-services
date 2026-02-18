@@ -125,24 +125,24 @@ public final class UpdateLabelService {
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(result.timestamp(), auditParentId);
 
-    var assignments = reassigned.assignments().scopes();
-    if (!assignments.isEmpty()) {
+    var assignedScopes = reassigned.assignments().scopes();
+    if (!assignedScopes.isEmpty()) {
       auditLogService.createLog(
           EntityRef.of(Label.class, result.labelId()),
           labelName,
-          AuditLogAction.ASSIGN_SCOPES_TO_LABEL,
-          assignments,
-          assignments);
+          AuditLogAction.ASSIGN_SCOPES_TO_LABELS,
+          assignedScopes,
+          assignedScopes);
     }
 
-    var unassignment = reassigned.unassignments().scopes();
-    if (!unassignment.isEmpty()) {
+    var unassignedScopes = reassigned.unassignments().scopes();
+    if (!unassignedScopes.isEmpty()) {
       auditLogService.createLog(
           EntityRef.of(Label.class, result.labelId()),
           labelName,
-          AuditLogAction.UNASSIGN_SCOPES_FROM_LABEL,
-          unassignment,
-          unassignment);
+          AuditLogAction.UNASSIGN_SCOPES_FROM_LABELS,
+          unassignedScopes,
+          unassignedScopes);
     }
   }
 }

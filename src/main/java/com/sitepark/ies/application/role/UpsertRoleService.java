@@ -1,6 +1,11 @@
 package com.sitepark.ies.application.role;
 
+import com.sitepark.ies.application.label.ReassignLabelsToEntitiesService;
+import com.sitepark.ies.application.label.ReassignLabelsToEntitiesServiceRequest;
 import com.sitepark.ies.application.value.UpsertResult;
+import com.sitepark.ies.label.core.usecase.ReassignLabelsToEntitiesRequest;
+import com.sitepark.ies.sharedkernel.domain.EntityRef;
+import com.sitepark.ies.userrepository.core.domain.entity.Role;
 import com.sitepark.ies.userrepository.core.usecase.role.UpsertRoleResult;
 import com.sitepark.ies.userrepository.core.usecase.role.UpsertRoleUseCase;
 import jakarta.inject.Inject;
@@ -25,32 +30,62 @@ public final class UpsertRoleService {
   private final UpsertRoleUseCase upsertRoleUseCase;
   private final CreateRoleService createRoleService;
   private final UpdateRoleService updateRoleService;
+  private final ReassignLabelsToEntitiesService reassignLabelsToEntitiesService;
 
   @Inject
   UpsertRoleService(
       UpsertRoleUseCase upsertRoleUseCase,
       CreateRoleService createRoleService,
-      UpdateRoleService updateRoleService) {
+      UpdateRoleService updateRoleService,
+      ReassignLabelsToEntitiesService reassignLabelsToEntitiesService) {
     this.upsertRoleUseCase = upsertRoleUseCase;
     this.createRoleService = createRoleService;
     this.updateRoleService = updateRoleService;
+    this.reassignLabelsToEntitiesService = reassignLabelsToEntitiesService;
   }
 
   public UpsertResult upsertRole(@NotNull UpsertRoleServiceRequest request) {
 
     UpsertRoleResult result = this.upsertRoleUseCase.upsertRole(request.upsertRoleRequest());
+    this.createAuditLogs(result, request.auditParentId());
 
+    UpsertResult upsertResult = this.createResult(result);
+
+    ReassignLabelsToEntitiesServiceRequest labelRequest =
+        ReassignLabelsToEntitiesServiceRequest.builder()
+            .reassignLabelsToEntitiesRequest(
+                ReassignLabelsToEntitiesRequest.builder()
+                    .entityRefs(
+                        configure -> configure.set(EntityRef.of(Role.class, result.roleId())))
+                    .labelIdentifiers(
+                        configure -> configure.identifiers(request.labelIdentifiers()))
+                    .build())
+            .auditParentId(request.auditParentId())
+            .build();
+    this.reassignLabelsToEntitiesService.reassignEntitiesFromLabels(labelRequest);
+
+    return upsertResult;
+  }
+
+  private void createAuditLogs(UpsertRoleResult result, String auditParentId) {
+    if (result instanceof UpsertRoleResult.Updated updated) {
+      if (updated.updateRoleResult().hasAnyChanges()) {
+        this.updateRoleService.createAuditLogs(updated.updateRoleResult(), auditParentId);
+      }
+    } else if (result instanceof UpsertRoleResult.Created created) {
+      this.createRoleService.createAuditLogs(created.createRoleResult(), auditParentId);
+    }
+  }
+
+  private UpsertResult createResult(UpsertRoleResult result) {
     if (result instanceof UpsertRoleResult.Updated updated) {
       if (!updated.updateRoleResult().hasAnyChanges()) {
         return UpsertResult.updated(false);
       }
-      this.updateRoleService.createAuditLogs(updated.updateRoleResult(), request.auditParentId());
       return UpsertResult.updated(true);
     } else if (result instanceof UpsertRoleResult.Created created) {
-      this.createRoleService.createAuditLogs(created.createRoleResult(), request.auditParentId());
       return UpsertResult.created(created.roleId());
     }
-
     return UpsertResult.updated(false);
   }
 }

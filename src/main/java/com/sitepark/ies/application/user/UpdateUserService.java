@@ -90,20 +90,18 @@ public final class UpdateUserService {
 
     this.createAuditLogs(result, request.auditParentId());
 
-    if (!request.labelIdentifiers().isEmpty()) {
-      ReassignLabelsToEntitiesServiceRequest labelRequest =
-          ReassignLabelsToEntitiesServiceRequest.builder()
-              .reassignLabelsToEntitiesRequest(
-                  ReassignLabelsToEntitiesRequest.builder()
-                      .entityRefs(
-                          configure -> configure.set(EntityRef.of(User.class, result.userId())))
-                      .labelIdentifiers(
-                          configure -> configure.identifiers(request.labelIdentifiers()))
-                      .build())
-              .auditParentId(request.auditParentId())
-              .build();
-      this.reassignLabelsToEntitiesService.reassignEntitiesFromLabels(labelRequest);
-    }
+    ReassignLabelsToEntitiesServiceRequest labelRequest =
+        ReassignLabelsToEntitiesServiceRequest.builder()
+            .reassignLabelsToEntitiesRequest(
+                ReassignLabelsToEntitiesRequest.builder()
+                    .entityRefs(
+                        configure -> configure.set(EntityRef.of(User.class, result.userId())))
+                    .labelIdentifiers(
+                        configure -> configure.identifiers(request.labelIdentifiers()))
+                    .build())
+            .auditParentId(request.auditParentId())
+            .build();
+    this.reassignLabelsToEntitiesService.reassignEntitiesFromLabels(labelRequest);
 
     if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Successfully processed user update for '{}'", result.userId());
@@ -150,24 +148,24 @@ public final class UpdateUserService {
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(result.timestamp(), auditParentId);
 
-    var assignments = reassigned.assignments();
-    if (!assignments.isEmpty()) {
+    var assignedRoleIds = reassigned.assignments().roleIds();
+    if (!assignedRoleIds.isEmpty()) {
       auditLogService.createLog(
           EntityRef.of(User.class, result.userId()),
           userDisplayName,
           AuditLogAction.ASSIGN_ROLES,
-          assignments,
-          assignments);
+          assignedRoleIds,
+          assignedRoleIds);
     }
 
-    var unassignment = reassigned.unassignments();
-    if (!unassignment.isEmpty()) {
+    var unassignedRoleIds = reassigned.unassignments().roleIds();
+    if (!unassignedRoleIds.isEmpty()) {
       auditLogService.createLog(
           EntityRef.of(User.class, result.userId()),
           userDisplayName,
           AuditLogAction.UNASSIGN_ROLES,
-          unassignment,
-          unassignment);
+          unassignedRoleIds,
+          unassignedRoleIds);
     }
   }
 }

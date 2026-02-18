@@ -5,8 +5,8 @@ import com.sitepark.ies.application.audit.revert.RevertFailedException;
 import com.sitepark.ies.audit.core.service.AuditLogService;
 import com.sitepark.ies.audit.core.service.RevertRequest;
 import com.sitepark.ies.label.core.domain.value.LabelEntityAssignment;
-import com.sitepark.ies.label.core.usecase.AssignEntitiesToLabelsRequest;
-import com.sitepark.ies.label.core.usecase.AssignEntitiesToLabelsUseCase;
+import com.sitepark.ies.label.core.usecase.AssignLabelsToEntitiesRequest;
+import com.sitepark.ies.label.core.usecase.AssignLabelsToEntitiesUseCase;
 import jakarta.inject.Inject;
 import java.io.IOException;
 
@@ -14,14 +14,14 @@ public class RevertLabelUnassignEntitiesActionHandler implements RevertEntityAct
 
   private final AuditLogService auditLogService;
 
-  private final AssignEntitiesToLabelsUseCase assignEntitiesToLabelsUseCase;
+  private final AssignLabelsToEntitiesUseCase assignLabelsToEntitiesUseCase;
 
   @Inject
   RevertLabelUnassignEntitiesActionHandler(
       AuditLogService auditLogService,
-      AssignEntitiesToLabelsUseCase assignEntitiesToLabelsUseCase) {
+      AssignLabelsToEntitiesUseCase assignLabelsToEntitiesUseCase) {
     this.auditLogService = auditLogService;
-    this.assignEntitiesToLabelsUseCase = assignEntitiesToLabelsUseCase;
+    this.assignLabelsToEntitiesUseCase = assignLabelsToEntitiesUseCase;
   }
 
   @Override
@@ -31,8 +31,8 @@ public class RevertLabelUnassignEntitiesActionHandler implements RevertEntityAct
           this.auditLogService.deserialize(request.backwardData(), LabelEntityAssignment.class);
 
       for (String labelId : assignments.labelIds()) {
-        this.assignEntitiesToLabelsUseCase.assignEntitiesToLabels(
-            AssignEntitiesToLabelsRequest.builder()
+        this.assignLabelsToEntitiesUseCase.assignEntitiesToLabels(
+            AssignLabelsToEntitiesRequest.builder()
                 .entityRefs(b -> b.set(assignments.entityRefs(labelId)))
                 .labelIdentifiers(b -> b.id(labelId))
                 .build());

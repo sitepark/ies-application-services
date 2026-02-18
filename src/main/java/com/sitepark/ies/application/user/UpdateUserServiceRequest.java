@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sitepark.ies.sharedkernel.base.Identifier;
 import com.sitepark.ies.sharedkernel.base.IdentifierListBuilder;
+import com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -16,10 +17,7 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName"})
 public final class UpdateUserServiceRequest {
 
-  @NotNull
-  private final com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest
-      updateUserRequest;
-
+  @NotNull private final UpdateUserRequest updateUserRequest;
   @NotNull private final List<Identifier> labelIdentifiers;
   @Nullable private final String auditParentId;
 

@@ -4,6 +4,9 @@ import com.sitepark.ies.application.ApplicationAuditLogService;
 import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
 import com.sitepark.ies.application.audit.AuditBatchLogAction;
 import com.sitepark.ies.application.audit.AuditLogAction;
+import com.sitepark.ies.application.label.ReassignLabelsToEntitiesService;
+import com.sitepark.ies.application.label.ReassignLabelsToEntitiesServiceRequest;
+import com.sitepark.ies.label.core.usecase.ReassignLabelsToEntitiesRequest;
 import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import com.sitepark.ies.userrepository.core.domain.entity.Role;
 import com.sitepark.ies.userrepository.core.usecase.role.AssignPrivilegesToRolesResult;
@@ -16,13 +19,16 @@ import org.jetbrains.annotations.Nullable;
 public final class CreateRoleService {
 
   private final CreateRoleUseCase createRoleUseCase;
+  private final ReassignLabelsToEntitiesService reassignLabelsToEntitiesService;
   private final ApplicationAuditLogServiceFactory auditLogServiceFactory;
 
   @Inject
   CreateRoleService(
       CreateRoleUseCase createRoleUseCase,
+      ReassignLabelsToEntitiesService reassignLabelsToEntitiesService,
       ApplicationAuditLogServiceFactory auditLogServiceFactory) {
     this.createRoleUseCase = createRoleUseCase;
+    this.reassignLabelsToEntitiesService = reassignLabelsToEntitiesService;
     this.auditLogServiceFactory = auditLogServiceFactory;
   }
 
@@ -31,6 +37,21 @@ public final class CreateRoleService {
     CreateRoleResult result = this.createRoleUseCase.createRole(request.createRoleRequest());
 
     this.createAuditLogs(result, request.auditParentId());
+
+    if (!request.labelIdentifiers().isEmpty()) {
+      ReassignLabelsToEntitiesServiceRequest labelRequest =
+          ReassignLabelsToEntitiesServiceRequest.builder()
+              .reassignLabelsToEntitiesRequest(
+                  ReassignLabelsToEntitiesRequest.builder()
+                      .entityRefs(
+                          configure -> configure.set(EntityRef.of(Role.class, result.roleId())))
+                      .labelIdentifiers(
+                          configure -> configure.identifiers(request.labelIdentifiers()))
+                      .build())
+              .auditParentId(request.auditParentId())
+              .build();
+      this.reassignLabelsToEntitiesService.reassignEntitiesFromLabels(labelRequest);
+    }
 
     return result.roleId();
   }

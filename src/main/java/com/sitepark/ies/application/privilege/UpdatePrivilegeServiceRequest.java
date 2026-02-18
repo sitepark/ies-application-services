@@ -2,7 +2,14 @@ package com.sitepark.ies.application.privilege;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import com.sitepark.ies.sharedkernel.base.Identifier;
+import com.sitepark.ies.sharedkernel.base.IdentifierListBuilder;
+import com.sitepark.ies.userrepository.core.usecase.privilege.UpdatePrivilegeRequest;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.function.Consumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,14 +17,13 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName"})
 public final class UpdatePrivilegeServiceRequest {
 
-  @NotNull
-  private final com.sitepark.ies.userrepository.core.usecase.privilege.UpdatePrivilegeRequest
-      updatePrivilegeRequest;
-
+  @NotNull private final UpdatePrivilegeRequest updatePrivilegeRequest;
+  @NotNull private final List<Identifier> labelIdentifiers;
   @Nullable private final String auditParentId;
 
   private UpdatePrivilegeServiceRequest(Builder builder) {
     this.updatePrivilegeRequest = builder.updatePrivilegeRequest;
+    this.labelIdentifiers = List.copyOf(builder.labelIdentifiers);
     this.auditParentId = builder.auditParentId;
   }
 
@@ -30,6 +36,10 @@ public final class UpdatePrivilegeServiceRequest {
     return this.updatePrivilegeRequest;
   }
 
+  public List<Identifier> labelIdentifiers() {
+    return this.labelIdentifiers;
+  }
+
   public String auditParentId() {
     return this.auditParentId;
   }
@@ -40,13 +50,14 @@ public final class UpdatePrivilegeServiceRequest {
 
   @Override
   public int hashCode() {
-    return Objects.hash(this.updatePrivilegeRequest, this.auditParentId);
+    return Objects.hash(this.updatePrivilegeRequest, this.labelIdentifiers, this.auditParentId);
   }
 
   @Override
   public boolean equals(Object o) {
     return (o instanceof UpdatePrivilegeServiceRequest that)
         && Objects.equals(this.updatePrivilegeRequest, that.updatePrivilegeRequest)
+        && Objects.equals(this.labelIdentifiers, that.labelIdentifiers)
         && Objects.equals(this.auditParentId, that.auditParentId);
   }
 
@@ -55,6 +66,8 @@ public final class UpdatePrivilegeServiceRequest {
     return "UpdatePrivilegeServiceRequest{"
         + "updatePrivilegeRequest="
         + updatePrivilegeRequest
+        + ", labelIdentifiers="
+        + labelIdentifiers
         + ", auditParentId='"
         + auditParentId
         + '\''
@@ -66,12 +79,14 @@ public final class UpdatePrivilegeServiceRequest {
 
     private com.sitepark.ies.userrepository.core.usecase.privilege.UpdatePrivilegeRequest
         updatePrivilegeRequest;
+    private final Set<Identifier> labelIdentifiers = new TreeSet<>();
     private String auditParentId;
 
     private Builder() {}
 
     private Builder(UpdatePrivilegeServiceRequest request) {
       this.updatePrivilegeRequest = request.updatePrivilegeRequest;
+      this.labelIdentifiers.addAll(request.labelIdentifiers);
       this.auditParentId = request.auditParentId;
     }
 
@@ -79,6 +94,14 @@ public final class UpdatePrivilegeServiceRequest {
         com.sitepark.ies.userrepository.core.usecase.privilege.UpdatePrivilegeRequest
             updatePrivilegeRequest) {
       this.updatePrivilegeRequest = updatePrivilegeRequest;
+      return this;
+    }
+
+    public Builder labelIdentifiers(Consumer<IdentifierListBuilder> configurer) {
+      IdentifierListBuilder listBuilder = new IdentifierListBuilder();
+      configurer.accept(listBuilder);
+      this.labelIdentifiers.clear();
+      this.labelIdentifiers.addAll(listBuilder.build());
       return this;
     }
 

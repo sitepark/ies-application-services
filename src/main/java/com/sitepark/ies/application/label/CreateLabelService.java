@@ -98,7 +98,7 @@ public final class CreateLabelService {
     auditLogService.createLog(
         EntityRef.of(Label.class, result.labelId()),
         labelName,
-        AuditLogAction.ASSIGN_SCOPES_TO_LABEL,
+        AuditLogAction.ASSIGN_SCOPES_TO_LABELS,
         assignments,
         assignments);
   }

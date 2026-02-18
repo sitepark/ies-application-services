@@ -5,8 +5,8 @@ import com.sitepark.ies.application.audit.revert.RevertFailedException;
 import com.sitepark.ies.audit.core.service.AuditLogService;
 import com.sitepark.ies.audit.core.service.RevertRequest;
 import com.sitepark.ies.label.core.domain.value.LabelEntityAssignment;
-import com.sitepark.ies.label.core.usecase.UnassignEntitiesFromLabelsRequest;
-import com.sitepark.ies.label.core.usecase.UnassignEntitiesFromLabelsUseCase;
+import com.sitepark.ies.label.core.usecase.UnassignLabelsToEntitiesRequest;
+import com.sitepark.ies.label.core.usecase.UnassignLabelsToEntitiesUseCase;
 import jakarta.inject.Inject;
 import java.io.IOException;
 
@@ -14,14 +14,14 @@ public class RevertLabelAssignEntitiesActionHandler implements RevertEntityActio
 
   private final AuditLogService auditLogService;
 
-  private final UnassignEntitiesFromLabelsUseCase unassignEntitiesFromLabelsUseCase;
+  private final UnassignLabelsToEntitiesUseCase unassignLabelsToEntitiesUseCase;
 
   @Inject
   RevertLabelAssignEntitiesActionHandler(
       AuditLogService auditLogService,
-      UnassignEntitiesFromLabelsUseCase unassignEntitiesFromLabelsUseCase) {
+      UnassignLabelsToEntitiesUseCase unassignLabelsToEntitiesUseCase) {
     this.auditLogService = auditLogService;
-    this.unassignEntitiesFromLabelsUseCase = unassignEntitiesFromLabelsUseCase;
+    this.unassignLabelsToEntitiesUseCase = unassignLabelsToEntitiesUseCase;
   }
 
   @Override
@@ -31,8 +31,8 @@ public class RevertLabelAssignEntitiesActionHandler implements RevertEntityActio
           this.auditLogService.deserialize(request.backwardData(), LabelEntityAssignment.class);
 
       for (String labelId : assignments.labelIds()) {
-        this.unassignEntitiesFromLabelsUseCase.unassignEntitiesFromLabels(
-            UnassignEntitiesFromLabelsRequest.builder()
+        this.unassignLabelsToEntitiesUseCase.unassignEntitiesFromLabels(
+            UnassignLabelsToEntitiesRequest.builder()
                 .entityRefs(b -> b.set(assignments.entityRefs(labelId)))
                 .labelIdentifiers(b -> b.id(labelId))
                 .build());

@@ -12,11 +12,13 @@ public enum AuditLogAction {
   REMOVE,
   RESTORE,
 
-  // Label assignment operations
-  ASSIGN_ENTITIES_TO_LABEL,
-  UNASSIGN_ENTITIES_FROM_LABEL,
-  ASSIGN_SCOPES_TO_LABEL,
-  UNASSIGN_SCOPES_FROM_LABEL,
+  // Labels-Entities assignment operations
+  ASSIGN_LABELS_TO_ENTITIES,
+  UNASSIGN_LABELS_FROM_ENTITIES,
+
+  // Scopes-Labels assignment operations
+  ASSIGN_SCOPES_TO_LABELS,
+  UNASSIGN_SCOPES_FROM_LABELS,
 
   // privilege assignment operations
   ASSIGN_PRIVILEGES,

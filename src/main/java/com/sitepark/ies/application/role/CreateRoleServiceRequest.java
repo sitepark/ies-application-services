@@ -2,7 +2,14 @@ package com.sitepark.ies.application.role;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import com.sitepark.ies.application.user.CreateUserServiceRequest.Builder;
+import com.sitepark.ies.sharedkernel.base.Identifier;
+import com.sitepark.ies.sharedkernel.base.IdentifierListBuilder;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.function.Consumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,10 +21,12 @@ public final class CreateRoleServiceRequest {
   private final com.sitepark.ies.userrepository.core.usecase.role.CreateRoleRequest
       createRoleRequest;
 
+  @NotNull private final List<Identifier> labelIdentifiers;
   @Nullable private final String auditParentId;
 
   private CreateRoleServiceRequest(Builder builder) {
     this.createRoleRequest = builder.createRoleRequest;
+    this.labelIdentifiers = List.copyOf(builder.labelIdentifiers);
     this.auditParentId = builder.auditParentId;
   }
 
@@ -27,6 +36,10 @@ public final class CreateRoleServiceRequest {
 
   public com.sitepark.ies.userrepository.core.usecase.role.CreateRoleRequest createRoleRequest() {
     return this.createRoleRequest;
+  }
+
+  public List<Identifier> labelIdentifiers() {
+    return this.labelIdentifiers;
   }
 
   public String auditParentId() {
@@ -39,13 +52,14 @@ public final class CreateRoleServiceRequest {
 
   @Override
   public int hashCode() {
-    return Objects.hash(this.createRoleRequest, this.auditParentId);
+    return Objects.hash(this.createRoleRequest, this.labelIdentifiers, this.auditParentId);
   }
 
   @Override
   public boolean equals(Object o) {
     return (o instanceof CreateRoleServiceRequest that)
         && Objects.equals(this.createRoleRequest, that.createRoleRequest)
+        && Objects.equals(this.labelIdentifiers, that.labelIdentifiers)
         && Objects.equals(this.auditParentId, that.auditParentId);
   }
 
@@ -54,6 +68,8 @@ public final class CreateRoleServiceRequest {
     return "CreateRoleServiceRequest{"
         + "createRoleRequest="
         + createRoleRequest
+        + ", labelIdentifiers="
+        + labelIdentifiers
         + ", auditParentId='"
         + auditParentId
         + '\''
@@ -64,18 +80,28 @@ public final class CreateRoleServiceRequest {
   public static final class Builder {
 
     private com.sitepark.ies.userrepository.core.usecase.role.CreateRoleRequest createRoleRequest;
+    private final Set<Identifier> labelIdentifiers = new TreeSet<>();
     private String auditParentId;
 
     private Builder() {}
 
     private Builder(CreateRoleServiceRequest request) {
       this.createRoleRequest = request.createRoleRequest;
+      this.labelIdentifiers.addAll(request.labelIdentifiers);
       this.auditParentId = request.auditParentId;
     }
 
     public Builder createRoleRequest(
         com.sitepark.ies.userrepository.core.usecase.role.CreateRoleRequest createRoleRequest) {
       this.createRoleRequest = createRoleRequest;
+      return this;
+    }
+
+    public Builder labelIdentifiers(Consumer<IdentifierListBuilder> configurer) {
+      IdentifierListBuilder listBuilder = new IdentifierListBuilder();
+      configurer.accept(listBuilder);
+      this.labelIdentifiers.clear();
+      this.labelIdentifiers.addAll(listBuilder.build());
       return this;
     }
 

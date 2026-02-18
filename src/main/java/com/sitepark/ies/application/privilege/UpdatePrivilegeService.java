@@ -4,6 +4,9 @@ import com.sitepark.ies.application.ApplicationAuditLogService;
 import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
 import com.sitepark.ies.application.MultiEntityNameResolver;
 import com.sitepark.ies.application.audit.AuditLogAction;
+import com.sitepark.ies.application.label.ReassignLabelsToEntitiesService;
+import com.sitepark.ies.application.label.ReassignLabelsToEntitiesServiceRequest;
+import com.sitepark.ies.label.core.usecase.ReassignLabelsToEntitiesRequest;
 import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import com.sitepark.ies.userrepository.core.domain.entity.Privilege;
 import com.sitepark.ies.userrepository.core.usecase.privilege.ReassignRolesToPrivilegesResult;
@@ -35,15 +38,18 @@ public final class UpdatePrivilegeService {
   private static final Logger LOGGER = LogManager.getLogger();
 
   private final UpdatePrivilegeUseCase updatePrivilegeUseCase;
+  private final ReassignLabelsToEntitiesService reassignLabelsToEntitiesService;
   private final MultiEntityNameResolver multiEntityNameResolver;
   private final ApplicationAuditLogServiceFactory auditLogServiceFactory;
 
   @Inject
   UpdatePrivilegeService(
       UpdatePrivilegeUseCase updatePrivilegeUseCase,
+      ReassignLabelsToEntitiesService reassignLabelsToEntitiesService,
       MultiEntityNameResolver multiEntityNameResolver,
       ApplicationAuditLogServiceFactory auditLogServiceFactory) {
     this.updatePrivilegeUseCase = updatePrivilegeUseCase;
+    this.reassignLabelsToEntitiesService = reassignLabelsToEntitiesService;
     this.multiEntityNameResolver = multiEntityNameResolver;
     this.auditLogServiceFactory = auditLogServiceFactory;
   }
@@ -81,6 +87,20 @@ public final class UpdatePrivilegeService {
         this.updatePrivilegeUseCase.updatePrivilege(request.updatePrivilegeRequest());
 
     this.createAuditLogs(result, request.auditParentId());
+
+    ReassignLabelsToEntitiesServiceRequest labelRequest =
+        ReassignLabelsToEntitiesServiceRequest.builder()
+            .reassignLabelsToEntitiesRequest(
+                ReassignLabelsToEntitiesRequest.builder()
+                    .entityRefs(
+                        configure ->
+                            configure.set(EntityRef.of(Privilege.class, result.privilegeId())))
+                    .labelIdentifiers(
+                        configure -> configure.identifiers(request.labelIdentifiers()))
+                    .build())
+            .auditParentId(request.auditParentId())
+            .build();
+    this.reassignLabelsToEntitiesService.reassignEntitiesFromLabels(labelRequest);
 
     if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Successfully processed privilege update for '{}'", result.privilegeId());
@@ -133,24 +153,24 @@ public final class UpdatePrivilegeService {
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(result.timestamp(), auditParentId);
 
-    var assignments = reassigned.assignments();
-    if (!assignments.isEmpty()) {
+    var assignedRoleIds = reassigned.assignments().roleIds();
+    if (!assignedRoleIds.isEmpty()) {
       auditLogService.createLog(
           EntityRef.of(Privilege.class, result.privilegeId()),
           privilegeName,
           AuditLogAction.ASSIGN_ROLES,
-          assignments,
-          assignments);
+          assignedRoleIds,
+          assignedRoleIds);
     }
 
-    var unassignments = reassigned.unassignments();
-    if (!unassignments.isEmpty()) {
+    var unassignedRoleIds = reassigned.unassignments().roleIds();
+    if (!unassignedRoleIds.isEmpty()) {
       auditLogService.createLog(
           EntityRef.of(Privilege.class, result.privilegeId()),
           privilegeName,
           AuditLogAction.UNASSIGN_ROLES,
-          unassignments,
-          unassignments);
+          unassignedRoleIds,
+          unassignedRoleIds);
     }
   }
 }

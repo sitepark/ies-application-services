@@ -4,6 +4,9 @@ import com.sitepark.ies.application.ApplicationAuditLogService;
 import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
 import com.sitepark.ies.application.MultiEntityNameResolver;
 import com.sitepark.ies.application.audit.AuditLogAction;
+import com.sitepark.ies.application.label.ReassignLabelsToEntitiesService;
+import com.sitepark.ies.application.label.ReassignLabelsToEntitiesServiceRequest;
+import com.sitepark.ies.label.core.usecase.ReassignLabelsToEntitiesRequest;
 import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import com.sitepark.ies.userrepository.core.domain.entity.Role;
 import com.sitepark.ies.userrepository.core.usecase.role.ReassignPrivilegesToRolesResult;
@@ -36,15 +39,18 @@ public final class UpdateRoleService {
   private static final Logger LOGGER = LogManager.getLogger();
 
   private final UpdateRoleUseCase updateRoleUseCase;
+  private final ReassignLabelsToEntitiesService reassignLabelsToEntitiesService;
   private final MultiEntityNameResolver multiEntityNameResolver;
   private final ApplicationAuditLogServiceFactory auditLogServiceFactory;
 
   @Inject
   UpdateRoleService(
       UpdateRoleUseCase updateRoleUseCase,
+      ReassignLabelsToEntitiesService reassignLabelsToEntitiesService,
       MultiEntityNameResolver multiEntityNameResolver,
       ApplicationAuditLogServiceFactory auditLogServiceFactory) {
     this.updateRoleUseCase = updateRoleUseCase;
+    this.reassignLabelsToEntitiesService = reassignLabelsToEntitiesService;
     this.multiEntityNameResolver = multiEntityNameResolver;
     this.auditLogServiceFactory = auditLogServiceFactory;
   }
@@ -80,6 +86,19 @@ public final class UpdateRoleService {
     UpdateRoleResult result = this.updateRoleUseCase.updateRole(request.updateRoleRequest());
 
     this.createAuditLogs(result, request.auditParentId());
+
+    ReassignLabelsToEntitiesServiceRequest labelRequest =
+        ReassignLabelsToEntitiesServiceRequest.builder()
+            .reassignLabelsToEntitiesRequest(
+                ReassignLabelsToEntitiesRequest.builder()
+                    .entityRefs(
+                        configure -> configure.set(EntityRef.of(Role.class, result.roleId())))
+                    .labelIdentifiers(
+                        configure -> configure.identifiers(request.labelIdentifiers()))
+                    .build())
+            .auditParentId(request.auditParentId())
+            .build();
+    this.reassignLabelsToEntitiesService.reassignEntitiesFromLabels(labelRequest);
 
     if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Successfully processed role update for '{}'", result.roleId());
@@ -130,24 +149,24 @@ public final class UpdateRoleService {
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(result.timestamp(), auditParentId);
 
-    var assignments = reassigned.assignments();
-    if (!assignments.isEmpty()) {
+    var assignedPrivilegeIds = reassigned.assignments().privilegeIds();
+    if (!assignedPrivilegeIds.isEmpty()) {
       auditLogService.createLog(
           EntityRef.of(Role.class, result.roleId()),
           roleName,
           AuditLogAction.ASSIGN_PRIVILEGES,
-          assignments,
-          assignments);
+          assignedPrivilegeIds,
+          assignedPrivilegeIds);
     }
 
-    var unassignments = reassigned.unassignments();
-    if (!unassignments.isEmpty()) {
+    var unassignedPrivilegeIds = reassigned.unassignments().privilegeIds();
+    if (!unassignedPrivilegeIds.isEmpty()) {
       auditLogService.createLog(
           EntityRef.of(Role.class, result.roleId()),
           roleName,
           AuditLogAction.UNASSIGN_PRIVILEGES,
-          unassignments,
-          unassignments);
+          unassignedPrivilegeIds,
+          unassignedPrivilegeIds);
     }
   }
 }

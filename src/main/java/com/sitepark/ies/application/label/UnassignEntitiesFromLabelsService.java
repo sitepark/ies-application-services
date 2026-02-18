@@ -6,9 +6,9 @@ import com.sitepark.ies.application.MultiEntityAuthorizationService;
 import com.sitepark.ies.application.MultiEntityNameResolver;
 import com.sitepark.ies.application.audit.AuditBatchLogAction;
 import com.sitepark.ies.application.audit.AuditLogAction;
-import com.sitepark.ies.label.core.usecase.UnassignEntitiesFromLabelsRequest;
-import com.sitepark.ies.label.core.usecase.UnassignEntitiesFromLabelsUseCase;
-import com.sitepark.ies.label.core.usecase.UnassignEntitiesToLabelsResult;
+import com.sitepark.ies.label.core.usecase.UnassignLabelsToEntitiesRequest;
+import com.sitepark.ies.label.core.usecase.UnassignLabelsToEntitiesResult;
+import com.sitepark.ies.label.core.usecase.UnassignLabelsToEntitiesUseCase;
 import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import com.sitepark.ies.sharedkernel.security.AccessDeniedException;
 import jakarta.inject.Inject;
@@ -36,18 +36,18 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class UnassignEntitiesFromLabelsService {
 
-  private final UnassignEntitiesFromLabelsUseCase unassignEntitiesFromLabelsUseCase;
+  private final UnassignLabelsToEntitiesUseCase unassignLabelsToEntitiesUseCase;
   private final MultiEntityAuthorizationService authorizationService;
   private final MultiEntityNameResolver multiEntityNameResolver;
   private final ApplicationAuditLogServiceFactory auditLogServiceFactory;
 
   @Inject
   UnassignEntitiesFromLabelsService(
-      UnassignEntitiesFromLabelsUseCase unassignEntitiesFromLabelsUseCase,
+      UnassignLabelsToEntitiesUseCase unassignLabelsToEntitiesUseCase,
       MultiEntityAuthorizationService authorizationService,
       MultiEntityNameResolver multiEntityNameResolver,
       ApplicationAuditLogServiceFactory auditLogServiceFactory) {
-    this.unassignEntitiesFromLabelsUseCase = unassignEntitiesFromLabelsUseCase;
+    this.unassignLabelsToEntitiesUseCase = unassignLabelsToEntitiesUseCase;
     this.authorizationService = authorizationService;
     this.multiEntityNameResolver = multiEntityNameResolver;
     this.auditLogServiceFactory = auditLogServiceFactory;
@@ -77,18 +77,18 @@ public final class UnassignEntitiesFromLabelsService {
 
     this.checkAuthorization(request.unassignEntitiesFromLabelsRequest());
 
-    UnassignEntitiesToLabelsResult result =
-        this.unassignEntitiesFromLabelsUseCase.unassignEntitiesFromLabels(
+    UnassignLabelsToEntitiesResult result =
+        this.unassignLabelsToEntitiesUseCase.unassignEntitiesFromLabels(
             request.unassignEntitiesFromLabelsRequest());
 
-    if (result instanceof UnassignEntitiesToLabelsResult.Unassigned unassigned) {
+    if (result instanceof UnassignLabelsToEntitiesResult.Unassigned unassigned) {
       this.createAuditLogs(unassigned, request.auditParentId());
     }
 
     return result.unassignments().size();
   }
 
-  private void checkAuthorization(UnassignEntitiesFromLabelsRequest request) {
+  private void checkAuthorization(UnassignLabelsToEntitiesRequest request) {
     for (EntityRef entityRef : request.entityRefs()) {
       if (!this.authorizationService.isWritable(entityRef)) {
         throw new AccessDeniedException(
@@ -98,7 +98,7 @@ public final class UnassignEntitiesFromLabelsService {
   }
 
   private void createAuditLogs(
-      UnassignEntitiesToLabelsResult.Unassigned result, String auditParentId) {
+      UnassignLabelsToEntitiesResult.Unassigned result, String auditParentId) {
 
     Map<EntityRef, String> entityNames = resolveEntityNames(result);
 
@@ -108,7 +108,7 @@ public final class UnassignEntitiesFromLabelsService {
         this.auditLogServiceFactory.createForBatchPerType(
             result.timestamp(),
             auditParentId,
-            AuditBatchLogAction.BATCH_UNASSIGN_ENTITIES_FROM_LABEL,
+            AuditBatchLogAction.BATCH_UNASSIGN_LABELS_FROM_ENTITIES,
             unassignments.entityRefs().stream().map(EntityRef::type).collect(Collectors.toSet()));
 
     unassignments
@@ -121,14 +121,14 @@ public final class UnassignEntitiesFromLabelsService {
                   .createLog(
                       entityRef,
                       entityNames.get(entityRef),
-                      AuditLogAction.UNASSIGN_ENTITIES_FROM_LABEL,
+                      AuditLogAction.UNASSIGN_LABELS_FROM_ENTITIES,
                       labels,
                       labels);
             });
   }
 
   private Map<EntityRef, String> resolveEntityNames(
-      UnassignEntitiesToLabelsResult.Unassigned result) {
+      UnassignLabelsToEntitiesResult.Unassigned result) {
     return multiEntityNameResolver.resolveNames(Set.copyOf(result.unassignments().entityRefs()));
   }
 }

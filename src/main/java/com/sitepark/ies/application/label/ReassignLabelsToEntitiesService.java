@@ -123,7 +123,7 @@ public final class ReassignLabelsToEntitiesService {
                   .createLog(
                       entityRef,
                       entityNames.get(entityRef),
-                      AuditLogAction.UNASSIGN_ENTITIES_FROM_LABEL,
+                      AuditLogAction.UNASSIGN_LABELS_FROM_ENTITIES,
                       labels,
                       labels);
             });
@@ -138,7 +138,7 @@ public final class ReassignLabelsToEntitiesService {
                   .createLog(
                       entityRef,
                       entityNames.get(entityRef),
-                      AuditLogAction.ASSIGN_ENTITIES_TO_LABEL,
+                      AuditLogAction.ASSIGN_LABELS_TO_ENTITIES,
                       labels,
                       labels);
             });

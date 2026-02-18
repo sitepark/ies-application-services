@@ -6,9 +6,9 @@ import com.sitepark.ies.application.MultiEntityAuthorizationService;
 import com.sitepark.ies.application.MultiEntityNameResolver;
 import com.sitepark.ies.application.audit.AuditBatchLogAction;
 import com.sitepark.ies.application.audit.AuditLogAction;
-import com.sitepark.ies.label.core.usecase.AssignEntitiesToLabelsRequest;
-import com.sitepark.ies.label.core.usecase.AssignEntitiesToLabelsResult;
-import com.sitepark.ies.label.core.usecase.AssignEntitiesToLabelsUseCase;
+import com.sitepark.ies.label.core.usecase.AssignLabelsToEntitiesRequest;
+import com.sitepark.ies.label.core.usecase.AssignLabelsToEntitiesResult;
+import com.sitepark.ies.label.core.usecase.AssignLabelsToEntitiesUseCase;
 import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import com.sitepark.ies.sharedkernel.security.AccessDeniedException;
 import jakarta.inject.Inject;
@@ -34,20 +34,20 @@ import org.jetbrains.annotations.NotNull;
  *   <li>Handle batch operations with parent audit logs
  * </ul>
  */
-public final class AssignEntitiesToLabelsService {
+public final class AssignLabelsToEntitiesService {
 
-  private final AssignEntitiesToLabelsUseCase assignEntitiesToLabelsUseCase;
+  private final AssignLabelsToEntitiesUseCase assignLabelsToEntitiesUseCase;
   private final MultiEntityAuthorizationService authorizationService;
   private final MultiEntityNameResolver multiEntityNameResolver;
   private final ApplicationAuditLogServiceFactory auditLogServiceFactory;
 
   @Inject
-  AssignEntitiesToLabelsService(
-      AssignEntitiesToLabelsUseCase assignEntitiesToLabelsUseCase,
+  AssignLabelsToEntitiesService(
+      AssignLabelsToEntitiesUseCase assignLabelsToEntitiesUseCase,
       MultiEntityAuthorizationService entityAccessControlService,
       MultiEntityNameResolver multiEntityNameResolver,
       ApplicationAuditLogServiceFactory auditLogServiceFactory) {
-    this.assignEntitiesToLabelsUseCase = assignEntitiesToLabelsUseCase;
+    this.assignLabelsToEntitiesUseCase = assignLabelsToEntitiesUseCase;
     this.multiEntityNameResolver = multiEntityNameResolver;
     this.authorizationService = entityAccessControlService;
     this.auditLogServiceFactory = auditLogServiceFactory;
@@ -74,22 +74,22 @@ public final class AssignEntitiesToLabelsService {
    * @throws com.sitepark.ies.label.core.domain.exception.LabelNotFoundException if a label does not
    *     exist
    */
-  public int assignEntitiesToLabels(@NotNull AssignEntitiesToLabelsServiceRequest request) {
+  public int assignEntitiesToLabels(@NotNull AssignLabelsToEntitiesServiceRequest request) {
 
     this.checkAuthorization(request.assignEntitiesToLabelsRequest());
 
-    AssignEntitiesToLabelsResult result =
-        this.assignEntitiesToLabelsUseCase.assignEntitiesToLabels(
+    AssignLabelsToEntitiesResult result =
+        this.assignLabelsToEntitiesUseCase.assignEntitiesToLabels(
             request.assignEntitiesToLabelsRequest());
 
-    if (result instanceof AssignEntitiesToLabelsResult.Assigned assigned) {
+    if (result instanceof AssignLabelsToEntitiesResult.Assigned assigned) {
       this.createAuditLogs(assigned, request.auditParentId());
     }
 
     return result.assignments().entityRefs().size();
   }
 
-  private void checkAuthorization(AssignEntitiesToLabelsRequest request) {
+  private void checkAuthorization(AssignLabelsToEntitiesRequest request) {
     for (EntityRef entityRef : request.entityRefs()) {
       if (!this.authorizationService.isWritable(entityRef)) {
         throw new AccessDeniedException(
@@ -98,7 +98,7 @@ public final class AssignEntitiesToLabelsService {
     }
   }
 
-  private void createAuditLogs(AssignEntitiesToLabelsResult.Assigned result, String auditParentId) {
+  private void createAuditLogs(AssignLabelsToEntitiesResult.Assigned result, String auditParentId) {
 
     Map<EntityRef, String> entityNames = resolveEntityNames(result);
 
@@ -108,7 +108,7 @@ public final class AssignEntitiesToLabelsService {
         this.auditLogServiceFactory.createForBatchPerType(
             result.timestamp(),
             auditParentId,
-            AuditBatchLogAction.BATCH_ASSIGN_ENTITIES_TO_LABEL,
+            AuditBatchLogAction.BATCH_ASSIGN_LABELS_TO_ENTITIES,
             assignments.entityRefs().stream().map(EntityRef::type).collect(Collectors.toSet()));
 
     assignments
@@ -121,13 +121,13 @@ public final class AssignEntitiesToLabelsService {
                   .createLog(
                       entityRef,
                       entityNames.get(entityRef),
-                      AuditLogAction.ASSIGN_ENTITIES_TO_LABEL,
+                      AuditLogAction.ASSIGN_LABELS_TO_ENTITIES,
                       labelIds,
                       labelIds);
             });
   }
 
-  private Map<EntityRef, String> resolveEntityNames(AssignEntitiesToLabelsResult.Assigned result) {
+  private Map<EntityRef, String> resolveEntityNames(AssignLabelsToEntitiesResult.Assigned result) {
     return multiEntityNameResolver.resolveNames(Set.copyOf(result.assignments().entityRefs()));
   }
 }

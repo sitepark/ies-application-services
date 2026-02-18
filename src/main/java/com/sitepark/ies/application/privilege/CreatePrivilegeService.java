@@ -4,6 +4,9 @@ import com.sitepark.ies.application.ApplicationAuditLogService;
 import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
 import com.sitepark.ies.application.audit.AuditBatchLogAction;
 import com.sitepark.ies.application.audit.AuditLogAction;
+import com.sitepark.ies.application.label.ReassignLabelsToEntitiesService;
+import com.sitepark.ies.application.label.ReassignLabelsToEntitiesServiceRequest;
+import com.sitepark.ies.label.core.usecase.ReassignLabelsToEntitiesRequest;
 import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import com.sitepark.ies.userrepository.core.domain.entity.Privilege;
 import com.sitepark.ies.userrepository.core.usecase.privilege.CreatePrivilegeResult;
@@ -31,13 +34,16 @@ import org.jetbrains.annotations.Nullable;
 public final class CreatePrivilegeService {
 
   private final CreatePrivilegeUseCase createPrivilegeUseCase;
+  private final ReassignLabelsToEntitiesService reassignLabelsToEntitiesService;
   private final ApplicationAuditLogServiceFactory auditLogServiceFactory;
 
   @Inject
   CreatePrivilegeService(
       CreatePrivilegeUseCase createPrivilegeUseCase,
+      ReassignLabelsToEntitiesService reassignLabelsToEntitiesService,
       ApplicationAuditLogServiceFactory auditLogServiceFactory) {
     this.createPrivilegeUseCase = createPrivilegeUseCase;
+    this.reassignLabelsToEntitiesService = reassignLabelsToEntitiesService;
     this.auditLogServiceFactory = auditLogServiceFactory;
   }
 
@@ -66,6 +72,22 @@ public final class CreatePrivilegeService {
         this.createPrivilegeUseCase.createPrivilege(request.createPrivilegeRequest());
 
     this.createAuditLogs(result, request.auditParentId());
+
+    if (!request.labelIdentifiers().isEmpty()) {
+      ReassignLabelsToEntitiesServiceRequest labelRequest =
+          ReassignLabelsToEntitiesServiceRequest.builder()
+              .reassignLabelsToEntitiesRequest(
+                  ReassignLabelsToEntitiesRequest.builder()
+                      .entityRefs(
+                          configure ->
+                              configure.set(EntityRef.of(Privilege.class, result.privilegeId())))
+                      .labelIdentifiers(
+                          configure -> configure.identifiers(request.labelIdentifiers()))
+                      .build())
+              .auditParentId(request.auditParentId())
+              .build();
+      this.reassignLabelsToEntitiesService.reassignEntitiesFromLabels(labelRequest);
+    }
 
     return result.privilegeId();
   }

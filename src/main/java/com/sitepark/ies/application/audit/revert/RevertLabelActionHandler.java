@@ -34,13 +34,13 @@ public class RevertLabelActionHandler implements ReverseActionHandler {
     this.actionHandlers.put(AuditLogAction.CREATE.name(), createHandler);
     this.actionHandlers.put(AuditLogAction.UPDATE.name(), updateHandler);
     this.actionHandlers.put(AuditLogAction.REMOVE.name(), removeHandler);
-    this.actionHandlers.put(AuditLogAction.ASSIGN_ENTITIES_TO_LABEL.name(), assignEntitiesHandler);
+    this.actionHandlers.put(AuditLogAction.ASSIGN_LABELS_TO_ENTITIES.name(), assignEntitiesHandler);
     this.actionHandlers.put(
-        AuditLogAction.UNASSIGN_ENTITIES_FROM_LABEL.name(), unassignEntitiesHandler);
+        AuditLogAction.UNASSIGN_LABELS_FROM_ENTITIES.name(), unassignEntitiesHandler);
     this.actionHandlers.put(
-        AuditBatchLogAction.BATCH_ASSIGN_ENTITIES_TO_LABEL.name(), batchAssignEntitiesHandler);
+        AuditBatchLogAction.BATCH_ASSIGN_LABELS_TO_ENTITIES.name(), batchAssignEntitiesHandler);
     this.actionHandlers.put(
-        AuditBatchLogAction.BATCH_UNASSIGN_ENTITIES_FROM_LABEL.name(),
+        AuditBatchLogAction.BATCH_UNASSIGN_LABELS_FROM_ENTITIES.name(),
         batchUnassignEntitiesHandler);
   }
 

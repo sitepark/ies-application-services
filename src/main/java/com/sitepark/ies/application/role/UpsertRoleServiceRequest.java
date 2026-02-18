@@ -2,8 +2,14 @@ package com.sitepark.ies.application.role;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import com.sitepark.ies.sharedkernel.base.Identifier;
+import com.sitepark.ies.sharedkernel.base.IdentifierListBuilder;
 import com.sitepark.ies.userrepository.core.usecase.role.UpsertRoleRequest;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.function.Consumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,11 +18,13 @@ import org.jetbrains.annotations.Nullable;
 public final class UpsertRoleServiceRequest {
 
   @NotNull private final UpsertRoleRequest upsertRoleRequest;
+  @NotNull private final List<Identifier> labelIdentifiers;
   @Nullable private final String auditParentId;
 
   private UpsertRoleServiceRequest(Builder builder) {
     Objects.requireNonNull(builder.upsertRoleRequest, "upsertRoleRequest must not be null");
     this.upsertRoleRequest = builder.upsertRoleRequest;
+    this.labelIdentifiers = List.copyOf(builder.labelIdentifiers);
     this.auditParentId = builder.auditParentId;
   }
 
@@ -26,6 +34,10 @@ public final class UpsertRoleServiceRequest {
 
   public UpsertRoleRequest upsertRoleRequest() {
     return this.upsertRoleRequest;
+  }
+
+  public List<Identifier> labelIdentifiers() {
+    return this.labelIdentifiers;
   }
 
   public String auditParentId() {
@@ -38,7 +50,7 @@ public final class UpsertRoleServiceRequest {
 
   @Override
   public int hashCode() {
-    return Objects.hash(this.upsertRoleRequest, this.auditParentId);
+    return Objects.hash(this.upsertRoleRequest, this.labelIdentifiers, this.auditParentId);
   }
 
   @Override
@@ -46,6 +58,7 @@ public final class UpsertRoleServiceRequest {
     return super.equals(o)
         && (o instanceof UpsertRoleServiceRequest that)
         && Objects.equals(this.upsertRoleRequest, that.upsertRoleRequest)
+        && Objects.equals(this.labelIdentifiers, that.labelIdentifiers)
         && Objects.equals(this.auditParentId, that.auditParentId);
   }
 
@@ -54,6 +67,8 @@ public final class UpsertRoleServiceRequest {
     return "UpsertRoleServiceRequest{"
         + "upsertRoleRequest="
         + upsertRoleRequest
+        + ", labelIdentifiers="
+        + labelIdentifiers
         + ", auditParentId='"
         + auditParentId
         + '\''
@@ -64,17 +79,27 @@ public final class UpsertRoleServiceRequest {
   public static final class Builder {
 
     private UpsertRoleRequest upsertRoleRequest;
-
+    private final Set<Identifier> labelIdentifiers = new TreeSet<>();
     private String auditParentId;
 
     private Builder() {}
 
     private Builder(UpsertRoleServiceRequest request) {
+      this.upsertRoleRequest = request.upsertRoleRequest;
+      this.labelIdentifiers.addAll(request.labelIdentifiers);
       this.auditParentId = request.auditParentId;
     }
 
     public Builder upsertRoleRequest(UpsertRoleRequest upsertRoleRequest) {
       this.upsertRoleRequest = upsertRoleRequest;
+      return this;
+    }
+
+    public Builder labelIdentifiers(Consumer<IdentifierListBuilder> configurer) {
+      IdentifierListBuilder listBuilder = new IdentifierListBuilder();
+      configurer.accept(listBuilder);
+      this.labelIdentifiers.clear();
+      this.labelIdentifiers.addAll(listBuilder.build());
       return this;
     }
 
