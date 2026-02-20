@@ -58,8 +58,8 @@ class UnassignRolesFromUsersServiceTest {
             any(UnassignRolesFromUsersRequest.class)))
         .thenReturn(unassignedResult);
 
-    UnassignRoleFromUserServiceRequest request =
-        UnassignRoleFromUserServiceRequest.builder()
+    UnassignRolesFromUsersServiceRequest request =
+        UnassignRolesFromUsersServiceRequest.builder()
             .unassignRolesFromUsersRequest(
                 UnassignRolesFromUsersRequest.builder()
                     .userIdentifiers(b -> b.id("123"))
@@ -87,8 +87,8 @@ class UnassignRolesFromUsersServiceTest {
             any(UnassignRolesFromUsersRequest.class)))
         .thenReturn(unassignedResult);
 
-    UnassignRoleFromUserServiceRequest request =
-        UnassignRoleFromUserServiceRequest.builder()
+    UnassignRolesFromUsersServiceRequest request =
+        UnassignRolesFromUsersServiceRequest.builder()
             .unassignRolesFromUsersRequest(
                 UnassignRolesFromUsersRequest.builder()
                     .userIdentifiers(b -> b.id("123"))
@@ -112,8 +112,8 @@ class UnassignRolesFromUsersServiceTest {
             any(UnassignRolesFromUsersRequest.class)))
         .thenReturn(skippedResult);
 
-    UnassignRoleFromUserServiceRequest request =
-        UnassignRoleFromUserServiceRequest.builder()
+    UnassignRolesFromUsersServiceRequest request =
+        UnassignRolesFromUsersServiceRequest.builder()
             .unassignRolesFromUsersRequest(
                 UnassignRolesFromUsersRequest.builder()
                     .userIdentifiers(b -> b.id("123"))
@@ -142,8 +142,8 @@ class UnassignRolesFromUsersServiceTest {
             any(UnassignRolesFromUsersRequest.class)))
         .thenReturn(unassignedResult);
 
-    UnassignRoleFromUserServiceRequest request =
-        UnassignRoleFromUserServiceRequest.builder()
+    UnassignRolesFromUsersServiceRequest request =
+        UnassignRolesFromUsersServiceRequest.builder()
             .unassignRolesFromUsersRequest(
                 UnassignRolesFromUsersRequest.builder()
                     .userIdentifiers(b -> b.id("123").id("456"))

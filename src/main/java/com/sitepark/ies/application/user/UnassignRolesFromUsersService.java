@@ -69,7 +69,7 @@ public final class UnassignRolesFromUsersService {
    * @throws com.sitepark.ies.userrepository.core.domain.exception.RoleNotFoundException if a role
    *     does not exist
    */
-  public int unassignRolesFromUsers(@NotNull UnassignRoleFromUserServiceRequest request) {
+  public int unassignRolesFromUsers(@NotNull UnassignRolesFromUsersServiceRequest request) {
 
     UnassignRolesFromUsersResult result =
         this.unassignRolesFromUsersUseCase.unassignRolesFromUsers(

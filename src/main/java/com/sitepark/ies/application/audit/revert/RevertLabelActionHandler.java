@@ -1,6 +1,5 @@
 package com.sitepark.ies.application.audit.revert;
 
-import com.sitepark.ies.application.audit.AuditBatchLogAction;
 import com.sitepark.ies.application.audit.AuditLogAction;
 import com.sitepark.ies.application.audit.revert.label.RevertLabelAssignEntitiesActionHandler;
 import com.sitepark.ies.application.audit.revert.label.RevertLabelBatchAssignEntitiesActionHandler;
@@ -34,14 +33,18 @@ public class RevertLabelActionHandler implements ReverseActionHandler {
     this.actionHandlers.put(AuditLogAction.CREATE.name(), createHandler);
     this.actionHandlers.put(AuditLogAction.UPDATE.name(), updateHandler);
     this.actionHandlers.put(AuditLogAction.REMOVE.name(), removeHandler);
+
     this.actionHandlers.put(AuditLogAction.ASSIGN_LABELS_TO_ENTITIES.name(), assignEntitiesHandler);
     this.actionHandlers.put(
         AuditLogAction.UNASSIGN_LABELS_FROM_ENTITIES.name(), unassignEntitiesHandler);
-    this.actionHandlers.put(
-        AuditBatchLogAction.BATCH_ASSIGN_LABELS_TO_ENTITIES.name(), batchAssignEntitiesHandler);
-    this.actionHandlers.put(
-        AuditBatchLogAction.BATCH_UNASSIGN_LABELS_FROM_ENTITIES.name(),
-        batchUnassignEntitiesHandler);
+  }
+
+  protected Map<String, RevertEntityActionHandler> getEntitiesActionHandlers() {
+    return Map.of(
+        AuditLogAction.ASSIGN_LABELS_TO_ENTITIES.name(),
+        this.actionHandlers.get(AuditLogAction.ASSIGN_LABELS_TO_ENTITIES.name()),
+        AuditLogAction.UNASSIGN_LABELS_FROM_ENTITIES.name(),
+        this.actionHandlers.get(AuditLogAction.UNASSIGN_LABELS_FROM_ENTITIES.name()));
   }
 
   @Override

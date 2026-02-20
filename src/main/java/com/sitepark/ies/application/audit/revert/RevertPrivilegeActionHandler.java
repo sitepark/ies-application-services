@@ -23,12 +23,15 @@ public class RevertPrivilegeActionHandler implements ReverseActionHandler {
       RevertPrivilegeCreateActionHandler createHandler,
       RevertPrivilegeUpdateActionHandler updateHandler,
       RevertPrivilegeRemoveActionHandler removeHandler,
-      RevertPrivilegeBatchRemoveActionHandler batchRemoveHandler) {
+      RevertPrivilegeBatchRemoveActionHandler batchRemoveHandler,
+      RevertLabelActionHandler revertLabelActionHandler) {
     this.actionHandlers = new HashMap<>();
     this.actionHandlers.put(AuditLogAction.CREATE.name(), createHandler);
     this.actionHandlers.put(AuditLogAction.UPDATE.name(), updateHandler);
     this.actionHandlers.put(AuditLogAction.REMOVE.name(), removeHandler);
     this.actionHandlers.put(AuditBatchLogAction.BATCH_REMOVE.name(), batchRemoveHandler);
+
+    this.actionHandlers.putAll(revertLabelActionHandler.getEntitiesActionHandlers());
   }
 
   @Override

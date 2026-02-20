@@ -10,7 +10,6 @@ import com.sitepark.ies.audit.core.service.AuditLogService;
 import com.sitepark.ies.audit.core.service.RevertRequest;
 import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import com.sitepark.ies.userrepository.core.domain.entity.Role;
-import com.sitepark.ies.userrepository.core.domain.entity.User;
 import com.sitepark.ies.userrepository.core.domain.value.RoleSnapshot;
 import com.sitepark.ies.userrepository.core.usecase.role.RestoreRoleRequest;
 import com.sitepark.ies.userrepository.core.usecase.role.RestoreRoleUseCase;
@@ -66,7 +65,7 @@ public class RevertRoleBatchRemoveActionHandler implements RevertEntityActionHan
 
       this.restoreRoleUseCase.restoreRole(new RestoreRoleRequest(restoreData));
       auditLogService.createLog(
-          EntityRef.of(User.class, restoreData.role().id()),
+          EntityRef.of(Role.class, restoreData.role().id()),
           restoreData.role().name(),
           AuditLogAction.RESTORE,
           null,

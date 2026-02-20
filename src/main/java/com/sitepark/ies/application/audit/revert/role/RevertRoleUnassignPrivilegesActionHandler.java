@@ -2,10 +2,11 @@ package com.sitepark.ies.application.audit.revert.role;
 
 import com.sitepark.ies.application.audit.revert.RevertEntityActionHandler;
 import com.sitepark.ies.application.audit.revert.RevertFailedException;
+import com.sitepark.ies.application.role.AssignPrivilegesToRolesService;
+import com.sitepark.ies.application.role.AssignPrivilegesToRolesServiceRequest;
 import com.sitepark.ies.audit.core.service.AuditLogService;
 import com.sitepark.ies.audit.core.service.RevertRequest;
 import com.sitepark.ies.userrepository.core.usecase.role.AssignPrivilegesToRolesRequest;
-import com.sitepark.ies.userrepository.core.usecase.role.AssignPrivilegesToRolesUseCase;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.List;
@@ -14,14 +15,14 @@ public class RevertRoleUnassignPrivilegesActionHandler implements RevertEntityAc
 
   private final AuditLogService auditLogService;
 
-  private final AssignPrivilegesToRolesUseCase assignPrivilegesToRolesUseCase;
+  private final AssignPrivilegesToRolesService assignPrivilegesToRolesService;
 
   @Inject
   RevertRoleUnassignPrivilegesActionHandler(
       AuditLogService auditLogService,
-      AssignPrivilegesToRolesUseCase assignPrivilegesToRolesUseCase) {
+      AssignPrivilegesToRolesService assignPrivilegesToRolesService) {
     this.auditLogService = auditLogService;
-    this.assignPrivilegesToRolesUseCase = assignPrivilegesToRolesUseCase;
+    this.assignPrivilegesToRolesService = assignPrivilegesToRolesService;
   }
 
   @Override
@@ -29,10 +30,14 @@ public class RevertRoleUnassignPrivilegesActionHandler implements RevertEntityAc
     try {
       List<String> privilegeIds =
           this.auditLogService.deserializeList(request.backwardData(), String.class);
-      this.assignPrivilegesToRolesUseCase.assignPrivilegesToRoles(
-          AssignPrivilegesToRolesRequest.builder()
-              .roleIdentifiers(b -> b.id(request.target().id()))
-              .privilegeIdentifiers(b -> b.ids(privilegeIds))
+      this.assignPrivilegesToRolesService.assignPrivilegesToRoles(
+          AssignPrivilegesToRolesServiceRequest.builder()
+              .assignPrivilegesToRolesRequest(
+                  AssignPrivilegesToRolesRequest.builder()
+                      .roleIdentifiers(b -> b.id(request.target().id()))
+                      .privilegeIdentifiers(b -> b.ids(privilegeIds))
+                      .build())
+              .auditParentId(request.parentId())
               .build());
     } catch (IOException e) {
       throw new RevertFailedException(request, "Failed to deserialize privilegeIds", e);

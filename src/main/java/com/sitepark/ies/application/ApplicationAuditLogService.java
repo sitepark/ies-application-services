@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.time.Instant;
 import org.jetbrains.annotations.Nullable;
 
+@SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
 public class ApplicationAuditLogService {
   private final CreateAuditLogUseCase createAuditLogUseCase;
   private final AuditLogService auditLogService;
@@ -30,6 +31,10 @@ public class ApplicationAuditLogService {
     this.multiEntityNameResolver = multiEntityNameResolver;
     this.timestamp = timestamp;
     this.parentId = parentId;
+  }
+
+  public String parentId() {
+    return this.parentId;
   }
 
   public void updateParentId(String parentId) {

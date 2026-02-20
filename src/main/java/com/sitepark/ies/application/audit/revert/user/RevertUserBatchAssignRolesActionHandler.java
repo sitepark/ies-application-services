@@ -6,11 +6,12 @@ import com.sitepark.ies.application.audit.AuditBatchLogAction;
 import com.sitepark.ies.application.audit.AuditLogAction;
 import com.sitepark.ies.application.audit.revert.RevertEntityActionHandler;
 import com.sitepark.ies.application.audit.revert.RevertFailedException;
+import com.sitepark.ies.application.user.UnassignRolesFromUsersService;
+import com.sitepark.ies.application.user.UnassignRolesFromUsersServiceRequest;
 import com.sitepark.ies.audit.core.service.AuditLogService;
 import com.sitepark.ies.audit.core.service.RevertRequest;
 import com.sitepark.ies.userrepository.core.domain.entity.User;
 import com.sitepark.ies.userrepository.core.usecase.user.UnassignRolesFromUsersRequest;
-import com.sitepark.ies.userrepository.core.usecase.user.UnassignRolesFromUsersUseCase;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.time.Clock;
@@ -21,18 +22,18 @@ public class RevertUserBatchAssignRolesActionHandler implements RevertEntityActi
 
   private final ApplicationAuditLogServiceFactory auditLogServiceFactory;
   private final AuditLogService auditLogService;
-  private final UnassignRolesFromUsersUseCase unassignRolesFromUsersUseCase;
+  private final UnassignRolesFromUsersService unassignRolesFromUsersService;
   private final Clock clock;
 
   @Inject
   RevertUserBatchAssignRolesActionHandler(
       ApplicationAuditLogServiceFactory auditLogServiceFactory,
       AuditLogService auditLogService,
-      UnassignRolesFromUsersUseCase unassignRolesFromUsersUseCase,
+      UnassignRolesFromUsersService unassignRolesFromUsersService,
       Clock clock) {
     this.auditLogServiceFactory = auditLogServiceFactory;
     this.auditLogService = auditLogService;
-    this.unassignRolesFromUsersUseCase = unassignRolesFromUsersUseCase;
+    this.unassignRolesFromUsersService = unassignRolesFromUsersService;
     this.clock = clock;
   }
 
@@ -55,10 +56,14 @@ public class RevertUserBatchAssignRolesActionHandler implements RevertEntityActi
         throw new RevertFailedException(request, "Failed to deserialize roleIds", e);
       }
 
-      this.unassignRolesFromUsersUseCase.unassignRolesFromUsers(
-          UnassignRolesFromUsersRequest.builder()
-              .userIdentifiers(b -> b.id(request.target().id()))
-              .roleIdentifiers(b -> b.ids(roleIds))
+      this.unassignRolesFromUsersService.unassignRolesFromUsers(
+          UnassignRolesFromUsersServiceRequest.builder()
+              .unassignRolesFromUsersRequest(
+                  UnassignRolesFromUsersRequest.builder()
+                      .userIdentifiers(b -> b.id(request.target().id()))
+                      .roleIdentifiers(b -> b.ids(roleIds))
+                      .build())
+              .auditParentId(auditLogService.parentId())
               .build());
       auditLogService.createLog(request.target(), AuditLogAction.UNASSIGN_ROLES, roleIds, roleIds);
     }

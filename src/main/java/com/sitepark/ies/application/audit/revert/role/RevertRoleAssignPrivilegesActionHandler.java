@@ -2,10 +2,11 @@ package com.sitepark.ies.application.audit.revert.role;
 
 import com.sitepark.ies.application.audit.revert.RevertEntityActionHandler;
 import com.sitepark.ies.application.audit.revert.RevertFailedException;
+import com.sitepark.ies.application.role.UnassignPrivilegesFromRolesService;
+import com.sitepark.ies.application.role.UnassignPrivilegesFromRolesServiceRequest;
 import com.sitepark.ies.audit.core.service.AuditLogService;
 import com.sitepark.ies.audit.core.service.RevertRequest;
 import com.sitepark.ies.userrepository.core.usecase.role.UnassignPrivilegesFromRolesRequest;
-import com.sitepark.ies.userrepository.core.usecase.role.UnassignPrivilegesFromRolesUseCase;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.List;
@@ -14,25 +15,29 @@ public class RevertRoleAssignPrivilegesActionHandler implements RevertEntityActi
 
   private final AuditLogService auditLogService;
 
-  private final UnassignPrivilegesFromRolesUseCase unassignPrivilegesFromRolesUseCase;
+  private final UnassignPrivilegesFromRolesService unassignPrivilegesFromRolesService;
 
   @Inject
   RevertRoleAssignPrivilegesActionHandler(
       AuditLogService auditLogService,
-      UnassignPrivilegesFromRolesUseCase unassignPrivilegesFromRolesUseCase) {
+      UnassignPrivilegesFromRolesService unassignPrivilegesFromRolesService) {
     this.auditLogService = auditLogService;
-    this.unassignPrivilegesFromRolesUseCase = unassignPrivilegesFromRolesUseCase;
+    this.unassignPrivilegesFromRolesService = unassignPrivilegesFromRolesService;
   }
 
   @Override
   public void revert(RevertRequest request) {
     try {
-      List<String> privilegeds =
+      List<String> privilegeIds =
           this.auditLogService.deserializeList(request.backwardData(), String.class);
-      this.unassignPrivilegesFromRolesUseCase.unassignPrivilegesFromRoles(
-          UnassignPrivilegesFromRolesRequest.builder()
-              .roleIdentifiers(b -> b.id(request.target().id()))
-              .privilegeIdentifiers(b -> b.ids(privilegeds))
+      this.unassignPrivilegesFromRolesService.unassignPrivilegesFromRoles(
+          UnassignPrivilegesFromRolesServiceRequest.builder()
+              .unassignPrivilegesFromRolesRequest(
+                  UnassignPrivilegesFromRolesRequest.builder()
+                      .roleIdentifiers(b -> b.id(request.target().id()))
+                      .privilegeIdentifiers(b -> b.ids(privilegeIds))
+                      .build())
+              .auditParentId(request.parentId())
               .build());
     } catch (IOException e) {
       throw new RevertFailedException(request, "Failed to deserialize privilegeds", e);

@@ -7,15 +7,15 @@ import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-@JsonDeserialize(builder = UnassignRoleFromUserServiceRequest.Builder.class)
+@JsonDeserialize(builder = UnassignRolesFromUsersServiceRequest.Builder.class)
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName"})
-public final class UnassignRoleFromUserServiceRequest {
+public final class UnassignRolesFromUsersServiceRequest {
 
   @NotNull private final UnassignRolesFromUsersRequest unassignRolesFromUsersRequest;
 
   @Nullable private final String auditParentId;
 
-  private UnassignRoleFromUserServiceRequest(Builder builder) {
+  private UnassignRolesFromUsersServiceRequest(Builder builder) {
     this.unassignRolesFromUsersRequest = builder.unassignRolesFromUsersRequest;
     this.auditParentId = builder.auditParentId;
   }
@@ -47,14 +47,14 @@ public final class UnassignRoleFromUserServiceRequest {
 
   @Override
   public boolean equals(Object o) {
-    return (o instanceof UnassignRoleFromUserServiceRequest that)
+    return (o instanceof UnassignRolesFromUsersServiceRequest that)
         && Objects.equals(this.unassignRolesFromUsersRequest, that.unassignRolesFromUsersRequest)
         && Objects.equals(this.auditParentId, that.auditParentId);
   }
 
   @Override
   public String toString() {
-    return "UnassignRoleFromUserServiceRequest{"
+    return "UnassignRolesFromUsersServiceRequest{"
         + "unassignRolesFromUsersRequest="
         + unassignRolesFromUsersRequest
         + ", auditParentId='"
@@ -71,7 +71,7 @@ public final class UnassignRoleFromUserServiceRequest {
 
     private Builder() {}
 
-    private Builder(UnassignRoleFromUserServiceRequest request) {
+    private Builder(UnassignRolesFromUsersServiceRequest request) {
       this.unassignRolesFromUsersRequest = request.unassignRolesFromUsersRequest;
       this.auditParentId = request.auditParentId;
     }
@@ -87,10 +87,10 @@ public final class UnassignRoleFromUserServiceRequest {
       return this;
     }
 
-    public UnassignRoleFromUserServiceRequest build() {
+    public UnassignRolesFromUsersServiceRequest build() {
       Objects.requireNonNull(
           this.unassignRolesFromUsersRequest, "unassignRolesFromUsersRequest must not be null");
-      return new UnassignRoleFromUserServiceRequest(this);
+      return new UnassignRolesFromUsersServiceRequest(this);
     }
   }
 }

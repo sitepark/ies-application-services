@@ -15,7 +15,6 @@ import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -74,7 +73,7 @@ public final class AssignLabelsToEntitiesService {
    * @throws com.sitepark.ies.label.core.domain.exception.LabelNotFoundException if a label does not
    *     exist
    */
-  public int assignEntitiesToLabels(@NotNull AssignLabelsToEntitiesServiceRequest request) {
+  public int assignLabelsToEntities(@NotNull AssignLabelsToEntitiesServiceRequest request) {
 
     this.checkAuthorization(request.assignEntitiesToLabelsRequest());
 
@@ -105,11 +104,11 @@ public final class AssignLabelsToEntitiesService {
     var assignments = result.assignments();
 
     Map<String, ApplicationAuditLogService> auditLogServiceMap =
-        this.auditLogServiceFactory.createForBatchPerType(
+        this.auditLogServiceFactory.createPerTypeForBatch(
             result.timestamp(),
             auditParentId,
             AuditBatchLogAction.BATCH_ASSIGN_LABELS_TO_ENTITIES,
-            assignments.entityRefs().stream().map(EntityRef::type).collect(Collectors.toSet()));
+            assignments.entityRefs());
 
     assignments
         .entityRefs()

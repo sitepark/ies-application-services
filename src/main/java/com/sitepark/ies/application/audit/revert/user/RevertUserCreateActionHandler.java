@@ -1,23 +1,26 @@
 package com.sitepark.ies.application.audit.revert.user;
 
 import com.sitepark.ies.application.audit.revert.RevertEntityActionHandler;
+import com.sitepark.ies.application.user.RemoveUsersService;
+import com.sitepark.ies.application.user.RemoveUsersServiceRequest;
 import com.sitepark.ies.audit.core.service.RevertRequest;
-import com.sitepark.ies.userrepository.core.usecase.user.RemoveUserRequest;
-import com.sitepark.ies.userrepository.core.usecase.user.RemoveUserUseCase;
 import jakarta.inject.Inject;
 
 public class RevertUserCreateActionHandler implements RevertEntityActionHandler {
 
-  private final RemoveUserUseCase removeUserUseCase;
+  private final RemoveUsersService removeUserService;
 
   @Inject
-  RevertUserCreateActionHandler(RemoveUserUseCase removeUserUseCase) {
-    this.removeUserUseCase = removeUserUseCase;
+  RevertUserCreateActionHandler(RemoveUsersService removeUserService) {
+    this.removeUserService = removeUserService;
   }
 
   @Override
   public void revert(RevertRequest request) {
-    this.removeUserUseCase.removeUser(
-        RemoveUserRequest.builder().id(request.target().id()).build());
+    this.removeUserService.removeUsers(
+        RemoveUsersServiceRequest.builder()
+            .identifiers(configure -> configure.add(request.target().id()))
+            .auditParentId(request.parentId())
+            .build());
   }
 }

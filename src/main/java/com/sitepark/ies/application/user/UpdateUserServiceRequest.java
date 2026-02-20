@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sitepark.ies.sharedkernel.base.Identifier;
 import com.sitepark.ies.sharedkernel.base.IdentifierListBuilder;
+import com.sitepark.ies.sharedkernel.base.Updatable;
 import com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest;
 import java.util.List;
 import java.util.Objects;
@@ -18,12 +19,15 @@ import org.jetbrains.annotations.Nullable;
 public final class UpdateUserServiceRequest {
 
   @NotNull private final UpdateUserRequest updateUserRequest;
-  @NotNull private final List<Identifier> labelIdentifiers;
+  @NotNull private final Updatable<List<Identifier>> labelIdentifiers;
   @Nullable private final String auditParentId;
 
   private UpdateUserServiceRequest(Builder builder) {
     this.updateUserRequest = builder.updateUserRequest;
-    this.labelIdentifiers = List.copyOf(builder.labelIdentifiers);
+    this.labelIdentifiers =
+        builder.labelIdentifiers != null
+            ? Updatable.of(List.copyOf(builder.labelIdentifiers))
+            : Updatable.unchanged();
     this.auditParentId = builder.auditParentId;
   }
 
@@ -35,7 +39,7 @@ public final class UpdateUserServiceRequest {
     return this.updateUserRequest;
   }
 
-  public List<Identifier> labelIdentifiers() {
+  public Updatable<List<Identifier>> labelIdentifiers() {
     return this.labelIdentifiers;
   }
 
@@ -77,14 +81,16 @@ public final class UpdateUserServiceRequest {
   public static final class Builder {
 
     private com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest updateUserRequest;
-    private final Set<Identifier> labelIdentifiers = new TreeSet<>();
+    private Set<Identifier> labelIdentifiers;
     private String auditParentId;
 
     private Builder() {}
 
     private Builder(UpdateUserServiceRequest request) {
       this.updateUserRequest = request.updateUserRequest;
-      this.labelIdentifiers.addAll(request.labelIdentifiers);
+      if (request.labelIdentifiers.shouldUpdate()) {
+        this.labelIdentifiers = new TreeSet<>(request.labelIdentifiers.getValue());
+      }
       this.auditParentId = request.auditParentId;
     }
 
@@ -97,8 +103,10 @@ public final class UpdateUserServiceRequest {
     public Builder labelIdentifiers(Consumer<IdentifierListBuilder> configurer) {
       IdentifierListBuilder listBuilder = new IdentifierListBuilder();
       configurer.accept(listBuilder);
-      this.labelIdentifiers.clear();
-      this.labelIdentifiers.addAll(listBuilder.build());
+      if (listBuilder.changed()) {
+        this.labelIdentifiers = new TreeSet<>();
+        this.labelIdentifiers.addAll(listBuilder.build());
+      }
       return this;
     }
 

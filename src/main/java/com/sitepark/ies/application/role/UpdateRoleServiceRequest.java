@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sitepark.ies.application.user.UpdateUserServiceRequest.Builder;
 import com.sitepark.ies.sharedkernel.base.Identifier;
 import com.sitepark.ies.sharedkernel.base.IdentifierListBuilder;
+import com.sitepark.ies.sharedkernel.base.Updatable;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -21,12 +22,15 @@ public final class UpdateRoleServiceRequest {
   private final com.sitepark.ies.userrepository.core.usecase.role.UpdateRoleRequest
       updateRoleRequest;
 
-  @NotNull private final List<Identifier> labelIdentifiers;
+  @NotNull private final Updatable<List<Identifier>> labelIdentifiers;
   @Nullable private final String auditParentId;
 
   private UpdateRoleServiceRequest(Builder builder) {
     this.updateRoleRequest = builder.updateRoleRequest;
-    this.labelIdentifiers = List.copyOf(builder.labelIdentifiers);
+    this.labelIdentifiers =
+        builder.labelIdentifiers != null
+            ? Updatable.of(List.copyOf(builder.labelIdentifiers))
+            : Updatable.unchanged();
     this.auditParentId = builder.auditParentId;
   }
 
@@ -38,7 +42,7 @@ public final class UpdateRoleServiceRequest {
     return this.updateRoleRequest;
   }
 
-  public List<Identifier> labelIdentifiers() {
+  public Updatable<List<Identifier>> labelIdentifiers() {
     return this.labelIdentifiers;
   }
 
@@ -80,14 +84,16 @@ public final class UpdateRoleServiceRequest {
   public static final class Builder {
 
     private com.sitepark.ies.userrepository.core.usecase.role.UpdateRoleRequest updateRoleRequest;
-    private final Set<Identifier> labelIdentifiers = new TreeSet<>();
+    private Set<Identifier> labelIdentifiers;
     private String auditParentId;
 
     private Builder() {}
 
     private Builder(UpdateRoleServiceRequest request) {
       this.updateRoleRequest = request.updateRoleRequest;
-      this.labelIdentifiers.addAll(request.labelIdentifiers);
+      if (request.labelIdentifiers.shouldUpdate()) {
+        this.labelIdentifiers = new TreeSet<>(request.labelIdentifiers.getValue());
+      }
       this.auditParentId = request.auditParentId;
     }
 
@@ -100,8 +106,10 @@ public final class UpdateRoleServiceRequest {
     public Builder labelIdentifiers(Consumer<IdentifierListBuilder> configurer) {
       IdentifierListBuilder listBuilder = new IdentifierListBuilder();
       configurer.accept(listBuilder);
-      this.labelIdentifiers.clear();
-      this.labelIdentifiers.addAll(listBuilder.build());
+      if (listBuilder.changed()) {
+        this.labelIdentifiers = new TreeSet<>();
+        this.labelIdentifiers.addAll(listBuilder.build());
+      }
       return this;
     }
 

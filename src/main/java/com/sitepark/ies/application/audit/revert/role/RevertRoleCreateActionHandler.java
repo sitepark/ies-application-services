@@ -1,25 +1,26 @@
 package com.sitepark.ies.application.audit.revert.role;
 
 import com.sitepark.ies.application.audit.revert.RevertEntityActionHandler;
+import com.sitepark.ies.application.role.RemoveRolesService;
+import com.sitepark.ies.application.role.RemoveRolesServiceRequest;
 import com.sitepark.ies.audit.core.service.RevertRequest;
-import com.sitepark.ies.userrepository.core.usecase.role.RemoveRoleRequest;
-import com.sitepark.ies.userrepository.core.usecase.role.RemoveRoleUseCase;
 import jakarta.inject.Inject;
 
 public class RevertRoleCreateActionHandler implements RevertEntityActionHandler {
 
-  private final RemoveRoleUseCase removeRoleUseCase;
+  private final RemoveRolesService removeRolesService;
 
   @Inject
-  RevertRoleCreateActionHandler(RemoveRoleUseCase removeRoleUseCase) {
-    this.removeRoleUseCase = removeRoleUseCase;
+  RevertRoleCreateActionHandler(RemoveRolesService removeRolesService) {
+    this.removeRolesService = removeRolesService;
   }
 
   @Override
   public void revert(RevertRequest request) {
-    this.removeRoleUseCase.removeRole(
-        RemoveRoleRequest.builder()
-            .identifier(com.sitepark.ies.sharedkernel.base.Identifier.ofId(request.target().id()))
+    this.removeRolesService.removeRoles(
+        RemoveRolesServiceRequest.builder()
+            .identifiers(configure -> configure.add(request.target().id()))
+            .auditParentId(request.parentId())
             .build());
   }
 }

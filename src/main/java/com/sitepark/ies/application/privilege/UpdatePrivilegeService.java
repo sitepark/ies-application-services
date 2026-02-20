@@ -85,22 +85,23 @@ public final class UpdatePrivilegeService {
 
     UpdatePrivilegeResult result =
         this.updatePrivilegeUseCase.updatePrivilege(request.updatePrivilegeRequest());
-
     this.createAuditLogs(result, request.auditParentId());
 
-    ReassignLabelsToEntitiesServiceRequest labelRequest =
-        ReassignLabelsToEntitiesServiceRequest.builder()
-            .reassignLabelsToEntitiesRequest(
-                ReassignLabelsToEntitiesRequest.builder()
-                    .entityRefs(
-                        configure ->
-                            configure.set(EntityRef.of(Privilege.class, result.privilegeId())))
-                    .labelIdentifiers(
-                        configure -> configure.identifiers(request.labelIdentifiers()))
-                    .build())
-            .auditParentId(request.auditParentId())
-            .build();
-    this.reassignLabelsToEntitiesService.reassignEntitiesFromLabels(labelRequest);
+    if (request.labelIdentifiers().shouldUpdate()) {
+      ReassignLabelsToEntitiesServiceRequest labelRequest =
+          ReassignLabelsToEntitiesServiceRequest.builder()
+              .reassignLabelsToEntitiesRequest(
+                  ReassignLabelsToEntitiesRequest.builder()
+                      .entityRefs(
+                          configure ->
+                              configure.set(EntityRef.of(Privilege.class, result.privilegeId())))
+                      .labelIdentifiers(
+                          configure -> configure.identifiers(request.labelIdentifiers().getValue()))
+                      .build())
+              .auditParentId(request.auditParentId())
+              .build();
+      this.reassignLabelsToEntitiesService.reassignEntitiesFromLabels(labelRequest);
+    }
 
     if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Successfully processed privilege update for '{}'", result.privilegeId());

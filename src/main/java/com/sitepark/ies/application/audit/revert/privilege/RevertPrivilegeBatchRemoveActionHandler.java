@@ -10,11 +10,9 @@ import com.sitepark.ies.audit.core.service.AuditLogService;
 import com.sitepark.ies.audit.core.service.RevertRequest;
 import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import com.sitepark.ies.userrepository.core.domain.entity.Privilege;
-import com.sitepark.ies.userrepository.core.domain.entity.User;
 import com.sitepark.ies.userrepository.core.domain.value.PrivilegeSnapshot;
 import com.sitepark.ies.userrepository.core.usecase.privilege.RestorePrivilegeRequest;
 import com.sitepark.ies.userrepository.core.usecase.privilege.RestorePrivilegeUseCase;
-import com.sitepark.ies.userrepository.core.usecase.user.CreateUserResult;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.time.Clock;
@@ -67,7 +65,7 @@ public class RevertPrivilegeBatchRemoveActionHandler implements RevertEntityActi
 
       this.restorePrivilegeUseCase.restorePrivilege(new RestorePrivilegeRequest(restoreData));
       auditLogService.createLog(
-          EntityRef.of(User.class, restoreData.privilege().id()),
+          EntityRef.of(Privilege.class, restoreData.privilege().id()),
           restoreData.privilege().name(),
           AuditLogAction.RESTORE,
           null,
@@ -83,17 +81,5 @@ public class RevertPrivilegeBatchRemoveActionHandler implements RevertEntityActi
         auditLogService.createBatchLog(Privilege.class, AuditBatchLogAction.REVERT_BATCH_REMOVE);
     auditLogService.updateParentId(batchId);
     return auditLogService;
-  }
-
-  protected void createCreationAuditLog(CreateUserResult result, String auditParentId) {
-
-    ApplicationAuditLogService auditLogService =
-        this.auditLogServiceFactory.create(result.timestamp(), auditParentId);
-    auditLogService.createLog(
-        EntityRef.of(User.class, result.userId()),
-        result.snapshot().user().toDisplayName(),
-        AuditLogAction.CREATE,
-        null,
-        result.snapshot());
   }
 }

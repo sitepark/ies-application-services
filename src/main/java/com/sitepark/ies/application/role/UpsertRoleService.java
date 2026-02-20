@@ -51,18 +51,20 @@ public final class UpsertRoleService {
 
     UpsertResult upsertResult = this.createResult(result);
 
-    ReassignLabelsToEntitiesServiceRequest labelRequest =
-        ReassignLabelsToEntitiesServiceRequest.builder()
-            .reassignLabelsToEntitiesRequest(
-                ReassignLabelsToEntitiesRequest.builder()
-                    .entityRefs(
-                        configure -> configure.set(EntityRef.of(Role.class, result.roleId())))
-                    .labelIdentifiers(
-                        configure -> configure.identifiers(request.labelIdentifiers()))
-                    .build())
-            .auditParentId(request.auditParentId())
-            .build();
-    this.reassignLabelsToEntitiesService.reassignEntitiesFromLabels(labelRequest);
+    if (request.labelIdentifiers().shouldUpdate()) {
+      ReassignLabelsToEntitiesServiceRequest labelRequest =
+          ReassignLabelsToEntitiesServiceRequest.builder()
+              .reassignLabelsToEntitiesRequest(
+                  ReassignLabelsToEntitiesRequest.builder()
+                      .entityRefs(
+                          configure -> configure.set(EntityRef.of(Role.class, result.roleId())))
+                      .labelIdentifiers(
+                          configure -> configure.identifiers(request.labelIdentifiers().getValue()))
+                      .build())
+              .auditParentId(request.auditParentId())
+              .build();
+      this.reassignLabelsToEntitiesService.reassignEntitiesFromLabels(labelRequest);
+    }
 
     return upsertResult;
   }

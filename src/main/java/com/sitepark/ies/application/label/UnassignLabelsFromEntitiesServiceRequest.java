@@ -2,20 +2,20 @@ package com.sitepark.ies.application.label;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
-import com.sitepark.ies.label.core.usecase.UnassignLabelsToEntitiesRequest;
+import com.sitepark.ies.label.core.usecase.UnassignLabelsFromEntitiesRequest;
 import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-@JsonDeserialize(builder = UnassignEntitiesFromLabelsServiceRequest.Builder.class)
+@JsonDeserialize(builder = UnassignLabelsFromEntitiesServiceRequest.Builder.class)
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName"})
-public final class UnassignEntitiesFromLabelsServiceRequest {
+public final class UnassignLabelsFromEntitiesServiceRequest {
 
-  @NotNull private final UnassignLabelsToEntitiesRequest unassignLabelsToEntitiesRequest;
+  @NotNull private final UnassignLabelsFromEntitiesRequest unassignLabelsToEntitiesRequest;
 
   @Nullable private final String auditParentId;
 
-  private UnassignEntitiesFromLabelsServiceRequest(Builder builder) {
+  private UnassignLabelsFromEntitiesServiceRequest(Builder builder) {
     Objects.requireNonNull(
         builder.unassignLabelsToEntitiesRequest,
         "unassignLabelsToEntitiesRequest must not be null");
@@ -27,7 +27,7 @@ public final class UnassignEntitiesFromLabelsServiceRequest {
     return new Builder();
   }
 
-  public UnassignLabelsToEntitiesRequest unassignEntitiesFromLabelsRequest() {
+  public UnassignLabelsFromEntitiesRequest unassignEntitiesFromLabelsRequest() {
     return this.unassignLabelsToEntitiesRequest;
   }
 
@@ -46,7 +46,7 @@ public final class UnassignEntitiesFromLabelsServiceRequest {
 
   @Override
   public boolean equals(Object o) {
-    return (o instanceof UnassignEntitiesFromLabelsServiceRequest that)
+    return (o instanceof UnassignLabelsFromEntitiesServiceRequest that)
         && Objects.equals(
             this.unassignLabelsToEntitiesRequest, that.unassignLabelsToEntitiesRequest)
         && Objects.equals(this.auditParentId, that.auditParentId);
@@ -66,19 +66,19 @@ public final class UnassignEntitiesFromLabelsServiceRequest {
   @JsonPOJOBuilder(withPrefix = "")
   public static final class Builder {
 
-    private UnassignLabelsToEntitiesRequest unassignLabelsToEntitiesRequest;
+    private UnassignLabelsFromEntitiesRequest unassignLabelsToEntitiesRequest;
 
     private String auditParentId;
 
     private Builder() {}
 
-    private Builder(UnassignEntitiesFromLabelsServiceRequest request) {
+    private Builder(UnassignLabelsFromEntitiesServiceRequest request) {
       this.unassignLabelsToEntitiesRequest = request.unassignLabelsToEntitiesRequest;
       this.auditParentId = request.auditParentId;
     }
 
     public Builder unassignEntitiesFromLabelsRequest(
-        UnassignLabelsToEntitiesRequest unassignLabelsToEntitiesRequest) {
+        UnassignLabelsFromEntitiesRequest unassignLabelsToEntitiesRequest) {
       this.unassignLabelsToEntitiesRequest = unassignLabelsToEntitiesRequest;
       return this;
     }
@@ -88,8 +88,8 @@ public final class UnassignEntitiesFromLabelsServiceRequest {
       return this;
     }
 
-    public UnassignEntitiesFromLabelsServiceRequest build() {
-      return new UnassignEntitiesFromLabelsServiceRequest(this);
+    public UnassignLabelsFromEntitiesServiceRequest build() {
+      return new UnassignLabelsFromEntitiesServiceRequest(this);
     }
   }
 }

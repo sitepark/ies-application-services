@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sitepark.ies.sharedkernel.base.Identifier;
 import com.sitepark.ies.sharedkernel.base.IdentifierListBuilder;
+import com.sitepark.ies.sharedkernel.base.Updatable;
 import com.sitepark.ies.userrepository.core.usecase.privilege.UpdatePrivilegeRequest;
 import java.util.List;
 import java.util.Objects;
@@ -18,12 +19,15 @@ import org.jetbrains.annotations.Nullable;
 public final class UpdatePrivilegeServiceRequest {
 
   @NotNull private final UpdatePrivilegeRequest updatePrivilegeRequest;
-  @NotNull private final List<Identifier> labelIdentifiers;
+  @NotNull private final Updatable<List<Identifier>> labelIdentifiers;
   @Nullable private final String auditParentId;
 
   private UpdatePrivilegeServiceRequest(Builder builder) {
     this.updatePrivilegeRequest = builder.updatePrivilegeRequest;
-    this.labelIdentifiers = List.copyOf(builder.labelIdentifiers);
+    this.labelIdentifiers =
+        builder.labelIdentifiers != null
+            ? Updatable.of(List.copyOf(builder.labelIdentifiers))
+            : Updatable.unchanged();
     this.auditParentId = builder.auditParentId;
   }
 
@@ -36,7 +40,7 @@ public final class UpdatePrivilegeServiceRequest {
     return this.updatePrivilegeRequest;
   }
 
-  public List<Identifier> labelIdentifiers() {
+  public Updatable<List<Identifier>> labelIdentifiers() {
     return this.labelIdentifiers;
   }
 
@@ -79,14 +83,16 @@ public final class UpdatePrivilegeServiceRequest {
 
     private com.sitepark.ies.userrepository.core.usecase.privilege.UpdatePrivilegeRequest
         updatePrivilegeRequest;
-    private final Set<Identifier> labelIdentifiers = new TreeSet<>();
+    private Set<Identifier> labelIdentifiers;
     private String auditParentId;
 
     private Builder() {}
 
     private Builder(UpdatePrivilegeServiceRequest request) {
       this.updatePrivilegeRequest = request.updatePrivilegeRequest;
-      this.labelIdentifiers.addAll(request.labelIdentifiers);
+      if (request.labelIdentifiers.shouldUpdate()) {
+        this.labelIdentifiers = new TreeSet<>(request.labelIdentifiers.getValue());
+      }
       this.auditParentId = request.auditParentId;
     }
 
@@ -100,8 +106,10 @@ public final class UpdatePrivilegeServiceRequest {
     public Builder labelIdentifiers(Consumer<IdentifierListBuilder> configurer) {
       IdentifierListBuilder listBuilder = new IdentifierListBuilder();
       configurer.accept(listBuilder);
-      this.labelIdentifiers.clear();
-      this.labelIdentifiers.addAll(listBuilder.build());
+      if (listBuilder.changed()) {
+        this.labelIdentifiers = new TreeSet<>();
+        this.labelIdentifiers.addAll(listBuilder.build());
+      }
       return this;
     }
 

@@ -6,7 +6,6 @@ import com.sitepark.ies.application.MultiEntityNameResolver;
 import com.sitepark.ies.application.audit.AuditLogAction;
 import com.sitepark.ies.application.label.ReassignLabelsToEntitiesService;
 import com.sitepark.ies.application.label.ReassignLabelsToEntitiesServiceRequest;
-import com.sitepark.ies.label.core.domain.entity.Label;
 import com.sitepark.ies.label.core.usecase.ReassignLabelsToEntitiesRequest;
 import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import com.sitepark.ies.userrepository.core.domain.entity.User;
@@ -87,21 +86,22 @@ public final class UpdateUserService {
     }
 
     UpdateUserResult result = this.updateUserUseCase.updateUser(request.updateUserRequest());
-
     this.createAuditLogs(result, request.auditParentId());
 
-    ReassignLabelsToEntitiesServiceRequest labelRequest =
-        ReassignLabelsToEntitiesServiceRequest.builder()
-            .reassignLabelsToEntitiesRequest(
-                ReassignLabelsToEntitiesRequest.builder()
-                    .entityRefs(
-                        configure -> configure.set(EntityRef.of(User.class, result.userId())))
-                    .labelIdentifiers(
-                        configure -> configure.identifiers(request.labelIdentifiers()))
-                    .build())
-            .auditParentId(request.auditParentId())
-            .build();
-    this.reassignLabelsToEntitiesService.reassignEntitiesFromLabels(labelRequest);
+    if (request.labelIdentifiers().shouldUpdate()) {
+      ReassignLabelsToEntitiesServiceRequest labelRequest =
+          ReassignLabelsToEntitiesServiceRequest.builder()
+              .reassignLabelsToEntitiesRequest(
+                  ReassignLabelsToEntitiesRequest.builder()
+                      .entityRefs(
+                          configure -> configure.set(EntityRef.of(User.class, result.userId())))
+                      .labelIdentifiers(
+                          configure -> configure.identifiers(request.labelIdentifiers().getValue()))
+                      .build())
+              .auditParentId(request.auditParentId())
+              .build();
+      this.reassignLabelsToEntitiesService.reassignEntitiesFromLabels(labelRequest);
+    }
 
     if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Successfully processed user update for '{}'", result.userId());
@@ -126,7 +126,7 @@ public final class UpdateUserService {
         this.auditLogServiceFactory.create(result.timestamp(), auditParentId);
 
     auditLogService.createLog(
-        EntityRef.of(Label.class, result.userId()),
+        EntityRef.of(User.class, result.userId()),
         updated.displayName(),
         AuditLogAction.UPDATE,
         updated.revertPatch().toJson(),

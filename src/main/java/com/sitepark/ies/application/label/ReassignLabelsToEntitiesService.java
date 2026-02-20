@@ -15,6 +15,7 @@ import com.sitepark.ies.label.core.usecase.ReassignLabelsToEntitiesUseCase;
 import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import com.sitepark.ies.sharedkernel.security.AccessDeniedException;
 import jakarta.inject.Inject;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -132,7 +133,7 @@ public final class ReassignLabelsToEntitiesService {
         .entityRefs()
         .forEach(
             entityRef -> {
-              List<String> labels = unassignments.labelIds(entityRef);
+              List<String> labels = assignments.labelIds(entityRef);
               auditLogServiceMap
                   .get(entityRef.type())
                   .createLog(
@@ -156,17 +157,15 @@ public final class ReassignLabelsToEntitiesService {
 
   private Map<String, ApplicationAuditLogService> createAuditLogServicePerType(
       ReassignLabelsToEntitiesResult.Reassigned result, String auditParentId) {
-    Set<String> entityTypes =
-        concat(
-                result.assignments().entityRefs().stream(),
-                result.unassignments().entityRefs().stream())
-            .map(EntityRef::type)
-            .collect(Collectors.toSet());
 
-    return this.auditLogServiceFactory.createForBatchPerType(
+    List<EntityRef> entityRefs = new ArrayList<>();
+    entityRefs.addAll(result.assignments().entityRefs());
+    entityRefs.addAll(result.unassignments().entityRefs());
+
+    return this.auditLogServiceFactory.createPerTypeForBatch(
         result.timestamp(),
         auditParentId,
         AuditBatchLogAction.BATCH_REASSIGN_LABELS_TO_ENTITIES,
-        entityTypes);
+        entityRefs);
   }
 }

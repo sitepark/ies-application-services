@@ -50,18 +50,20 @@ public final class UpsertUserService {
     this.createAuditLogs(result, request.auditParentId());
     UpsertResult upsertResult = this.createResult(result);
 
-    ReassignLabelsToEntitiesServiceRequest labelRequest =
-        ReassignLabelsToEntitiesServiceRequest.builder()
-            .reassignLabelsToEntitiesRequest(
-                ReassignLabelsToEntitiesRequest.builder()
-                    .entityRefs(
-                        configure -> configure.set(EntityRef.of(User.class, result.userId())))
-                    .labelIdentifiers(
-                        configure -> configure.identifiers(request.labelIdentifiers()))
-                    .build())
-            .auditParentId(request.auditParentId())
-            .build();
-    this.reassignLabelsToEntitiesService.reassignEntitiesFromLabels(labelRequest);
+    if (request.labelIdentifiers().shouldUpdate()) {
+      ReassignLabelsToEntitiesServiceRequest labelRequest =
+          ReassignLabelsToEntitiesServiceRequest.builder()
+              .reassignLabelsToEntitiesRequest(
+                  ReassignLabelsToEntitiesRequest.builder()
+                      .entityRefs(
+                          configure -> configure.set(EntityRef.of(User.class, result.userId())))
+                      .labelIdentifiers(
+                          configure -> configure.identifiers(request.labelIdentifiers().getValue()))
+                      .build())
+              .auditParentId(request.auditParentId())
+              .build();
+      this.reassignLabelsToEntitiesService.reassignEntitiesFromLabels(labelRequest);
+    }
 
     return upsertResult;
   }

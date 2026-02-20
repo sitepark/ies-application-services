@@ -30,7 +30,8 @@ public class RevertRoleActionHandler implements ReverseActionHandler {
       RevertRoleAssignPrivilegesActionHandler assignPrivilegesHandler,
       RevertRoleAssignPrivilegesActionHandler batchAssignPrivilegesHandler,
       RevertRoleUnassignPrivilegesActionHandler unassignPrivilegesActionHandler,
-      RevertRoleBatchUnassignPrivilegesActionHandler batchUnassignPrivilegesActionHandler) {
+      RevertRoleBatchUnassignPrivilegesActionHandler batchUnassignPrivilegesActionHandler,
+      RevertLabelActionHandler revertLabelActionHandler) {
 
     this.actionHandlers = new HashMap<>();
     this.actionHandlers.put(AuditLogAction.CREATE.name(), createHandler);
@@ -44,6 +45,8 @@ public class RevertRoleActionHandler implements ReverseActionHandler {
         AuditBatchLogAction.BATCH_ASSIGN_PRIVILEGES.name(), batchAssignPrivilegesHandler);
     this.actionHandlers.put(
         AuditBatchLogAction.BATCH_UNASSIGN_PRIVILEGES.name(), batchUnassignPrivilegesActionHandler);
+
+    this.actionHandlers.putAll(revertLabelActionHandler.getEntitiesActionHandlers());
   }
 
   @Override

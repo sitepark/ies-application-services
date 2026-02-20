@@ -1,25 +1,26 @@
 package com.sitepark.ies.application.audit.revert.privilege;
 
 import com.sitepark.ies.application.audit.revert.RevertEntityActionHandler;
+import com.sitepark.ies.application.privilege.RemovePrivilegesService;
+import com.sitepark.ies.application.privilege.RemovePrivilegesServiceRequest;
 import com.sitepark.ies.audit.core.service.RevertRequest;
-import com.sitepark.ies.userrepository.core.usecase.privilege.RemovePrivilegeRequest;
-import com.sitepark.ies.userrepository.core.usecase.privilege.RemovePrivilegeUseCase;
 import jakarta.inject.Inject;
 
 public class RevertPrivilegeCreateActionHandler implements RevertEntityActionHandler {
 
-  private final RemovePrivilegeUseCase removePrivilegeUseCase;
+  private final RemovePrivilegesService removePrivilegesService;
 
   @Inject
-  RevertPrivilegeCreateActionHandler(RemovePrivilegeUseCase removePrivilegeUseCase) {
-    this.removePrivilegeUseCase = removePrivilegeUseCase;
+  RevertPrivilegeCreateActionHandler(RemovePrivilegesService removePrivilegesService) {
+    this.removePrivilegesService = removePrivilegesService;
   }
 
   @Override
   public void revert(RevertRequest request) {
-    this.removePrivilegeUseCase.removePrivilege(
-        RemovePrivilegeRequest.builder()
-            .identifier(com.sitepark.ies.sharedkernel.base.Identifier.ofId(request.target().id()))
+    this.removePrivilegesService.removePrivileges(
+        RemovePrivilegesServiceRequest.builder()
+            .identifiers(configure -> configure.add(request.target().id()))
+            .auditParentId(request.parentId())
             .build());
   }
 }

@@ -3,11 +3,13 @@ package com.sitepark.ies.application;
 import com.sitepark.ies.application.audit.AuditBatchLogAction;
 import com.sitepark.ies.audit.core.service.AuditLogService;
 import com.sitepark.ies.audit.core.usecase.CreateAuditLogUseCase;
+import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import jakarta.inject.Inject;
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.stream.Collectors;
 import org.jetbrains.annotations.Nullable;
 
 public class ApplicationAuditLogServiceFactory {
@@ -36,21 +38,29 @@ public class ApplicationAuditLogServiceFactory {
   }
 
   @SuppressWarnings("PMD.UseConcurrentHashMap")
-  public Map<String, ApplicationAuditLogService> createForBatchPerType(
+  public Map<String, ApplicationAuditLogService> createPerTypeForBatch(
       Instant timestamp,
       @Nullable String parentId,
       AuditBatchLogAction action,
-      Set<String> entityTypes) {
+      List<EntityRef> entityRefs) {
+
+    Map<String, Long> typeCount =
+        entityRefs.stream().collect(Collectors.groupingBy(EntityRef::type, Collectors.counting()));
 
     ApplicationAuditLogService auditLogService = this.create(timestamp, parentId);
 
     String parentIdForType =
-        entityTypes.size() > 1 ? auditLogService.createBatchLog(null, action) : parentId;
+        typeCount.size() > 1 ? auditLogService.createBatchLog(null, action) : parentId;
     auditLogService.updateParentId(parentIdForType);
 
     Map<String, ApplicationAuditLogService> auditLogServicesPerType = new HashMap<>();
-    for (String entityType : entityTypes) {
-      String auditLogId = auditLogService.createBatchLog(null, action);
+    for (Map.Entry<String, Long> me : typeCount.entrySet()) {
+
+      String entityType = me.getKey();
+      long entriesCount = me.getValue();
+
+      String auditLogId =
+          entriesCount > 1 ? auditLogService.createBatchLog(null, action) : parentIdForType;
       ApplicationAuditLogService auditLogServicePerType = this.create(timestamp, auditLogId);
       auditLogServicesPerType.put(entityType, auditLogServicePerType);
     }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sitepark.ies.sharedkernel.base.Identifier;
 import com.sitepark.ies.sharedkernel.base.IdentifierListBuilder;
+import com.sitepark.ies.sharedkernel.base.Updatable;
 import com.sitepark.ies.userrepository.core.usecase.user.UpsertUserRequest;
 import java.util.List;
 import java.util.Objects;
@@ -18,13 +19,16 @@ import org.jetbrains.annotations.Nullable;
 public final class UpsertUserServiceRequest {
 
   @NotNull private final UpsertUserRequest upsertUserRequest;
-  @NotNull private final List<Identifier> labelIdentifiers;
+  @NotNull private final Updatable<List<Identifier>> labelIdentifiers;
   @Nullable private final String auditParentId;
 
   private UpsertUserServiceRequest(Builder builder) {
     Objects.requireNonNull(builder.upsertUserRequest, "upsertUserRequest must not be null");
     this.upsertUserRequest = builder.upsertUserRequest;
-    this.labelIdentifiers = List.copyOf(builder.labelIdentifiers);
+    this.labelIdentifiers =
+        builder.labelIdentifiers != null
+            ? Updatable.of(List.copyOf(builder.labelIdentifiers))
+            : Updatable.unchanged();
     this.auditParentId = builder.auditParentId;
   }
 
@@ -36,7 +40,7 @@ public final class UpsertUserServiceRequest {
     return this.upsertUserRequest;
   }
 
-  public List<Identifier> labelIdentifiers() {
+  public Updatable<List<Identifier>> labelIdentifiers() {
     return this.labelIdentifiers;
   }
 
@@ -79,14 +83,16 @@ public final class UpsertUserServiceRequest {
   public static final class Builder {
 
     private UpsertUserRequest upsertUserRequest;
-    private final Set<Identifier> labelIdentifiers = new TreeSet<>();
+    private Set<Identifier> labelIdentifiers;
     private String auditParentId;
 
     private Builder() {}
 
     private Builder(UpsertUserServiceRequest request) {
       this.upsertUserRequest = request.upsertUserRequest;
-      this.labelIdentifiers.addAll(request.labelIdentifiers);
+      if (request.labelIdentifiers.shouldUpdate()) {
+        this.labelIdentifiers = new TreeSet<>(request.labelIdentifiers.getValue());
+      }
       this.auditParentId = request.auditParentId;
     }
 
@@ -98,8 +104,10 @@ public final class UpsertUserServiceRequest {
     public Builder labelIdentifiers(Consumer<IdentifierListBuilder> configurer) {
       IdentifierListBuilder listBuilder = new IdentifierListBuilder();
       configurer.accept(listBuilder);
-      this.labelIdentifiers.clear();
-      this.labelIdentifiers.addAll(listBuilder.build());
+      if (listBuilder.changed()) {
+        this.labelIdentifiers = new TreeSet<>();
+        this.labelIdentifiers.addAll(listBuilder.build());
+      }
       return this;
     }
 

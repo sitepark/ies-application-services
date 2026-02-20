@@ -84,21 +84,22 @@ public final class UpdateRoleService {
     }
 
     UpdateRoleResult result = this.updateRoleUseCase.updateRole(request.updateRoleRequest());
-
     this.createAuditLogs(result, request.auditParentId());
 
-    ReassignLabelsToEntitiesServiceRequest labelRequest =
-        ReassignLabelsToEntitiesServiceRequest.builder()
-            .reassignLabelsToEntitiesRequest(
-                ReassignLabelsToEntitiesRequest.builder()
-                    .entityRefs(
-                        configure -> configure.set(EntityRef.of(Role.class, result.roleId())))
-                    .labelIdentifiers(
-                        configure -> configure.identifiers(request.labelIdentifiers()))
-                    .build())
-            .auditParentId(request.auditParentId())
-            .build();
-    this.reassignLabelsToEntitiesService.reassignEntitiesFromLabels(labelRequest);
+    if (request.labelIdentifiers().shouldUpdate()) {
+      ReassignLabelsToEntitiesServiceRequest labelRequest =
+          ReassignLabelsToEntitiesServiceRequest.builder()
+              .reassignLabelsToEntitiesRequest(
+                  ReassignLabelsToEntitiesRequest.builder()
+                      .entityRefs(
+                          configure -> configure.set(EntityRef.of(Role.class, result.roleId())))
+                      .labelIdentifiers(
+                          configure -> configure.identifiers(request.labelIdentifiers().getValue()))
+                      .build())
+              .auditParentId(request.auditParentId())
+              .build();
+      this.reassignLabelsToEntitiesService.reassignEntitiesFromLabels(labelRequest);
+    }
 
     if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Successfully processed role update for '{}'", result.roleId());

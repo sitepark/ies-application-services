@@ -1,5 +1,7 @@
 package com.sitepark.ies.application.audit.revert;
 
+import static com.sitepark.ies.application.audit.revert.RevertEntityActionHandler.ALL_ENTITIES;
+
 import com.sitepark.ies.audit.core.port.ReversalHandlerRegistry;
 import com.sitepark.ies.audit.core.service.ReverseActionHandler;
 import jakarta.inject.Inject;
@@ -22,12 +24,11 @@ public class ApplicationReversalHandlerRegistry implements ReversalHandlerRegist
           "Multiple reversal handlers registered for entity type: " + handler.getEntityType());
     }
     this.handler.put(handler.getEntityType(), handler);
-    this.handler.put(handler.getEntityType(), handler);
   }
 
   @Override
   public ReverseActionHandler getHandler(String entityType) {
-    ReverseActionHandler h = handler.get(entityType);
+    ReverseActionHandler h = handler.get(entityType != null ? entityType : ALL_ENTITIES);
     if (h == null) {
       throw new IllegalArgumentException(
           "No reversal handler registered for entity type: " + entityType);

@@ -6,11 +6,12 @@ import com.sitepark.ies.application.audit.AuditBatchLogAction;
 import com.sitepark.ies.application.audit.AuditLogAction;
 import com.sitepark.ies.application.audit.revert.RevertEntityActionHandler;
 import com.sitepark.ies.application.audit.revert.RevertFailedException;
+import com.sitepark.ies.application.role.UnassignPrivilegesFromRolesService;
+import com.sitepark.ies.application.role.UnassignPrivilegesFromRolesServiceRequest;
 import com.sitepark.ies.audit.core.service.AuditLogService;
 import com.sitepark.ies.audit.core.service.RevertRequest;
 import com.sitepark.ies.userrepository.core.domain.entity.Role;
 import com.sitepark.ies.userrepository.core.usecase.role.UnassignPrivilegesFromRolesRequest;
-import com.sitepark.ies.userrepository.core.usecase.role.UnassignPrivilegesFromRolesUseCase;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.time.Clock;
@@ -21,18 +22,18 @@ public class RevertRoleBatchAssignPrivilegesActionHandler implements RevertEntit
 
   private final ApplicationAuditLogServiceFactory auditLogServiceFactory;
   private final AuditLogService auditLogService;
-  private final UnassignPrivilegesFromRolesUseCase unassignPrivilegesFromRolesUseCase;
+  private final UnassignPrivilegesFromRolesService unassignPrivilegesFromRolesService;
   private final Clock clock;
 
   @Inject
   RevertRoleBatchAssignPrivilegesActionHandler(
       ApplicationAuditLogServiceFactory auditLogServiceFactory,
       AuditLogService auditLogService,
-      UnassignPrivilegesFromRolesUseCase unassignPrivilegesFromRolesUseCase,
+      UnassignPrivilegesFromRolesService unassignPrivilegesFromRolesService,
       Clock clock) {
     this.auditLogServiceFactory = auditLogServiceFactory;
     this.auditLogService = auditLogService;
-    this.unassignPrivilegesFromRolesUseCase = unassignPrivilegesFromRolesUseCase;
+    this.unassignPrivilegesFromRolesService = unassignPrivilegesFromRolesService;
     this.clock = clock;
   }
 
@@ -55,10 +56,14 @@ public class RevertRoleBatchAssignPrivilegesActionHandler implements RevertEntit
         throw new RevertFailedException(request, "Failed to deserialize privilegeIds", e);
       }
 
-      this.unassignPrivilegesFromRolesUseCase.unassignPrivilegesFromRoles(
-          UnassignPrivilegesFromRolesRequest.builder()
-              .roleIdentifiers(b -> b.id(request.target().id()))
-              .privilegeIdentifiers(b -> b.ids(privilegeIds))
+      this.unassignPrivilegesFromRolesService.unassignPrivilegesFromRoles(
+          UnassignPrivilegesFromRolesServiceRequest.builder()
+              .unassignPrivilegesFromRolesRequest(
+                  UnassignPrivilegesFromRolesRequest.builder()
+                      .roleIdentifiers(b -> b.id(request.target().id()))
+                      .privilegeIdentifiers(b -> b.ids(privilegeIds))
+                      .build())
+              .auditParentId(auditLogService.parentId())
               .build());
       auditLogService.createLog(
           request.target(), AuditLogAction.UNASSIGN_PRIVILEGES, privilegeIds, privilegeIds);

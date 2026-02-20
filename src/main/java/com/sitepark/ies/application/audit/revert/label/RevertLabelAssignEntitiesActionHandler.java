@@ -2,41 +2,42 @@ package com.sitepark.ies.application.audit.revert.label;
 
 import com.sitepark.ies.application.audit.revert.RevertEntityActionHandler;
 import com.sitepark.ies.application.audit.revert.RevertFailedException;
+import com.sitepark.ies.application.label.UnassignLabelsFromEntitiesService;
+import com.sitepark.ies.application.label.UnassignLabelsFromEntitiesServiceRequest;
 import com.sitepark.ies.audit.core.service.AuditLogService;
 import com.sitepark.ies.audit.core.service.RevertRequest;
-import com.sitepark.ies.label.core.domain.value.LabelEntityAssignment;
-import com.sitepark.ies.label.core.usecase.UnassignLabelsToEntitiesRequest;
-import com.sitepark.ies.label.core.usecase.UnassignLabelsToEntitiesUseCase;
+import com.sitepark.ies.label.core.usecase.UnassignLabelsFromEntitiesRequest;
 import jakarta.inject.Inject;
 import java.io.IOException;
+import java.util.List;
 
 public class RevertLabelAssignEntitiesActionHandler implements RevertEntityActionHandler {
 
   private final AuditLogService auditLogService;
-
-  private final UnassignLabelsToEntitiesUseCase unassignLabelsToEntitiesUseCase;
+  private final UnassignLabelsFromEntitiesService unassignLabelsFromEntitiesService;
 
   @Inject
   RevertLabelAssignEntitiesActionHandler(
       AuditLogService auditLogService,
-      UnassignLabelsToEntitiesUseCase unassignLabelsToEntitiesUseCase) {
+      UnassignLabelsFromEntitiesService unassignLabelsFromEntitiesService) {
     this.auditLogService = auditLogService;
-    this.unassignLabelsToEntitiesUseCase = unassignLabelsToEntitiesUseCase;
+    this.unassignLabelsFromEntitiesService = unassignLabelsFromEntitiesService;
   }
 
   @Override
   public void revert(RevertRequest request) {
     try {
-      LabelEntityAssignment assignments =
-          this.auditLogService.deserialize(request.backwardData(), LabelEntityAssignment.class);
+      List<String> labelIds = this.auditLogService.getBackwardDataList(request.id(), String.class);
 
-      for (String labelId : assignments.labelIds()) {
-        this.unassignLabelsToEntitiesUseCase.unassignEntitiesFromLabels(
-            UnassignLabelsToEntitiesRequest.builder()
-                .entityRefs(b -> b.set(assignments.entityRefs(labelId)))
-                .labelIdentifiers(b -> b.id(labelId))
-                .build());
-      }
+      this.unassignLabelsFromEntitiesService.unassignEntitiesFromLabels(
+          UnassignLabelsFromEntitiesServiceRequest.builder()
+              .unassignEntitiesFromLabelsRequest(
+                  UnassignLabelsFromEntitiesRequest.builder()
+                      .entityRefs(b -> b.set(request.target().toEntityRef()))
+                      .labelIdentifiers(b -> b.ids(labelIds))
+                      .build())
+              .auditParentId(request.parentId())
+              .build());
     } catch (IOException e) {
       throw new RevertFailedException(request, "Failed to deserialize LabelEntityAssignment", e);
     }

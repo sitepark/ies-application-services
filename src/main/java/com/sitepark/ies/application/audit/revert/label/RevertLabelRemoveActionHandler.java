@@ -37,14 +37,11 @@ public class RevertLabelRemoveActionHandler implements RevertEntityActionHandler
     try {
       LabelSnapshot restoreData =
           this.auditLogService.deserialize(request.backwardData(), LabelSnapshot.class);
-
       RestoreLabelResult result =
           this.restoreLabelUseCase.restoreLabel(new RestoreLabelRequest(restoreData, null));
-
       if (result instanceof RestoreLabelResult.Restored restored) {
         this.createRestoreAuditLog(restored, request.parentId());
       }
-
     } catch (IOException e) {
       throw new RevertFailedException(request, "Failed to deserialize label-snapshot", e);
     }

@@ -4,6 +4,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import com.sitepark.ies.application.audit.revert.ApplicationReversalHandlerRegistry;
 import com.sitepark.ies.application.audit.revert.RevertLabelActionHandler;
+import com.sitepark.ies.application.audit.revert.RevertMultiEntityActionHandler;
 import com.sitepark.ies.application.audit.revert.RevertPrivilegeActionHandler;
 import com.sitepark.ies.application.audit.revert.RevertRoleActionHandler;
 import com.sitepark.ies.application.audit.revert.RevertUserActionHandler;
@@ -19,6 +20,7 @@ public class ApplicationServiceModule extends AbstractModule {
     reverseActionHandler.addBinding().to(RevertUserActionHandler.class);
     reverseActionHandler.addBinding().to(RevertRoleActionHandler.class);
     reverseActionHandler.addBinding().to(RevertPrivilegeActionHandler.class);
+    reverseActionHandler.addBinding().to(RevertMultiEntityActionHandler.class);
 
     bind(ReversalHandlerRegistry.class).to(ApplicationReversalHandlerRegistry.class);
   }
