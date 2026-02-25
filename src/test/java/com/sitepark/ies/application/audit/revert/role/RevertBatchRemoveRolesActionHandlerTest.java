@@ -27,10 +27,15 @@ import org.junit.jupiter.api.Test;
 
 class RevertBatchRemoveRolesActionHandlerTest {
 
+  @SuppressWarnings("PMD.SingularField")
   private ApplicationAuditLogServiceFactory auditLogServiceFactory;
+
   private AuditLogService auditLogService;
   private RestoreRoleUseCase restoreRoleUseCase;
+
+  @SuppressWarnings("PMD.SingularField")
   private Clock clock;
+
   private RevertRequest request;
   private RevertBatchRemoveRolesActionHandler handler;
 

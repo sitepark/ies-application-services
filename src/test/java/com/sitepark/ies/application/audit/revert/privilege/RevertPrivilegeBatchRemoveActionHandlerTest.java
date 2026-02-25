@@ -27,10 +27,15 @@ import org.junit.jupiter.api.Test;
 
 class RevertPrivilegeBatchRemoveActionHandlerTest {
 
+  @SuppressWarnings("PMD.SingularField")
   private ApplicationAuditLogServiceFactory auditLogServiceFactory;
+
   private AuditLogService auditLogService;
   private RestorePrivilegeUseCase restorePrivilegeUseCase;
+
+  @SuppressWarnings("PMD.SingularField")
   private Clock clock;
+
   private RevertRequest request;
   private RevertPrivilegeBatchRemoveActionHandler handler;
 

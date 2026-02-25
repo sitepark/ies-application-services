@@ -22,7 +22,10 @@ import org.junit.jupiter.api.Test;
 class RevertUpdateUserActionHandlerTest {
 
   private UpdateUserService updateUserService;
+
+  @SuppressWarnings("PMD.SingularField")
   private PatchServiceFactory patchServiceFactory;
+
   private UserRepository repository;
   private RevertRequest request;
 

@@ -21,10 +21,19 @@ import org.junit.jupiter.api.Test;
 class RevertPrivilegeActionHandlerTest {
 
   private RevertPrivilegeCreateActionHandler createHandler;
+
+  @SuppressWarnings("PMD.SingularField")
   private RevertPrivilegeUpdateActionHandler updateHandler;
+
+  @SuppressWarnings("PMD.SingularField")
   private RevertPrivilegeRemoveActionHandler removeHandler;
+
+  @SuppressWarnings("PMD.SingularField")
   private RevertPrivilegeBatchRemoveActionHandler batchRemoveHandler;
+
+  @SuppressWarnings("PMD.SingularField")
   private RevertLabelActionHandler labelActionHandler;
+
   private RevertPrivilegeActionHandler handler;
 
   @BeforeEach

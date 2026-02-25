@@ -22,7 +22,10 @@ import org.junit.jupiter.api.Test;
 class RevertPrivilegeUpdateActionHandlerTest {
 
   private UpdatePrivilegeService updatePrivilegeService;
+
+  @SuppressWarnings("PMD.SingularField")
   private PatchServiceFactory patchServiceFactory;
+
   private PrivilegeRepository repository;
   private RevertRequest request;
 

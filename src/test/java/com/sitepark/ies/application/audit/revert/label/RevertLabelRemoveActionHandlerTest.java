@@ -19,7 +19,9 @@ import org.junit.jupiter.api.Test;
 
 class RevertLabelRemoveActionHandlerTest {
 
+  @SuppressWarnings("PMD.SingularField")
   private ApplicationAuditLogServiceFactory auditLogServiceFactory;
+
   private AuditLogService auditLogService;
   private RestoreLabelUseCase restoreLabelUseCase;
   private RevertRequest request;

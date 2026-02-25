@@ -20,7 +20,9 @@ import org.junit.jupiter.api.Test;
 
 class RevertRemoveRoleActionHandlerTest {
 
+  @SuppressWarnings("PMD.SingularField")
   private ApplicationAuditLogServiceFactory auditLogServiceFactory;
+
   private AuditLogService auditLogService;
   private RestoreRoleUseCase restoreRoleUseCase;
   private RevertRequest request;

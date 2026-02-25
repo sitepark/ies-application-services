@@ -28,10 +28,15 @@ import org.junit.jupiter.api.Test;
 
 class RevertBatchRemoveUsersActionHandlerTest {
 
+  @SuppressWarnings("PMD.SingularField")
   private ApplicationAuditLogServiceFactory auditLogServiceFactory;
+
   private AuditLogService auditLogService;
   private RestoreUserUseCase restoreUserUseCase;
+
+  @SuppressWarnings("PMD.SingularField")
   private Clock clock;
+
   private RevertRequest request;
   private RevertBatchRemoveUsersActionHandler handler;
 

@@ -22,7 +22,10 @@ import org.junit.jupiter.api.Test;
 class RevertLabelUpdateActionHandlerTest {
 
   private UpdateLabelService updateLabelService;
+
+  @SuppressWarnings("PMD.SingularField")
   private PatchServiceFactory patchServiceFactory;
+
   private LabelRepository repository;
   private RevertRequest request;
 

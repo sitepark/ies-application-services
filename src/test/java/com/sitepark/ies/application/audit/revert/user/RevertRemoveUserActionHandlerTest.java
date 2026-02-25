@@ -24,7 +24,9 @@ import org.junit.jupiter.api.Test;
 
 class RevertRemoveUserActionHandlerTest {
 
+  @SuppressWarnings("PMD.SingularField")
   private ApplicationAuditLogServiceFactory auditLogServiceFactory;
+
   private AuditLogService auditLogService;
   private RestoreUserUseCase restoreUserUseCase;
   private RevertRequest request;

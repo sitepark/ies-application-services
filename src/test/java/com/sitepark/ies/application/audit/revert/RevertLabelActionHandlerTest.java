@@ -21,10 +21,19 @@ import org.junit.jupiter.api.Test;
 class RevertLabelActionHandlerTest {
 
   private RevertLabelCreateActionHandler createHandler;
+
+  @SuppressWarnings("PMD.SingularField")
   private RevertLabelUpdateActionHandler updateHandler;
+
+  @SuppressWarnings("PMD.SingularField")
   private RevertLabelRemoveActionHandler removeHandler;
+
+  @SuppressWarnings("PMD.SingularField")
   private RevertLabelAssignEntitiesActionHandler assignEntitiesHandler;
+
+  @SuppressWarnings("PMD.SingularField")
   private RevertLabelUnassignEntitiesActionHandler unassignEntitiesHandler;
+
   private RevertLabelActionHandler handler;
 
   @BeforeEach

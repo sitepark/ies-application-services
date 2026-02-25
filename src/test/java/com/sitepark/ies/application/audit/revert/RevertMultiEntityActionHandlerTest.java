@@ -17,8 +17,13 @@ import org.junit.jupiter.api.Test;
 class RevertMultiEntityActionHandlerTest {
 
   private RevertLabelBatchAssignEntitiesActionHandler batchAssignEntitiesHandler;
+
+  @SuppressWarnings("PMD.SingularField")
   private RevertLabelBatchReassignEntitiesActionHandler batchReassignEntitiesHandler;
+
+  @SuppressWarnings("PMD.SingularField")
   private RevertLabelBatchUnassignEntitiesActionHandler batchUnassignEntitiesHandler;
+
   private RevertMultiEntityActionHandler handler;
 
   @BeforeEach

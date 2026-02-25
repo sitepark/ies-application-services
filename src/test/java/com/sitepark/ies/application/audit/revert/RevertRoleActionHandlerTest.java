@@ -25,14 +25,31 @@ import org.junit.jupiter.api.Test;
 class RevertRoleActionHandlerTest {
 
   private RevertCreateRoleActionHandler createHandler;
+
+  @SuppressWarnings("PMD.SingularField")
   private RevertRoleUpdateActionHandler updateHandler;
+
+  @SuppressWarnings("PMD.SingularField")
   private RevertRemoveRoleActionHandler removeHandler;
+
+  @SuppressWarnings("PMD.SingularField")
   private RevertBatchRemoveRolesActionHandler batchRemoveHandler;
+
+  @SuppressWarnings("PMD.SingularField")
   private RevertAssignPrivilegesToRolesActionHandler assignPrivilegesHandler;
+
+  @SuppressWarnings("PMD.SingularField")
   private RevertUnassignPrivilegesFromRolesActionHandler unassignPrivilegesHandler;
+
+  @SuppressWarnings("PMD.SingularField")
   private RevertBatchAssignPrivilegesToRolesActionHandler batchAssignPrivilegesHandler;
+
+  @SuppressWarnings("PMD.SingularField")
   private RevertBatchUnassignPrivilegesToRolesActionHandler batchUnassignPrivilegesHandler;
+
+  @SuppressWarnings("PMD.SingularField")
   private RevertLabelActionHandler labelActionHandler;
+
   private RevertRoleActionHandler handler;
 
   @BeforeEach

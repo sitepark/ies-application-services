@@ -22,7 +22,10 @@ import org.junit.jupiter.api.Test;
 class RevertRoleUpdateActionHandlerTest {
 
   private UpdateRoleService updateRoleService;
+
+  @SuppressWarnings("PMD.SingularField")
   private PatchServiceFactory patchServiceFactory;
+
   private RoleRepository repository;
   private RevertRequest request;
 

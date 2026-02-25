@@ -27,10 +27,15 @@ import org.junit.jupiter.api.Test;
 
 class RevertLabelBatchAssignEntitiesActionHandlerTest {
 
+  @SuppressWarnings("PMD.SingularField")
   private ApplicationAuditLogServiceFactory auditLogServiceFactory;
+
   private AuditLogService auditLogService;
   private UnassignLabelsFromEntitiesService unassignLabelsFromEntitiesService;
+
+  @SuppressWarnings("PMD.SingularField")
   private Clock clock;
+
   private RevertRequest request;
   private RevertLabelBatchAssignEntitiesActionHandler handler;
 

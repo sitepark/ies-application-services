@@ -29,11 +29,16 @@ import org.junit.jupiter.api.Test;
 
 class RevertBatchReassignPrivilegesToRolesActionHandlerTest {
 
+  @SuppressWarnings("PMD.SingularField")
   private ApplicationAuditLogServiceFactory auditLogServiceFactory;
+
   private AuditLogService auditLogService;
   private AssignPrivilegesToRolesService assignPrivilegesToRolesService;
   private UnassignPrivilegesFromRolesService unassignPrivilegesFromRolesService;
+
+  @SuppressWarnings("PMD.SingularField")
   private Clock clock;
+
   private RevertRequest request;
   private RevertBatchReassignPrivilegesToRolesActionHandler handler;
 

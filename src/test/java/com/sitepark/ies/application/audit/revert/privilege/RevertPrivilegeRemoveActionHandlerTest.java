@@ -19,7 +19,9 @@ import org.junit.jupiter.api.Test;
 
 class RevertPrivilegeRemoveActionHandlerTest {
 
+  @SuppressWarnings("PMD.SingularField")
   private ApplicationAuditLogServiceFactory auditLogServiceFactory;
+
   private AuditLogService auditLogService;
   private RestorePrivilegeUseCase restorePrivilegeUseCase;
   private RevertRequest request;
