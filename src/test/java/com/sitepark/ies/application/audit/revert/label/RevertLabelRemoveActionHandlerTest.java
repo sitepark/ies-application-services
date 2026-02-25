@@ -11,9 +11,11 @@ import com.sitepark.ies.application.audit.revert.RevertFailedException;
 import com.sitepark.ies.audit.core.domain.value.AuditLogTarget;
 import com.sitepark.ies.audit.core.service.AuditLogService;
 import com.sitepark.ies.audit.core.service.RevertRequest;
+import com.sitepark.ies.label.core.domain.entity.Label;
 import com.sitepark.ies.label.core.domain.value.LabelSnapshot;
 import com.sitepark.ies.label.core.usecase.RestoreLabelUseCase;
 import java.io.IOException;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -47,7 +49,7 @@ class RevertLabelRemoveActionHandlerTest {
 
   @Test
   void testRevertCallsRestoreLabelUseCase() throws IOException {
-    LabelSnapshot labelSnapshot = mock();
+    LabelSnapshot labelSnapshot = new LabelSnapshot(mock(Label.class), List.of(), List.of());
     when(this.auditLogService.deserialize("{}", LabelSnapshot.class)).thenReturn(labelSnapshot);
 
     this.handler.revert(this.request);
