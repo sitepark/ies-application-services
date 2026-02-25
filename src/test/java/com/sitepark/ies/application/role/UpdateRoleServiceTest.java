@@ -13,6 +13,8 @@ import com.sitepark.ies.application.MultiEntityNameResolver;
 import com.sitepark.ies.application.label.ReassignLabelsToEntitiesService;
 import com.sitepark.ies.sharedkernel.patch.PatchDocument;
 import com.sitepark.ies.userrepository.core.domain.entity.Role;
+import com.sitepark.ies.userrepository.core.domain.value.RolePrivilegeAssignment;
+import com.sitepark.ies.userrepository.core.usecase.role.ReassignPrivilegesToRolesResult;
 import com.sitepark.ies.userrepository.core.usecase.role.UpdateRoleResult;
 import com.sitepark.ies.userrepository.core.usecase.role.UpdateRoleUseCase;
 import java.time.Instant;
@@ -23,13 +25,11 @@ class UpdateRoleServiceTest {
 
   private UpdateRoleUseCase updateRoleUseCase;
 
-  @SuppressWarnings("PMD.SingularField")
   private MultiEntityNameResolver multiEntityNameResolver;
 
   @SuppressWarnings("PMD.SingularField")
   private ApplicationAuditLogServiceFactory auditLogServiceFactory;
 
-  @SuppressWarnings("PMD.SingularField")
   private ReassignLabelsToEntitiesService reassignLabelsToEntitiesService;
 
   private ApplicationAuditLogService auditLogService;
@@ -205,5 +205,152 @@ class UpdateRoleServiceTest {
     service.updateRole(request);
 
     verify(auditLogService).createLog(any(), any(), any(), any(), any());
+  }
+
+  @Test
+  void testUpdateRoleReassignsLabelsWhenLabelIdentifiersProvided() {
+
+    Role role = Role.builder().id("123").name("TestRole").build();
+
+    Instant timestamp = Instant.now();
+    UpdateRoleResult result = new UpdateRoleResult("123", "TestRole", timestamp, null, null, null);
+
+    when(updateRoleUseCase.updateRole(
+            any(com.sitepark.ies.userrepository.core.usecase.role.UpdateRoleRequest.class)))
+        .thenReturn(result);
+
+    UpdateRoleServiceRequest request =
+        UpdateRoleServiceRequest.builder()
+            .updateRoleRequest(
+                com.sitepark.ies.userrepository.core.usecase.role.UpdateRoleRequest.builder()
+                    .role(role)
+                    .build())
+            .labelIdentifiers(b -> b.id("501"))
+            .build();
+
+    service.updateRole(request);
+
+    verify(reassignLabelsToEntitiesService).reassignEntitiesFromLabels(any());
+  }
+
+  @Test
+  void testUpdateRoleDoesNotReassignLabelsWhenNoLabelIdentifiers() {
+
+    Role role = Role.builder().id("123").name("TestRole").build();
+
+    Instant timestamp = Instant.now();
+    UpdateRoleResult result = new UpdateRoleResult("123", "TestRole", timestamp, null, null, null);
+
+    when(updateRoleUseCase.updateRole(
+            any(com.sitepark.ies.userrepository.core.usecase.role.UpdateRoleRequest.class)))
+        .thenReturn(result);
+
+    UpdateRoleServiceRequest request =
+        UpdateRoleServiceRequest.builder()
+            .updateRoleRequest(
+                com.sitepark.ies.userrepository.core.usecase.role.UpdateRoleRequest.builder()
+                    .role(role)
+                    .build())
+            .build();
+
+    service.updateRole(request);
+
+    verify(reassignLabelsToEntitiesService, never()).reassignEntitiesFromLabels(any());
+  }
+
+  @Test
+  void testUpdateRoleCreatesAuditLogForAssignedPrivileges() {
+
+    Role role = Role.builder().id("123").name("TestRole").build();
+
+    Instant timestamp = Instant.now();
+    RolePrivilegeAssignment assignments =
+        RolePrivilegeAssignment.builder().assignments("123", "priv-1").build();
+    RolePrivilegeAssignment emptyUnassignments = RolePrivilegeAssignment.builder().build();
+    ReassignPrivilegesToRolesResult privilegeResult =
+        ReassignPrivilegesToRolesResult.reassigned(assignments, emptyUnassignments, timestamp);
+    UpdateRoleResult result =
+        new UpdateRoleResult("123", "TestRole", timestamp, null, null, privilegeResult);
+
+    when(updateRoleUseCase.updateRole(
+            any(com.sitepark.ies.userrepository.core.usecase.role.UpdateRoleRequest.class)))
+        .thenReturn(result);
+    when(multiEntityNameResolver.resolveName(any())).thenReturn("TestRole");
+
+    UpdateRoleServiceRequest request =
+        UpdateRoleServiceRequest.builder()
+            .updateRoleRequest(
+                com.sitepark.ies.userrepository.core.usecase.role.UpdateRoleRequest.builder()
+                    .role(role)
+                    .build())
+            .build();
+
+    service.updateRole(request);
+
+    verify(auditLogService).createLog(any(), any(), any(), any(), any());
+  }
+
+  @Test
+  void testUpdateRoleCreatesAuditLogForUnassignedPrivileges() {
+
+    Role role = Role.builder().id("123").name("TestRole").build();
+
+    Instant timestamp = Instant.now();
+    RolePrivilegeAssignment emptyAssignments = RolePrivilegeAssignment.builder().build();
+    RolePrivilegeAssignment unassignments =
+        RolePrivilegeAssignment.builder().assignments("123", "priv-1").build();
+    ReassignPrivilegesToRolesResult privilegeResult =
+        ReassignPrivilegesToRolesResult.reassigned(emptyAssignments, unassignments, timestamp);
+    UpdateRoleResult result =
+        new UpdateRoleResult("123", "TestRole", timestamp, null, null, privilegeResult);
+
+    when(updateRoleUseCase.updateRole(
+            any(com.sitepark.ies.userrepository.core.usecase.role.UpdateRoleRequest.class)))
+        .thenReturn(result);
+    when(multiEntityNameResolver.resolveName(any())).thenReturn("TestRole");
+
+    UpdateRoleServiceRequest request =
+        UpdateRoleServiceRequest.builder()
+            .updateRoleRequest(
+                com.sitepark.ies.userrepository.core.usecase.role.UpdateRoleRequest.builder()
+                    .role(role)
+                    .build())
+            .build();
+
+    service.updateRole(request);
+
+    verify(auditLogService).createLog(any(), any(), any(), any(), any());
+  }
+
+  @Test
+  void testUpdateRoleResolvesRoleNameWhenNoRoleChangesButPrivilegesReassigned() {
+
+    Role role = Role.builder().id("123").name("TestRole").build();
+
+    Instant timestamp = Instant.now();
+    RolePrivilegeAssignment assignments =
+        RolePrivilegeAssignment.builder().assignments("123", "priv-1").build();
+    RolePrivilegeAssignment emptyUnassignments = RolePrivilegeAssignment.builder().build();
+    ReassignPrivilegesToRolesResult privilegeResult =
+        ReassignPrivilegesToRolesResult.reassigned(assignments, emptyUnassignments, timestamp);
+    UpdateRoleResult result =
+        new UpdateRoleResult("123", "TestRole", timestamp, null, null, privilegeResult);
+
+    when(updateRoleUseCase.updateRole(
+            any(com.sitepark.ies.userrepository.core.usecase.role.UpdateRoleRequest.class)))
+        .thenReturn(result);
+    when(multiEntityNameResolver.resolveName(any())).thenReturn("TestRole");
+
+    UpdateRoleServiceRequest request =
+        UpdateRoleServiceRequest.builder()
+            .updateRoleRequest(
+                com.sitepark.ies.userrepository.core.usecase.role.UpdateRoleRequest.builder()
+                    .role(role)
+                    .build())
+            .build();
+
+    service.updateRole(request);
+
+    verify(multiEntityNameResolver).resolveName(any());
   }
 }

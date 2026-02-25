@@ -10,7 +10,6 @@ import com.sitepark.ies.application.label.UnassignLabelsFromEntitiesServiceReque
 import com.sitepark.ies.audit.core.domain.entity.AuditLog;
 import com.sitepark.ies.audit.core.service.AuditLogService;
 import com.sitepark.ies.audit.core.service.RevertRequest;
-import com.sitepark.ies.label.core.domain.entity.Label;
 import com.sitepark.ies.label.core.usecase.UnassignLabelsFromEntitiesRequest;
 import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import jakarta.inject.Inject;
@@ -66,7 +65,7 @@ public class RevertLabelBatchAssignEntitiesActionHandler implements RevertEntity
         throw new RevertFailedException(request, "Failed to deserialize labelIds", e);
       }
 
-      this.unassignLabelsFromEntitiesService.unassignEntitiesFromLabels(
+      this.unassignLabelsFromEntitiesService.unassignLabelsFromEntities(
           UnassignLabelsFromEntitiesServiceRequest.builder()
               .unassignEntitiesFromLabelsRequest(
                   UnassignLabelsFromEntitiesRequest.builder()
@@ -84,7 +83,7 @@ public class RevertLabelBatchAssignEntitiesActionHandler implements RevertEntity
         this.auditLogServiceFactory.create(timestamp, auditParentId);
     String batchId =
         auditLogService.createBatchLog(
-            Label.class, AuditBatchLogAction.REVERT_BATCH_ASSIGN_LABELS_TO_ENTITIES);
+            null, AuditBatchLogAction.BATCH_UNASSIGN_LABELS_FROM_ENTITIES);
     auditLogService.updateParentId(batchId);
     return auditLogService;
   }

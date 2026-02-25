@@ -59,8 +59,7 @@ public final class UpsertUserServiceRequest {
 
   @Override
   public boolean equals(Object o) {
-    return super.equals(o)
-        && (o instanceof UpsertUserServiceRequest that)
+    return (o instanceof UpsertUserServiceRequest that)
         && Objects.equals(this.upsertUserRequest, that.upsertUserRequest)
         && Objects.equals(this.labelIdentifiers, that.labelIdentifiers)
         && Objects.equals(this.auditParentId, that.auditParentId);

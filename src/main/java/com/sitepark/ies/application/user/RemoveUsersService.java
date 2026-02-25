@@ -85,7 +85,8 @@ public final class RemoveUsersService {
 
     String parentId =
         request.identifiers().size() > 1
-            ? auditLogService.createBatchLog(User.class, AuditBatchLogAction.BATCH_ASSIGN_ROLES)
+            ? auditLogService.createBatchLog(
+                User.class, AuditBatchLogAction.BATCH_ASSIGN_ROLES_TO_USERS)
             : request.auditParentId();
     auditLogService.updateParentId(parentId);
 

@@ -3,6 +3,7 @@ package com.sitepark.ies.application.user;
 import com.sitepark.ies.application.ApplicationAuditLogService;
 import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
 import com.sitepark.ies.application.MultiEntityNameResolver;
+import com.sitepark.ies.application.audit.AuditBatchLogAction;
 import com.sitepark.ies.application.audit.AuditLogAction;
 import com.sitepark.ies.application.label.ReassignLabelsToEntitiesService;
 import com.sitepark.ies.application.label.ReassignLabelsToEntitiesServiceRequest;
@@ -148,24 +149,34 @@ public final class UpdateUserService {
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(result.timestamp(), auditParentId);
 
-    var assignedRoleIds = reassigned.assignments().roleIds();
-    if (!assignedRoleIds.isEmpty()) {
-      auditLogService.createLog(
-          EntityRef.of(User.class, result.userId()),
-          userDisplayName,
-          AuditLogAction.ASSIGN_ROLES,
-          assignedRoleIds,
-          assignedRoleIds);
+    var assignments = reassigned.assignments();
+    var unassignments = reassigned.unassignments();
+
+    int totalChanges = assignments.size() + unassignments.size();
+    boolean requiresBatchProcessing = totalChanges > 1;
+    if (requiresBatchProcessing) {
+      String batchId =
+          auditLogService.createBatchLog(
+              User.class, AuditBatchLogAction.BATCH_REASSIGN_ROLES_TO_USERS);
+      auditLogService.updateParentId(batchId);
     }
 
-    var unassignedRoleIds = reassigned.unassignments().roleIds();
-    if (!unassignedRoleIds.isEmpty()) {
+    if (!assignments.isEmpty()) {
       auditLogService.createLog(
           EntityRef.of(User.class, result.userId()),
           userDisplayName,
-          AuditLogAction.UNASSIGN_ROLES,
-          unassignedRoleIds,
-          unassignedRoleIds);
+          AuditLogAction.ASSIGN_ROLES_TO_USERS,
+          assignments.roleIds(),
+          assignments.roleIds());
+    }
+
+    if (!unassignments.isEmpty()) {
+      auditLogService.createLog(
+          EntityRef.of(User.class, result.userId()),
+          userDisplayName,
+          AuditLogAction.UNASSIGN_ROLES_FROM_USERS,
+          assignments.roleIds(),
+          assignments.roleIds());
     }
   }
 }

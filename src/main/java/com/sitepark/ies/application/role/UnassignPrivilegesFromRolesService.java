@@ -97,7 +97,7 @@ public final class UnassignPrivilegesFromRolesService {
     String parentId =
         unassignments.size() > 1
             ? auditLogService.createBatchLog(
-                Role.class, AuditBatchLogAction.BATCH_UNASSIGN_PRIVILEGES)
+                Role.class, AuditBatchLogAction.BATCH_UNASSIGN_PRIVILEGES_FROM_ROLES)
             : auditParentId;
     auditLogService.updateParentId(parentId);
 
@@ -109,7 +109,7 @@ public final class UnassignPrivilegesFromRolesService {
               auditLogService.createLog(
                   EntityRef.of(Role.class, roleId),
                   roleNames.get(roleId),
-                  AuditLogAction.UNASSIGN_PRIVILEGES,
+                  AuditLogAction.UNASSIGN_PRIVILEGES_FROM_ROLES,
                   privilegeIds,
                   privilegeIds);
             });

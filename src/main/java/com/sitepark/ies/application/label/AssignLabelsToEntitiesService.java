@@ -114,7 +114,7 @@ public final class AssignLabelsToEntitiesService {
         .entityRefs()
         .forEach(
             entityRef -> {
-              List<String> labelIds = assignments.labelIds();
+              List<String> labelIds = assignments.labelIds(entityRef);
               auditLogServiceMap
                   .get(entityRef.type())
                   .createLog(

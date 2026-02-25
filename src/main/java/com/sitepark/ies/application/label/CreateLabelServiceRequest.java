@@ -42,8 +42,8 @@ public final class CreateLabelServiceRequest {
 
   @Override
   public boolean equals(Object o) {
-    return super.equals(o)
-        && (o instanceof CreateLabelServiceRequest that)
+    return (o instanceof CreateLabelServiceRequest that)
+        && Objects.equals(this.createLabelRequest, that.createLabelRequest)
         && Objects.equals(this.auditParentId, that.auditParentId);
   }
 

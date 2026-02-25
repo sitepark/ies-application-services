@@ -29,7 +29,7 @@ public class RevertLabelAssignEntitiesActionHandler implements RevertEntityActio
     try {
       List<String> labelIds = this.auditLogService.getBackwardDataList(request.id(), String.class);
 
-      this.unassignLabelsFromEntitiesService.unassignEntitiesFromLabels(
+      this.unassignLabelsFromEntitiesService.unassignLabelsFromEntities(
           UnassignLabelsFromEntitiesServiceRequest.builder()
               .unassignEntitiesFromLabelsRequest(
                   UnassignLabelsFromEntitiesRequest.builder()

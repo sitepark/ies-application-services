@@ -2,8 +2,6 @@ package com.sitepark.ies.application.audit.revert;
 
 import com.sitepark.ies.application.audit.AuditLogAction;
 import com.sitepark.ies.application.audit.revert.label.RevertLabelAssignEntitiesActionHandler;
-import com.sitepark.ies.application.audit.revert.label.RevertLabelBatchAssignEntitiesActionHandler;
-import com.sitepark.ies.application.audit.revert.label.RevertLabelBatchUnassignEntitiesActionHandler;
 import com.sitepark.ies.application.audit.revert.label.RevertLabelCreateActionHandler;
 import com.sitepark.ies.application.audit.revert.label.RevertLabelRemoveActionHandler;
 import com.sitepark.ies.application.audit.revert.label.RevertLabelUnassignEntitiesActionHandler;
@@ -26,9 +24,7 @@ public class RevertLabelActionHandler implements ReverseActionHandler {
       RevertLabelUpdateActionHandler updateHandler,
       RevertLabelRemoveActionHandler removeHandler,
       RevertLabelAssignEntitiesActionHandler assignEntitiesHandler,
-      RevertLabelUnassignEntitiesActionHandler unassignEntitiesHandler,
-      RevertLabelBatchAssignEntitiesActionHandler batchAssignEntitiesHandler,
-      RevertLabelBatchUnassignEntitiesActionHandler batchUnassignEntitiesHandler) {
+      RevertLabelUnassignEntitiesActionHandler unassignEntitiesHandler) {
     this.actionHandlers = new HashMap<>();
     this.actionHandlers.put(AuditLogAction.CREATE.name(), createHandler);
     this.actionHandlers.put(AuditLogAction.UPDATE.name(), updateHandler);

@@ -72,7 +72,7 @@ public final class UnassignLabelsFromEntitiesService {
    * @throws com.sitepark.ies.label.core.domain.exception.LabelNotFoundException if a label does not
    *     exist
    */
-  public int unassignEntitiesFromLabels(@NotNull UnassignLabelsFromEntitiesServiceRequest request) {
+  public int unassignLabelsFromEntities(@NotNull UnassignLabelsFromEntitiesServiceRequest request) {
 
     this.checkAuthorization(request.unassignEntitiesFromLabelsRequest());
 
@@ -114,7 +114,7 @@ public final class UnassignLabelsFromEntitiesService {
         .entityRefs()
         .forEach(
             entityRef -> {
-              List<String> labels = unassignments.labelIds();
+              List<String> labels = unassignments.labelIds(entityRef);
               auditLogServiceMap
                   .get(entityRef.type())
                   .createLog(

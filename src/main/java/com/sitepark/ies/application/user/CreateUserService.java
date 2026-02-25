@@ -2,7 +2,6 @@ package com.sitepark.ies.application.user;
 
 import com.sitepark.ies.application.ApplicationAuditLogService;
 import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
-import com.sitepark.ies.application.audit.AuditBatchLogAction;
 import com.sitepark.ies.application.audit.AuditLogAction;
 import com.sitepark.ies.application.label.ReassignLabelsToEntitiesService;
 import com.sitepark.ies.application.label.ReassignLabelsToEntitiesServiceRequest;
@@ -119,16 +118,10 @@ public final class CreateUserService {
 
     var assignments = assigned.assignments();
 
-    String parentId =
-        assignments.size() > 1
-            ? auditLogService.createBatchLog(User.class, AuditBatchLogAction.BATCH_ASSIGN_ROLES)
-            : auditParentId;
-    auditLogService.updateParentId(parentId);
-
     auditLogService.createLog(
         EntityRef.of(User.class, result.snapshot().user().id()),
         result.snapshot().user().toDisplayName(),
-        AuditLogAction.ASSIGN_ROLES,
+        AuditLogAction.ASSIGN_ROLES_TO_USERS,
         assignments.roleIds(),
         assignments.roleIds());
   }

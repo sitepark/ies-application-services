@@ -43,8 +43,7 @@ public final class UpsertLabelServiceRequest {
 
   @Override
   public boolean equals(Object o) {
-    return super.equals(o)
-        && (o instanceof UpsertLabelServiceRequest that)
+    return (o instanceof UpsertLabelServiceRequest that)
         && Objects.equals(this.upsertLabelRequest, that.upsertLabelRequest)
         && Objects.equals(this.auditParentId, that.auditParentId);
   }

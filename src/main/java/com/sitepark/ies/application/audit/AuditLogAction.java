@@ -20,11 +20,11 @@ public enum AuditLogAction {
   ASSIGN_SCOPES_TO_LABELS,
   UNASSIGN_SCOPES_FROM_LABELS,
 
-  // privilege assignment operations
-  ASSIGN_PRIVILEGES,
-  UNASSIGN_PRIVILEGES,
+  // user assignment operations
+  ASSIGN_ROLES_TO_USERS,
+  UNASSIGN_ROLES_FROM_USERS,
 
   // role assignment operations
-  ASSIGN_ROLES,
-  UNASSIGN_ROLES,
+  ASSIGN_PRIVILEGES_TO_ROLES,
+  UNASSIGN_PRIVILEGES_FROM_ROLES,
 }

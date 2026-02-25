@@ -94,7 +94,8 @@ public final class AssignRolesToUsersService {
 
     String parentId =
         assignments.size() > 1
-            ? auditLogService.createBatchLog(User.class, AuditBatchLogAction.BATCH_ASSIGN_ROLES)
+            ? auditLogService.createBatchLog(
+                User.class, AuditBatchLogAction.BATCH_ASSIGN_ROLES_TO_USERS)
             : auditParentId;
     auditLogService.updateParentId(parentId);
 
@@ -106,7 +107,7 @@ public final class AssignRolesToUsersService {
               auditLogService.createLog(
                   EntityRef.of(User.class, userId),
                   userDisplayNames.get(userId),
-                  AuditLogAction.ASSIGN_ROLES,
+                  AuditLogAction.ASSIGN_ROLES_TO_USERS,
                   roleIds,
                   roleIds);
             });

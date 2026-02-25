@@ -13,6 +13,7 @@ import com.sitepark.ies.application.MultiEntityNameResolver;
 import com.sitepark.ies.application.label.ReassignLabelsToEntitiesService;
 import com.sitepark.ies.sharedkernel.patch.PatchDocument;
 import com.sitepark.ies.userrepository.core.domain.entity.User;
+import com.sitepark.ies.userrepository.core.domain.value.UserRoleAssignment;
 import com.sitepark.ies.userrepository.core.usecase.user.ReassignRolesToUsersResult;
 import com.sitepark.ies.userrepository.core.usecase.user.UpdateUserResult;
 import com.sitepark.ies.userrepository.core.usecase.user.UpdateUserUseCase;
@@ -25,10 +26,8 @@ class UpdateUserServiceTest {
 
   private UpdateUserUseCase updateUserUseCase;
 
-  @SuppressWarnings("PMD.SingularField")
   private ReassignLabelsToEntitiesService reassignLabelsToEntitiesService;
 
-  @SuppressWarnings("PMD.SingularField")
   private MultiEntityNameResolver multiEntityNameResolver;
 
   @SuppressWarnings("PMD.SingularField")
@@ -218,5 +217,227 @@ class UpdateUserServiceTest {
     service.updateUser(request);
 
     verify(auditLogService).createLog(any(), any(), any(), any(), any());
+  }
+
+  @Test
+  void testUpdateUserReassignsLabelsWhenLabelIdentifiersProvided() {
+
+    User user = User.builder().id("123").login("testuser").lastName("Test").build();
+
+    Instant timestamp = Instant.now();
+    UpdateUserResult result =
+        new UpdateUserResult(
+            "123", timestamp, UserUpdateResult.unchanged(), ReassignRolesToUsersResult.skipped());
+
+    when(updateUserUseCase.updateUser(
+            any(com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest.class)))
+        .thenReturn(result);
+
+    UpdateUserServiceRequest request =
+        UpdateUserServiceRequest.builder()
+            .updateUserRequest(
+                com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest.builder()
+                    .user(user)
+                    .build())
+            .labelIdentifiers(b -> b.id("501"))
+            .build();
+
+    service.updateUser(request);
+
+    verify(reassignLabelsToEntitiesService).reassignEntitiesFromLabels(any());
+  }
+
+  @Test
+  void testUpdateUserDoesNotReassignLabelsWhenNoLabelIdentifiers() {
+
+    User user = User.builder().id("123").login("testuser").lastName("Test").build();
+
+    Instant timestamp = Instant.now();
+    UpdateUserResult result =
+        new UpdateUserResult(
+            "123", timestamp, UserUpdateResult.unchanged(), ReassignRolesToUsersResult.skipped());
+
+    when(updateUserUseCase.updateUser(
+            any(com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest.class)))
+        .thenReturn(result);
+
+    UpdateUserServiceRequest request =
+        UpdateUserServiceRequest.builder()
+            .updateUserRequest(
+                com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest.builder()
+                    .user(user)
+                    .build())
+            .build();
+
+    service.updateUser(request);
+
+    verify(reassignLabelsToEntitiesService, never()).reassignEntitiesFromLabels(any());
+  }
+
+  @Test
+  void testUpdateUserCreatesAuditLogForRoleAssignment() {
+
+    User user = User.builder().id("123").login("testuser").lastName("Test").build();
+
+    Instant timestamp = Instant.now();
+    UserRoleAssignment assignments =
+        UserRoleAssignment.builder().assignments("123", "role-1").build();
+    UserRoleAssignment emptyUnassignments = UserRoleAssignment.builder().build();
+    ReassignRolesToUsersResult roleResult =
+        ReassignRolesToUsersResult.reassigned(assignments, emptyUnassignments, timestamp);
+    UpdateUserResult result =
+        new UpdateUserResult("123", timestamp, UserUpdateResult.unchanged(), roleResult);
+
+    when(updateUserUseCase.updateUser(
+            any(com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest.class)))
+        .thenReturn(result);
+    when(multiEntityNameResolver.resolveDisplayUserName(any())).thenReturn("Test User");
+
+    UpdateUserServiceRequest request =
+        UpdateUserServiceRequest.builder()
+            .updateUserRequest(
+                com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest.builder()
+                    .user(user)
+                    .build())
+            .build();
+
+    service.updateUser(request);
+
+    verify(auditLogService).createLog(any(), any(), any(), any(), any());
+  }
+
+  @Test
+  void testUpdateUserCreatesAuditLogForRoleUnassignment() {
+
+    User user = User.builder().id("123").login("testuser").lastName("Test").build();
+
+    Instant timestamp = Instant.now();
+    UserRoleAssignment emptyAssignments = UserRoleAssignment.builder().build();
+    UserRoleAssignment unassignments =
+        UserRoleAssignment.builder().assignments("123", "role-1").build();
+    ReassignRolesToUsersResult roleResult =
+        ReassignRolesToUsersResult.reassigned(emptyAssignments, unassignments, timestamp);
+    UpdateUserResult result =
+        new UpdateUserResult("123", timestamp, UserUpdateResult.unchanged(), roleResult);
+
+    when(updateUserUseCase.updateUser(
+            any(com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest.class)))
+        .thenReturn(result);
+    when(multiEntityNameResolver.resolveDisplayUserName(any())).thenReturn("Test User");
+
+    UpdateUserServiceRequest request =
+        UpdateUserServiceRequest.builder()
+            .updateUserRequest(
+                com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest.builder()
+                    .user(user)
+                    .build())
+            .build();
+
+    service.updateUser(request);
+
+    verify(auditLogService).createLog(any(), any(), any(), any(), any());
+  }
+
+  @Test
+  void testUpdateUserCreatesBatchAuditLogWhenMultipleRoleChanges() {
+
+    User user = User.builder().id("123").login("testuser").lastName("Test").build();
+
+    Instant timestamp = Instant.now();
+    UserRoleAssignment assignments =
+        UserRoleAssignment.builder().assignments("123", "role-1").build();
+    UserRoleAssignment unassignments =
+        UserRoleAssignment.builder().assignments("123", "role-2").build();
+    ReassignRolesToUsersResult roleResult =
+        ReassignRolesToUsersResult.reassigned(assignments, unassignments, timestamp);
+    UpdateUserResult result =
+        new UpdateUserResult("123", timestamp, UserUpdateResult.unchanged(), roleResult);
+
+    when(updateUserUseCase.updateUser(
+            any(com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest.class)))
+        .thenReturn(result);
+    when(multiEntityNameResolver.resolveDisplayUserName(any())).thenReturn("Test User");
+    when(auditLogService.createBatchLog(any(), any())).thenReturn("batch-id");
+
+    UpdateUserServiceRequest request =
+        UpdateUserServiceRequest.builder()
+            .updateUserRequest(
+                com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest.builder()
+                    .user(user)
+                    .build())
+            .build();
+
+    service.updateUser(request);
+
+    verify(auditLogService).createBatchLog(any(), any());
+  }
+
+  @Test
+  void testUpdateUserResolvesDisplayNameWhenNoUserChangesButRolesReassigned() {
+
+    User user = User.builder().id("123").login("testuser").lastName("Test").build();
+
+    Instant timestamp = Instant.now();
+    UserRoleAssignment assignments =
+        UserRoleAssignment.builder().assignments("123", "role-1").build();
+    UserRoleAssignment emptyUnassignments = UserRoleAssignment.builder().build();
+    ReassignRolesToUsersResult roleResult =
+        ReassignRolesToUsersResult.reassigned(assignments, emptyUnassignments, timestamp);
+    UpdateUserResult result =
+        new UpdateUserResult("123", timestamp, UserUpdateResult.unchanged(), roleResult);
+
+    when(updateUserUseCase.updateUser(
+            any(com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest.class)))
+        .thenReturn(result);
+    when(multiEntityNameResolver.resolveDisplayUserName(any())).thenReturn("Test User");
+
+    UpdateUserServiceRequest request =
+        UpdateUserServiceRequest.builder()
+            .updateUserRequest(
+                com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest.builder()
+                    .user(user)
+                    .build())
+            .build();
+
+    service.updateUser(request);
+
+    verify(multiEntityNameResolver).resolveDisplayUserName(any());
+  }
+
+  @Test
+  void testUpdateUserUsesDisplayNameFromUpdateWhenUserChangedAndRolesReassigned() {
+
+    User user = User.builder().id("123").login("testuser").lastName("Test").build();
+
+    PatchDocument patch = mock(PatchDocument.class);
+    when(patch.toJson()).thenReturn("{\"patch\":\"forward\"}");
+
+    PatchDocument revertPatch = mock(PatchDocument.class);
+    when(revertPatch.toJson()).thenReturn("{\"patch\":\"revert\"}");
+
+    Instant timestamp = Instant.now();
+    UserUpdateResult userUpdateResult = UserUpdateResult.updated("Test User", patch, revertPatch);
+    UserRoleAssignment assignments =
+        UserRoleAssignment.builder().assignments("123", "role-1").build();
+    UserRoleAssignment emptyUnassignments = UserRoleAssignment.builder().build();
+    ReassignRolesToUsersResult roleResult =
+        ReassignRolesToUsersResult.reassigned(assignments, emptyUnassignments, timestamp);
+    UpdateUserResult result = new UpdateUserResult("123", timestamp, userUpdateResult, roleResult);
+
+    when(updateUserUseCase.updateUser(
+            any(com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest.class)))
+        .thenReturn(result);
+
+    UpdateUserServiceRequest request =
+        UpdateUserServiceRequest.builder()
+            .updateUserRequest(
+                com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest.builder()
+                    .user(user)
+                    .build())
+            .build();
+
+    service.updateUser(request);
+
+    verify(multiEntityNameResolver, never()).resolveDisplayUserName(any());
   }
 }

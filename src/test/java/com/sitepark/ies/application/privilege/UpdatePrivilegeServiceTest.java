@@ -13,9 +13,12 @@ import com.sitepark.ies.application.MultiEntityNameResolver;
 import com.sitepark.ies.application.label.ReassignLabelsToEntitiesService;
 import com.sitepark.ies.sharedkernel.patch.PatchDocument;
 import com.sitepark.ies.userrepository.core.domain.entity.Privilege;
+import com.sitepark.ies.userrepository.core.domain.value.PrivilegeRoleAssignment;
+import com.sitepark.ies.userrepository.core.usecase.privilege.ReassignRolesToPrivilegesResult;
 import com.sitepark.ies.userrepository.core.usecase.privilege.UpdatePrivilegeResult;
 import com.sitepark.ies.userrepository.core.usecase.privilege.UpdatePrivilegeUseCase;
 import java.time.Instant;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,13 +26,11 @@ class UpdatePrivilegeServiceTest {
 
   private UpdatePrivilegeUseCase updatePrivilegeUseCase;
 
-  @SuppressWarnings("PMD.SingularField")
   private MultiEntityNameResolver multiEntityNameResolver;
 
   @SuppressWarnings("PMD.SingularField")
   private ApplicationAuditLogServiceFactory auditLogServiceFactory;
 
-  @SuppressWarnings("PMD.SingularField")
   private ReassignLabelsToEntitiesService reassignLabelsToEntitiesService;
 
   private ApplicationAuditLogService auditLogService;
@@ -219,6 +220,170 @@ class UpdatePrivilegeServiceTest {
                     .privilege(privilege)
                     .build())
             .auditParentId("parent-audit-123")
+            .build();
+
+    service.updatePrivilege(request);
+
+    verify(auditLogService).createLog(any(), any(), any(), any(), any());
+  }
+
+  @Test
+  void testUpdatePrivilegeReassignsLabelsWhenLabelIdentifiersProvided() {
+
+    Privilege privilege = Privilege.builder().id("123").name("TestPrivilege").build();
+
+    Instant timestamp = Instant.now();
+    UpdatePrivilegeResult result =
+        new UpdatePrivilegeResult("123", "TestPrivilege", timestamp, null, null, null);
+
+    when(updatePrivilegeUseCase.updatePrivilege(
+            any(
+                com.sitepark.ies.userrepository.core.usecase.privilege.UpdatePrivilegeRequest
+                    .class)))
+        .thenReturn(result);
+
+    UpdatePrivilegeServiceRequest request =
+        UpdatePrivilegeServiceRequest.builder()
+            .updatePrivilegeRequest(
+                com.sitepark.ies.userrepository.core.usecase.privilege.UpdatePrivilegeRequest
+                    .builder()
+                    .privilege(privilege)
+                    .build())
+            .labelIdentifiers(b -> b.id("501"))
+            .build();
+
+    service.updatePrivilege(request);
+
+    verify(reassignLabelsToEntitiesService).reassignEntitiesFromLabels(any());
+  }
+
+  @Test
+  void testUpdatePrivilegeDoesNotReassignLabelsWhenNoLabelIdentifiers() {
+
+    Privilege privilege = Privilege.builder().id("123").name("TestPrivilege").build();
+
+    Instant timestamp = Instant.now();
+    UpdatePrivilegeResult result =
+        new UpdatePrivilegeResult("123", "TestPrivilege", timestamp, null, null, null);
+
+    when(updatePrivilegeUseCase.updatePrivilege(
+            any(
+                com.sitepark.ies.userrepository.core.usecase.privilege.UpdatePrivilegeRequest
+                    .class)))
+        .thenReturn(result);
+
+    UpdatePrivilegeServiceRequest request =
+        UpdatePrivilegeServiceRequest.builder()
+            .updatePrivilegeRequest(
+                com.sitepark.ies.userrepository.core.usecase.privilege.UpdatePrivilegeRequest
+                    .builder()
+                    .privilege(privilege)
+                    .build())
+            .build();
+
+    service.updatePrivilege(request);
+
+    verify(reassignLabelsToEntitiesService, never()).reassignEntitiesFromLabels(any());
+  }
+
+  @Test
+  void testUpdatePrivilegeCreatesAuditLogForRoleAssignment() {
+
+    Privilege privilege = Privilege.builder().id("123").name("TestPrivilege").build();
+
+    Instant timestamp = Instant.now();
+    PrivilegeRoleAssignment assignments =
+        PrivilegeRoleAssignment.builder().assignments("priv-1", "role-1").build();
+    PrivilegeRoleAssignment emptyUnassignments = PrivilegeRoleAssignment.builder().build();
+    ReassignRolesToPrivilegesResult roleResult =
+        ReassignRolesToPrivilegesResult.reassigned(assignments, emptyUnassignments, timestamp);
+    UpdatePrivilegeResult result =
+        new UpdatePrivilegeResult("123", "TestPrivilege", timestamp, null, null, roleResult);
+
+    when(updatePrivilegeUseCase.updatePrivilege(
+            any(
+                com.sitepark.ies.userrepository.core.usecase.privilege.UpdatePrivilegeRequest
+                    .class)))
+        .thenReturn(result);
+    when(multiEntityNameResolver.resolveRoleNames(any())).thenReturn(Map.of("role-1", "RoleOne"));
+
+    UpdatePrivilegeServiceRequest request =
+        UpdatePrivilegeServiceRequest.builder()
+            .updatePrivilegeRequest(
+                com.sitepark.ies.userrepository.core.usecase.privilege.UpdatePrivilegeRequest
+                    .builder()
+                    .privilege(privilege)
+                    .build())
+            .build();
+
+    service.updatePrivilege(request);
+
+    verify(auditLogService).createLog(any(), any(), any(), any(), any());
+  }
+
+  @Test
+  void testUpdatePrivilegeResolvesRoleNamesForReassignment() {
+
+    Privilege privilege = Privilege.builder().id("123").name("TestPrivilege").build();
+
+    Instant timestamp = Instant.now();
+    PrivilegeRoleAssignment assignments =
+        PrivilegeRoleAssignment.builder().assignments("priv-1", "role-1").build();
+    PrivilegeRoleAssignment emptyUnassignments = PrivilegeRoleAssignment.builder().build();
+    ReassignRolesToPrivilegesResult roleResult =
+        ReassignRolesToPrivilegesResult.reassigned(assignments, emptyUnassignments, timestamp);
+    UpdatePrivilegeResult result =
+        new UpdatePrivilegeResult("123", "TestPrivilege", timestamp, null, null, roleResult);
+
+    when(updatePrivilegeUseCase.updatePrivilege(
+            any(
+                com.sitepark.ies.userrepository.core.usecase.privilege.UpdatePrivilegeRequest
+                    .class)))
+        .thenReturn(result);
+    when(multiEntityNameResolver.resolveRoleNames(any())).thenReturn(Map.of("role-1", "RoleOne"));
+
+    UpdatePrivilegeServiceRequest request =
+        UpdatePrivilegeServiceRequest.builder()
+            .updatePrivilegeRequest(
+                com.sitepark.ies.userrepository.core.usecase.privilege.UpdatePrivilegeRequest
+                    .builder()
+                    .privilege(privilege)
+                    .build())
+            .build();
+
+    service.updatePrivilege(request);
+
+    verify(multiEntityNameResolver).resolveRoleNames(any());
+  }
+
+  @Test
+  void testUpdatePrivilegeCreatesAuditLogForRoleUnassignment() {
+
+    Privilege privilege = Privilege.builder().id("123").name("TestPrivilege").build();
+
+    Instant timestamp = Instant.now();
+    PrivilegeRoleAssignment emptyAssignments = PrivilegeRoleAssignment.builder().build();
+    PrivilegeRoleAssignment unassignments =
+        PrivilegeRoleAssignment.builder().assignments("priv-1", "role-1").build();
+    ReassignRolesToPrivilegesResult roleResult =
+        ReassignRolesToPrivilegesResult.reassigned(emptyAssignments, unassignments, timestamp);
+    UpdatePrivilegeResult result =
+        new UpdatePrivilegeResult("123", "TestPrivilege", timestamp, null, null, roleResult);
+
+    when(updatePrivilegeUseCase.updatePrivilege(
+            any(
+                com.sitepark.ies.userrepository.core.usecase.privilege.UpdatePrivilegeRequest
+                    .class)))
+        .thenReturn(result);
+    when(multiEntityNameResolver.resolveRoleNames(any())).thenReturn(Map.of("role-1", "RoleOne"));
+
+    UpdatePrivilegeServiceRequest request =
+        UpdatePrivilegeServiceRequest.builder()
+            .updatePrivilegeRequest(
+                com.sitepark.ies.userrepository.core.usecase.privilege.UpdatePrivilegeRequest
+                    .builder()
+                    .privilege(privilege)
+                    .build())
             .build();
 
     service.updatePrivilege(request);

@@ -4,6 +4,7 @@ import static com.sitepark.ies.application.audit.revert.RevertEntityActionHandle
 
 import com.sitepark.ies.application.audit.AuditBatchLogAction;
 import com.sitepark.ies.application.audit.revert.label.RevertLabelBatchAssignEntitiesActionHandler;
+import com.sitepark.ies.application.audit.revert.label.RevertLabelBatchReassignEntitiesActionHandler;
 import com.sitepark.ies.application.audit.revert.label.RevertLabelBatchUnassignEntitiesActionHandler;
 import com.sitepark.ies.audit.core.service.ReverseActionHandler;
 import com.sitepark.ies.audit.core.service.RevertRequest;
@@ -18,10 +19,13 @@ public class RevertMultiEntityActionHandler implements ReverseActionHandler {
   @Inject
   RevertMultiEntityActionHandler(
       RevertLabelBatchAssignEntitiesActionHandler batchAssignEntitiesHandler,
+      RevertLabelBatchReassignEntitiesActionHandler batchReassignEntitiesHandler,
       RevertLabelBatchUnassignEntitiesActionHandler batchUnassignEntitiesHandler) {
     this.actionHandlers = new HashMap<>();
     this.actionHandlers.put(
         AuditBatchLogAction.BATCH_ASSIGN_LABELS_TO_ENTITIES.name(), batchAssignEntitiesHandler);
+    this.actionHandlers.put(
+        AuditBatchLogAction.BATCH_REASSIGN_LABELS_TO_ENTITIES.name(), batchReassignEntitiesHandler);
     this.actionHandlers.put(
         AuditBatchLogAction.BATCH_UNASSIGN_LABELS_FROM_ENTITIES.name(),
         batchUnassignEntitiesHandler);

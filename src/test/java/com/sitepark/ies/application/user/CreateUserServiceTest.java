@@ -25,7 +25,6 @@ class CreateUserServiceTest {
 
   private CreateUserUseCase createUserUseCase;
 
-  @SuppressWarnings("PMD.SingularField")
   private ReassignLabelsToEntitiesService reassignLabelsToEntitiesService;
 
   @SuppressWarnings("PMD.SingularField")
@@ -182,5 +181,31 @@ class CreateUserServiceTest {
     service.createUser(request);
 
     verify(auditLogService, times(1)).createLog(any(), any(), any(), any(), any());
+  }
+
+  @Test
+  void testCreateUserReassignsLabelsWhenLabelIdentifiersProvided() {
+
+    User user = User.builder().id("123").login("testuser").lastName("Test").build();
+    UserSnapshot snapshot = new UserSnapshot(user, List.of());
+    Instant timestamp = Instant.now();
+    CreateUserResult result = new CreateUserResult("123", snapshot, null, timestamp);
+
+    when(createUserUseCase.createUser(
+            any(com.sitepark.ies.userrepository.core.usecase.user.CreateUserRequest.class)))
+        .thenReturn(result);
+
+    CreateUserServiceRequest request =
+        CreateUserServiceRequest.builder()
+            .createUserRequest(
+                com.sitepark.ies.userrepository.core.usecase.user.CreateUserRequest.builder()
+                    .user(user)
+                    .build())
+            .labelIdentifiers(b -> b.id("501"))
+            .build();
+
+    service.createUser(request);
+
+    verify(reassignLabelsToEntitiesService).reassignEntitiesFromLabels(any());
   }
 }

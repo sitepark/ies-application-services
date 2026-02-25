@@ -47,8 +47,8 @@ public final class RemoveLabelsServiceRequest {
 
   @Override
   public boolean equals(Object o) {
-    return super.equals(o)
-        && (o instanceof RemoveLabelsServiceRequest that)
+    return (o instanceof RemoveLabelsServiceRequest that)
+        && Objects.equals(this.identifiers, that.identifiers)
         && Objects.equals(this.auditParentId, that.auditParentId);
   }
 

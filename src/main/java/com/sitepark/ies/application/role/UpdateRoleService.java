@@ -155,7 +155,7 @@ public final class UpdateRoleService {
       auditLogService.createLog(
           EntityRef.of(Role.class, result.roleId()),
           roleName,
-          AuditLogAction.ASSIGN_PRIVILEGES,
+          AuditLogAction.ASSIGN_PRIVILEGES_TO_ROLES,
           assignedPrivilegeIds,
           assignedPrivilegeIds);
     }
@@ -165,7 +165,7 @@ public final class UpdateRoleService {
       auditLogService.createLog(
           EntityRef.of(Role.class, result.roleId()),
           roleName,
-          AuditLogAction.UNASSIGN_PRIVILEGES,
+          AuditLogAction.UNASSIGN_PRIVILEGES_FROM_ROLES,
           unassignedPrivilegeIds,
           unassignedPrivilegeIds);
     }

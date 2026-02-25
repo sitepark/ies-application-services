@@ -125,7 +125,7 @@ public final class CreatePrivilegeService {
     String parentId =
         assignments.size() > 1
             ? auditLogService.createBatchLog(
-                Privilege.class, AuditBatchLogAction.BATCH_ASSIGN_PRIVILEGES)
+                Privilege.class, AuditBatchLogAction.BATCH_ASSIGN_PRIVILEGES_TO_ROLES)
             : auditParentId;
     auditLogService.updateParentId(parentId);
 
@@ -133,7 +133,7 @@ public final class CreatePrivilegeService {
       auditLogService.createLog(
           EntityRef.of(Privilege.class, result.privilegeId()),
           result.snapshot().privilege().name(),
-          AuditLogAction.ASSIGN_PRIVILEGES,
+          AuditLogAction.ASSIGN_PRIVILEGES_TO_ROLES,
           assignments.privilegeIds(roleId),
           assignments.privilegeIds(roleId));
     }

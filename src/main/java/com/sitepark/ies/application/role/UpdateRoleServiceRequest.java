@@ -106,10 +106,8 @@ public final class UpdateRoleServiceRequest {
     public Builder labelIdentifiers(Consumer<IdentifierListBuilder> configurer) {
       IdentifierListBuilder listBuilder = new IdentifierListBuilder();
       configurer.accept(listBuilder);
-      if (listBuilder.changed()) {
-        this.labelIdentifiers = new TreeSet<>();
-        this.labelIdentifiers.addAll(listBuilder.build());
-      }
+      this.labelIdentifiers = new TreeSet<>();
+      this.labelIdentifiers.addAll(listBuilder.build());
       return this;
     }
 

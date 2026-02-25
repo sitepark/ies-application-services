@@ -53,7 +53,7 @@ public final class AssignLabelsToEntitiesServiceRequest {
   @Override
   public String toString() {
     return "AssignLabelsToEntitiesServiceRequest{"
-        + "assignEntitiesToLabelsRequest="
+        + "assignLabelsToEntitiesRequest="
         + assignLabelsToEntitiesRequest
         + ", auditParentId='"
         + auditParentId
@@ -75,7 +75,7 @@ public final class AssignLabelsToEntitiesServiceRequest {
       this.auditParentId = request.auditParentId;
     }
 
-    public Builder assignEntitiesToLabelsRequest(
+    public Builder assignLabelsToEntitiesRequest(
         AssignLabelsToEntitiesRequest assignLabelsToEntitiesRequest) {
       this.assignLabelsToEntitiesRequest = assignLabelsToEntitiesRequest;
       return this;

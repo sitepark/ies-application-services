@@ -30,7 +30,7 @@ public class RevertLabelUnassignEntitiesActionHandler implements RevertEntityAct
       List<String> labelIds = this.auditLogService.getBackwardDataList(request.id(), String.class);
       this.assignLabelsToEntitiesService.assignLabelsToEntities(
           AssignLabelsToEntitiesServiceRequest.builder()
-              .assignEntitiesToLabelsRequest(
+              .assignLabelsToEntitiesRequest(
                   AssignLabelsToEntitiesRequest.builder()
                       .entityRefs(b -> b.set(request.target().toEntityRef()))
                       .labelIdentifiers(b -> b.ids(labelIds))

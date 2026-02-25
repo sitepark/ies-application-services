@@ -15,6 +15,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("PMD.TooManyMethods")
 public final class MultiEntityNameResolver {
 
   private final GetAllUsersUseCase getAllUsersUseCase;
@@ -89,6 +90,15 @@ public final class MultiEntityNameResolver {
     }
     List<Role> roles = getRolesByIdsUseCase.getRolesByIds(new ArrayList<>(roleIds));
     return roles.stream().collect(Collectors.toMap(Role::id, Role::name));
+  }
+
+  public Map<String, String> resolvePrivilegeNames(Set<String> privilegeIds) {
+    if (privilegeIds.isEmpty()) {
+      return Map.of();
+    }
+    List<Privilege> privileges =
+        getPrivilegesByIdsUseCase.getPrivilegesByIds(new ArrayList<>(privilegeIds));
+    return privileges.stream().collect(Collectors.toMap(Privilege::id, Privilege::name));
   }
 
   private Map<EntityRef, String> getUserNames(Set<EntityRef> entityRefs) {

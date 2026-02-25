@@ -43,15 +43,14 @@ public final class UpdateLabelServiceRequest {
 
   @Override
   public boolean equals(Object o) {
-    return super.equals(o)
-        && (o instanceof UpdateLabelServiceRequest that)
+    return (o instanceof UpdateLabelServiceRequest that)
         && Objects.equals(this.updateLabelRequest, that.updateLabelRequest)
         && Objects.equals(this.auditParentId, that.auditParentId);
   }
 
   @Override
   public String toString() {
-    return "CreateLabelServiceRequest{"
+    return "UpdateLabelServiceRequest{"
         + "updateLabelRequest="
         + updateLabelRequest
         + ", auditParentId='"
