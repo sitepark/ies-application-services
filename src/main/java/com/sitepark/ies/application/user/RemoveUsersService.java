@@ -15,7 +15,6 @@ import java.time.Clock;
 import java.time.Instant;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Application Service that orchestrates user removal operations with cross-cutting concerns.
@@ -72,7 +71,7 @@ public final class RemoveUsersService {
    * @throws com.sitepark.ies.sharedkernel.anchor.AnchorNotFoundException if an anchor does not
    *     exist
    */
-  public void removeUsers(@NotNull RemoveUsersServiceRequest request) {
+  public void removeUsers(RemoveUsersServiceRequest request) {
 
     if (request.isEmpty()) {
       return;

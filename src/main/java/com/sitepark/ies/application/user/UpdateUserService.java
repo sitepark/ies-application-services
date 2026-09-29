@@ -17,7 +17,7 @@ import com.sitepark.ies.userrepository.core.usecase.user.UserUpdateResult;
 import jakarta.inject.Inject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Application Service that orchestrates user update operations with cross-cutting concerns.
@@ -80,7 +80,7 @@ public final class UpdateUserService {
    * @throws com.sitepark.ies.sharedkernel.anchor.AnchorAlreadyExistsException if anchor already
    *     exists for a different user
    */
-  public String updateUser(@NotNull UpdateUserServiceRequest request) {
+  public String updateUser(UpdateUserServiceRequest request) {
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("Updating user with ID '{}'", request.updateUserRequest().user().id());
@@ -111,12 +111,13 @@ public final class UpdateUserService {
     return result.userId();
   }
 
-  protected void createAuditLogs(UpdateUserResult result, String auditParentId) {
+  void createAuditLogs(UpdateUserResult result, @Nullable String auditParentId) {
     this.createAuditLogForUserUpdate(result, auditParentId);
     this.createAuditLogsForRoleReassignment(result, auditParentId);
   }
 
-  private void createAuditLogForUserUpdate(UpdateUserResult result, String auditParentId) {
+  private void createAuditLogForUserUpdate(
+      UpdateUserResult result, @Nullable String auditParentId) {
 
     UserUpdateResult.Updated updated = result.userUpdate();
     if (updated == null) {
@@ -134,7 +135,8 @@ public final class UpdateUserService {
         updated.patch().toJson());
   }
 
-  private void createAuditLogsForRoleReassignment(UpdateUserResult result, String auditParentId) {
+  private void createAuditLogsForRoleReassignment(
+      UpdateUserResult result, @Nullable String auditParentId) {
     ReassignRolesToUsersResult.Reassigned reassigned =
         (ReassignRolesToUsersResult.Reassigned) result.roleReassignmentResult();
     if (reassigned == null) {

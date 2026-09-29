@@ -3,14 +3,12 @@ package com.sitepark.ies.application.user;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import java.util.Objects;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @JsonDeserialize(builder = AssignRolesToUsersServiceRequest.Builder.class)
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName"})
 public final class AssignRolesToUsersServiceRequest {
 
-  @NotNull
   private final com.sitepark.ies.userrepository.core.usecase.user.AssignRolesToUsersRequest
       assignRolesToUsersRequest;
 
@@ -30,7 +28,7 @@ public final class AssignRolesToUsersServiceRequest {
     return this.assignRolesToUsersRequest;
   }
 
-  public String auditParentId() {
+  public @Nullable String auditParentId() {
     return this.auditParentId;
   }
 
@@ -66,11 +64,12 @@ public final class AssignRolesToUsersServiceRequest {
   }
 
   @JsonPOJOBuilder(withPrefix = "")
+  @SuppressWarnings("NullAway.Init")
   public static final class Builder {
 
     private com.sitepark.ies.userrepository.core.usecase.user.AssignRolesToUsersRequest
         assignRolesToUsersRequest;
-    private String auditParentId;
+    private @Nullable String auditParentId;
 
     private Builder() {}
 
@@ -86,7 +85,7 @@ public final class AssignRolesToUsersServiceRequest {
       return this;
     }
 
-    public Builder auditParentId(String auditParentId) {
+    public Builder auditParentId(@Nullable String auditParentId) {
       this.auditParentId = auditParentId;
       return this;
     }

@@ -5,7 +5,6 @@ import com.sitepark.ies.security.core.usecase.password.SetUserPasswordUseCase;
 import jakarta.inject.Inject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Application Service that orchestrates User creation across multiple bounded contexts.
@@ -56,7 +55,7 @@ public final class CreateUserWithPasswordService {
    * @throws com.sitepark.ies.sharedkernel.anchor.AnchorAlreadyExistsException if anchor already
    *     exists
    */
-  public String createUserWithPassword(@NotNull CreateUserWithPasswordRequest request) {
+  public String createUserWithPassword(CreateUserWithPasswordRequest request) {
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug(

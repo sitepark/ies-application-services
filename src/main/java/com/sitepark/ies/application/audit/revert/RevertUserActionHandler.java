@@ -23,6 +23,8 @@ public class RevertUserActionHandler implements ReverseActionHandler {
 
   private final Map<String, RevertEntityActionHandler> actionHandlers;
 
+  // Dependency-injected dispatcher: one constructor parameter per supported action handler.
+  @SuppressWarnings("PMD.ExcessiveParameterList")
   @Inject
   RevertUserActionHandler(
       RevertCreateUserActionHandler revertCreateUserActionHandler,

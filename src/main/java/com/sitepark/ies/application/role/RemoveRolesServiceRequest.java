@@ -2,13 +2,11 @@ package com.sitepark.ies.application.role;
 
 import com.sitepark.ies.sharedkernel.base.Identifier;
 import com.sitepark.ies.sharedkernel.base.IdentifierListBuilder;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Request to remove one or more roles.
@@ -17,12 +15,7 @@ import org.jetbrains.annotations.Nullable;
  * @param auditParentId optional parent audit log ID for grouping related operations
  */
 public record RemoveRolesServiceRequest(
-    @SuppressFBWarnings(
-            value = "EI_EXPOSE_REP",
-            justification = "List.copyOf() in canonical constructor ensures immutability")
-        @NotNull
-        List<Identifier> identifiers,
-    @Nullable String auditParentId) {
+    List<Identifier> identifiers, @Nullable String auditParentId) {
 
   public RemoveRolesServiceRequest {
     identifiers = identifiers != null ? List.copyOf(identifiers) : Collections.emptyList();
@@ -47,10 +40,11 @@ public record RemoveRolesServiceRequest(
   }
 
   /** Builder for RemoveRolesServiceRequest. */
+  @SuppressWarnings("NullAway.Init")
   public static final class Builder {
 
     private List<Identifier> identifiers = Collections.emptyList();
-    private String auditParentId;
+    private @Nullable String auditParentId;
 
     /**
      * Sets the identifiers for the roles to remove using a configurator.
@@ -82,7 +76,7 @@ public record RemoveRolesServiceRequest(
      * @param auditParentId the parent audit log ID for grouping
      * @return this builder
      */
-    public Builder auditParentId(String auditParentId) {
+    public Builder auditParentId(@Nullable String auditParentId) {
       this.auditParentId = auditParentId;
       return this;
     }

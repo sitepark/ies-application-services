@@ -12,15 +12,14 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Consumer;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @JsonDeserialize(builder = UpsertPrivilegeServiceRequest.Builder.class)
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName"})
 public final class UpsertPrivilegeServiceRequest {
 
-  @NotNull private final UpsertPrivilegeRequest upsertPrivilegeRequest;
-  @NotNull private final Updatable<List<Identifier>> labelIdentifiers;
+  private final UpsertPrivilegeRequest upsertPrivilegeRequest;
+  private final Updatable<List<Identifier>> labelIdentifiers;
   @Nullable private final String auditParentId;
 
   private UpsertPrivilegeServiceRequest(Builder builder) {
@@ -46,7 +45,7 @@ public final class UpsertPrivilegeServiceRequest {
     return this.labelIdentifiers;
   }
 
-  public String auditParentId() {
+  public @Nullable String auditParentId() {
     return this.auditParentId;
   }
 
@@ -81,11 +80,12 @@ public final class UpsertPrivilegeServiceRequest {
   }
 
   @JsonPOJOBuilder(withPrefix = "")
+  @SuppressWarnings("NullAway.Init")
   public static final class Builder {
 
     private UpsertPrivilegeRequest upsertPrivilegeRequest;
-    private Set<Identifier> labelIdentifiers;
-    private String auditParentId;
+    private @Nullable Set<Identifier> labelIdentifiers;
+    private @Nullable String auditParentId;
 
     private Builder() {}
 
@@ -112,7 +112,7 @@ public final class UpsertPrivilegeServiceRequest {
       return this;
     }
 
-    public Builder auditParentId(String auditParentId) {
+    public Builder auditParentId(@Nullable String auditParentId) {
       this.auditParentId = auditParentId;
       return this;
     }

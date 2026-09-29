@@ -13,8 +13,7 @@ import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Application Service that orchestrates privilege unassignment operations with cross-cutting
@@ -70,8 +69,7 @@ public final class UnassignPrivilegesFromRolesService {
    * @throws com.sitepark.ies.userrepository.core.domain.exception.PrivilegeNotFoundException if a
    *     privilege does not exist
    */
-  public int unassignPrivilegesFromRoles(
-      @NotNull UnassignPrivilegesFromRolesServiceRequest request) {
+  public int unassignPrivilegesFromRoles(UnassignPrivilegesFromRolesServiceRequest request) {
 
     UnassignPrivilegesFromRolesResult result =
         this.unassignPrivilegesFromRolesUseCase.unassignPrivilegesFromRoles(

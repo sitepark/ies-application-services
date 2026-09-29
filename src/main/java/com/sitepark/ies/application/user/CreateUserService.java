@@ -12,7 +12,7 @@ import com.sitepark.ies.userrepository.core.usecase.user.AssignRolesToUsersResul
 import com.sitepark.ies.userrepository.core.usecase.user.CreateUserResult;
 import com.sitepark.ies.userrepository.core.usecase.user.CreateUserUseCase;
 import jakarta.inject.Inject;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Application Service that orchestrates user creation operations with cross-cutting concerns.
@@ -66,7 +66,7 @@ public final class CreateUserService {
    * @throws com.sitepark.ies.sharedkernel.anchor.AnchorAlreadyExistsException if anchor already
    *     exists
    */
-  public String createUser(@NotNull CreateUserServiceRequest request) {
+  public String createUser(CreateUserServiceRequest request) {
 
     CreateUserResult result = this.createUserUseCase.createUser(request.createUserRequest());
 
@@ -90,12 +90,12 @@ public final class CreateUserService {
     return result.userId();
   }
 
-  protected void createAuditLogs(CreateUserResult result, String auditParentId) {
+  void createAuditLogs(CreateUserResult result, @Nullable String auditParentId) {
     this.createCreationAuditLog(result, auditParentId);
     this.createRoleAssignmentAuditLogs(result, auditParentId);
   }
 
-  private void createCreationAuditLog(CreateUserResult result, String auditParentId) {
+  private void createCreationAuditLog(CreateUserResult result, @Nullable String auditParentId) {
 
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(result.timestamp(), auditParentId);
@@ -107,7 +107,8 @@ public final class CreateUserService {
         result.snapshot());
   }
 
-  private void createRoleAssignmentAuditLogs(CreateUserResult result, String auditParentId) {
+  private void createRoleAssignmentAuditLogs(
+      CreateUserResult result, @Nullable String auditParentId) {
 
     if (!(result.roleAssignmentResult() instanceof AssignRolesToUsersResult.Assigned assigned)) {
       return;

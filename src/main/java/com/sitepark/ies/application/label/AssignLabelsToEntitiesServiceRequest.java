@@ -4,14 +4,13 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sitepark.ies.label.core.usecase.AssignLabelsToEntitiesRequest;
 import java.util.Objects;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @JsonDeserialize(builder = AssignLabelsToEntitiesServiceRequest.Builder.class)
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName"})
 public final class AssignLabelsToEntitiesServiceRequest {
 
-  @NotNull private final AssignLabelsToEntitiesRequest assignLabelsToEntitiesRequest;
+  private final AssignLabelsToEntitiesRequest assignLabelsToEntitiesRequest;
 
   @Nullable private final String auditParentId;
 
@@ -30,7 +29,7 @@ public final class AssignLabelsToEntitiesServiceRequest {
     return this.assignLabelsToEntitiesRequest;
   }
 
-  public String auditParentId() {
+  public @Nullable String auditParentId() {
     return this.auditParentId;
   }
 
@@ -62,11 +61,12 @@ public final class AssignLabelsToEntitiesServiceRequest {
   }
 
   @JsonPOJOBuilder(withPrefix = "")
+  @SuppressWarnings("NullAway.Init")
   public static final class Builder {
 
     private AssignLabelsToEntitiesRequest assignLabelsToEntitiesRequest;
 
-    private String auditParentId;
+    private @Nullable String auditParentId;
 
     private Builder() {}
 
@@ -81,7 +81,7 @@ public final class AssignLabelsToEntitiesServiceRequest {
       return this;
     }
 
-    public Builder auditParentId(String auditParentId) {
+    public Builder auditParentId(@Nullable String auditParentId) {
       this.auditParentId = auditParentId;
       return this;
     }

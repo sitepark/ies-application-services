@@ -11,9 +11,13 @@ import com.sitepark.ies.userrepository.core.usecase.query.filter.Filter;
 import com.sitepark.ies.userrepository.core.usecase.role.GetRolesByIdsUseCase;
 import com.sitepark.ies.userrepository.core.usecase.user.GetAllUsersUseCase;
 import jakarta.inject.Inject;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.jspecify.annotations.Nullable;
 
 @SuppressWarnings("PMD.TooManyMethods")
 public final class MultiEntityNameResolver {
@@ -44,7 +48,7 @@ public final class MultiEntityNameResolver {
             EntityRef.toTypeString(Label.class), this::getLabelNames);
   }
 
-  public String resolveName(EntityRef entityRef) {
+  public @Nullable String resolveName(EntityRef entityRef) {
     Map<EntityRef, String> resolved =
         resolverMap.getOrDefault(entityRef.type(), refs -> Map.of()).apply(Set.of(entityRef));
 
@@ -66,7 +70,7 @@ public final class MultiEntityNameResolver {
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
-  public String resolveDisplayUserName(String userId) {
+  public @Nullable String resolveDisplayUserName(String userId) {
     List<User> users = getAllUsersUseCase.getAllUsers(Filter.idList(userId));
     if (users.isEmpty()) {
       return null;

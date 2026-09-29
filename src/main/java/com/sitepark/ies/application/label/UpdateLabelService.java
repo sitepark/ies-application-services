@@ -13,7 +13,7 @@ import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import jakarta.inject.Inject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Application Service that orchestrates label update operations with cross-cutting concerns.
@@ -69,7 +69,7 @@ public final class UpdateLabelService {
    * @throws com.sitepark.ies.sharedkernel.anchor.AnchorAlreadyExistsException if anchor already
    *     exists for a different label
    */
-  public boolean updateLabel(@NotNull UpdateLabelServiceRequest request) {
+  public boolean updateLabel(UpdateLabelServiceRequest request) {
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("Updating label with ID '{}'", request.updateLabelRequest().label().id());
@@ -87,12 +87,13 @@ public final class UpdateLabelService {
     return result.hasAnyChanges();
   }
 
-  protected void createAuditLogs(UpdateLabelResult result, String auditParentId) {
+  void createAuditLogs(UpdateLabelResult result, @Nullable String auditParentId) {
     this.createAuditLogForLabelUpdate(result, auditParentId);
     this.createAuditLogsForScopeReassignment(result, auditParentId);
   }
 
-  private void createAuditLogForLabelUpdate(UpdateLabelResult result, String auditParentId) {
+  private void createAuditLogForLabelUpdate(
+      UpdateLabelResult result, @Nullable String auditParentId) {
 
     Updated updated = result.getLabelUpdate();
     if (updated == null) {
@@ -110,7 +111,8 @@ public final class UpdateLabelService {
         updated.patch().toJson());
   }
 
-  private void createAuditLogsForScopeReassignment(UpdateLabelResult result, String auditParentId) {
+  private void createAuditLogsForScopeReassignment(
+      UpdateLabelResult result, @Nullable String auditParentId) {
 
     ReassignScopesToLabelsResult.Reassigned reassigned = result.getScopeReassignment();
     if (reassigned == null) {
