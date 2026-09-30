@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class RevertPrivilegeBatchRemoveActionHandler implements RevertEntityActionHandler {
@@ -65,7 +66,9 @@ public class RevertPrivilegeBatchRemoveActionHandler implements RevertEntityActi
 
       this.restorePrivilegeUseCase.restorePrivilege(new RestorePrivilegeRequest(restoreData));
       auditLogService.createLog(
-          EntityRef.of(Privilege.class, restoreData.privilege().id()),
+          EntityRef.of(
+              Privilege.class,
+              Objects.requireNonNull(restoreData.privilege().id(), "restored privilege has an id")),
           restoreData.privilege().name(),
           AuditLogAction.RESTORE,
           null,

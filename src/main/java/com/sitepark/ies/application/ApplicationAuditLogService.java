@@ -41,10 +41,13 @@ public class ApplicationAuditLogService {
     this.parentId = parentId;
   }
 
-  // The audit-core API is not yet JSpecify-annotated, so its parameters are treated as non-null.
+  // audit-core does not annotate the optional values of AuditLogTarget and CreateAuditLogRequest
+  // (id, name, data, parent id) as @Nullable yet
   @SuppressWarnings("NullAway")
   public String createBatchLog(@Nullable Class<?> type, AuditBatchLogAction action) {
-    AuditLogTarget target = AuditLogTarget.of(type, null, null);
+    // A batch log may span several types; then it has no type (EntityRef.toTypeString rejects null)
+    String typeString = type == null ? null : EntityRef.toTypeString(type);
+    AuditLogTarget target = new AuditLogTarget(typeString, null, null);
     return this.createAuditLogUseCase.createAuditLog(
         new CreateAuditLogRequest(target, action.name(), null, null, timestamp, parentId));
   }
@@ -62,7 +65,8 @@ public class ApplicationAuditLogService {
         forwardData);
   }
 
-  // The audit-core API is not yet JSpecify-annotated, so its parameters are treated as non-null.
+  // audit-core does not annotate the optional values of AuditLogTarget and CreateAuditLogRequest
+  // (id, name, data, parent id) as @Nullable yet
   @SuppressWarnings("NullAway")
   public String createLog(
       EntityRef entityRef,
@@ -74,7 +78,8 @@ public class ApplicationAuditLogService {
     return this.createLog(target, action, backwardData, forwardData);
   }
 
-  // The audit-core API is not yet JSpecify-annotated, so its parameters are treated as non-null.
+  // audit-core does not annotate the optional values of AuditLogTarget and CreateAuditLogRequest
+  // (id, name, data, parent id) as @Nullable yet
   @SuppressWarnings("NullAway")
   public String createLog(
       AuditLogTarget target,

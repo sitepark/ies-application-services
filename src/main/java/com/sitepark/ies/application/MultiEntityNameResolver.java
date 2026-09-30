@@ -14,6 +14,7 @@ import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -114,7 +115,11 @@ public final class MultiEntityNameResolver {
     String type = EntityRef.toTypeString(User.class);
     List<User> users = getAllUsersUseCase.getAllUsers(Filter.idList(ids.toArray(String[]::new)));
     return users.stream()
-        .collect(Collectors.toMap(user -> EntityRef.of(type, user.id()), User::toDisplayName));
+        .collect(
+            Collectors.toMap(
+                user ->
+                    EntityRef.of(type, Objects.requireNonNull(user.id(), "stored user has an id")),
+                User::toDisplayName));
   }
 
   private Map<EntityRef, String> getRolesNames(Set<EntityRef> entityRefs) {
@@ -126,7 +131,11 @@ public final class MultiEntityNameResolver {
     String type = EntityRef.toTypeString(Role.class);
     List<Role> roles = getRolesByIdsUseCase.getRolesByIds(new ArrayList<>(ids));
     return roles.stream()
-        .collect(Collectors.toMap(role -> EntityRef.of(type, role.id()), Role::name));
+        .collect(
+            Collectors.toMap(
+                role ->
+                    EntityRef.of(type, Objects.requireNonNull(role.id(), "stored role has an id")),
+                Role::name));
   }
 
   private Map<EntityRef, String> getPrivilegesNames(Set<EntityRef> entityRefs) {
@@ -139,7 +148,11 @@ public final class MultiEntityNameResolver {
     List<Privilege> privileges = getPrivilegesByIdsUseCase.getPrivilegesByIds(new ArrayList<>(ids));
     return privileges.stream()
         .collect(
-            Collectors.toMap(privilege -> EntityRef.of(type, privilege.id()), Privilege::name));
+            Collectors.toMap(
+                privilege ->
+                    EntityRef.of(
+                        type, Objects.requireNonNull(privilege.id(), "stored privilege has an id")),
+                Privilege::name));
   }
 
   private Map<EntityRef, String> getLabelNames(Set<EntityRef> entityRefs) {
@@ -151,7 +164,12 @@ public final class MultiEntityNameResolver {
     String type = EntityRef.toTypeString(Label.class);
     List<Label> labels = getLabelsByIdsUseCase.getLabelsByIds(new ArrayList<>(ids));
     return labels.stream()
-        .collect(Collectors.toMap(label -> EntityRef.of(type, label.id()), Label::name));
+        .collect(
+            Collectors.toMap(
+                label ->
+                    EntityRef.of(
+                        type, Objects.requireNonNull(label.id(), "stored label has an id")),
+                Label::name));
   }
 
   private <T> Set<String> extractIds(Set<EntityRef> entityRefs, Class<T> type) {

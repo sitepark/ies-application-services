@@ -12,6 +12,7 @@ import com.sitepark.ies.userrepository.core.usecase.user.AssignRolesToUsersResul
 import com.sitepark.ies.userrepository.core.usecase.user.CreateUserResult;
 import com.sitepark.ies.userrepository.core.usecase.user.CreateUserUseCase;
 import jakarta.inject.Inject;
+import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -120,7 +121,9 @@ public final class CreateUserService {
     var assignments = assigned.assignments();
 
     auditLogService.createLog(
-        EntityRef.of(User.class, result.snapshot().user().id()),
+        EntityRef.of(
+            User.class,
+            Objects.requireNonNull(result.snapshot().user().id(), "created user has an id")),
         result.snapshot().user().toDisplayName(),
         AuditLogAction.ASSIGN_ROLES_TO_USERS,
         assignments.roleIds(),

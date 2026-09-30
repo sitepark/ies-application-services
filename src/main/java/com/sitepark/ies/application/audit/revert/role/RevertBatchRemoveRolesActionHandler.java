@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class RevertBatchRemoveRolesActionHandler implements RevertEntityActionHandler {
@@ -65,7 +66,9 @@ public class RevertBatchRemoveRolesActionHandler implements RevertEntityActionHa
 
       this.restoreRoleUseCase.restoreRole(new RestoreRoleRequest(restoreData));
       auditLogService.createLog(
-          EntityRef.of(Role.class, restoreData.role().id()),
+          EntityRef.of(
+              Role.class,
+              Objects.requireNonNull(restoreData.role().id(), "restored role has an id")),
           restoreData.role().name(),
           AuditLogAction.RESTORE,
           null,

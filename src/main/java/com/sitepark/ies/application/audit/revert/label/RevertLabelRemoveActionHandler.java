@@ -47,6 +47,9 @@ public class RevertLabelRemoveActionHandler implements RevertEntityActionHandler
     }
   }
 
+  // audit-core does not annotate the optional values of AuditLogTarget and CreateAuditLogRequest
+  // (here the name) as @Nullable yet
+  @SuppressWarnings("NullAway")
   private void createRestoreAuditLog(RestoreLabelResult.Restored restored, String auditParentId) {
 
     ApplicationAuditLogService auditLogService =
