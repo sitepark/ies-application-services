@@ -15,6 +15,8 @@ import com.sitepark.ies.userrepository.core.usecase.role.RestoreRoleResult;
 import com.sitepark.ies.userrepository.core.usecase.role.RestoreRoleUseCase;
 import jakarta.inject.Inject;
 import java.io.IOException;
+import java.util.Objects;
+import org.jspecify.annotations.Nullable;
 
 public class RevertRemoveRoleActionHandler implements RevertEntityActionHandler {
 
@@ -36,7 +38,9 @@ public class RevertRemoveRoleActionHandler implements RevertEntityActionHandler 
   public void revert(RevertRequest request) {
     try {
       RoleSnapshot restoreData =
-          this.auditLogService.deserialize(request.backwardData(), RoleSnapshot.class);
+          this.auditLogService.deserialize(
+              Objects.requireNonNull(request.backwardData(), "revert needs the backward data"),
+              RoleSnapshot.class);
       RestoreRoleResult result =
           this.restoreRoleUseCase.restoreRole(new RestoreRoleRequest(restoreData));
       if (result instanceof RestoreRoleResult.Restored restored) {
@@ -47,7 +51,8 @@ public class RevertRemoveRoleActionHandler implements RevertEntityActionHandler 
     }
   }
 
-  private void createRestoreAuditLog(RestoreRoleResult.Restored restored, String auditParentId) {
+  private void createRestoreAuditLog(
+      RestoreRoleResult.Restored restored, @Nullable String auditParentId) {
 
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(restored.timestamp(), auditParentId);

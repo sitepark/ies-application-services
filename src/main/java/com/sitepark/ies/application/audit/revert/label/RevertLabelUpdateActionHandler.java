@@ -12,6 +12,7 @@ import com.sitepark.ies.sharedkernel.patch.PatchDocument;
 import com.sitepark.ies.sharedkernel.patch.PatchService;
 import com.sitepark.ies.sharedkernel.patch.PatchServiceFactory;
 import jakarta.inject.Inject;
+import java.util.Objects;
 
 public class RevertLabelUpdateActionHandler implements RevertEntityActionHandler {
 
@@ -31,10 +32,12 @@ public class RevertLabelUpdateActionHandler implements RevertEntityActionHandler
 
   @Override
   public void revert(RevertRequest request) {
-    PatchDocument patch = this.patchService.parsePatch(request.backwardData());
+    PatchDocument patch =
+        this.patchService.parsePatch(
+            Objects.requireNonNull(request.backwardData(), "revert needs the backward data"));
     Label label =
         this.repository
-            .get(request.target().id())
+            .get(Objects.requireNonNull(request.target().id(), "revert target has an id"))
             .orElseThrow(
                 () ->
                     new RevertFailedException(

@@ -20,6 +20,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import org.jspecify.annotations.Nullable;
 
 public class RevertBatchRemoveUsersActionHandler implements RevertEntityActionHandler {
 
@@ -72,14 +73,15 @@ public class RevertBatchRemoveUsersActionHandler implements RevertEntityActionHa
     }
   }
 
-  private String createRevertBatchRemoveLog(Instant timestamp, String auditParentId) {
+  private String createRevertBatchRemoveLog(Instant timestamp, @Nullable String auditParentId) {
 
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(timestamp, auditParentId);
     return auditLogService.createBatchLog(User.class, AuditBatchLogAction.REVERT_BATCH_REMOVE);
   }
 
-  private void createRestoreAuditLog(RestoreUserResult.Restored restored, String auditParentId) {
+  private void createRestoreAuditLog(
+      RestoreUserResult.Restored restored, @Nullable String auditParentId) {
 
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(restored.timestamp(), auditParentId);

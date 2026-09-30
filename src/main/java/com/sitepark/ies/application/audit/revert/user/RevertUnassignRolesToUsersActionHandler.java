@@ -10,6 +10,7 @@ import com.sitepark.ies.userrepository.core.usecase.user.AssignRolesToUsersReque
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 public class RevertUnassignRolesToUsersActionHandler implements RevertEntityActionHandler {
 
@@ -28,7 +29,9 @@ public class RevertUnassignRolesToUsersActionHandler implements RevertEntityActi
   public void revert(RevertRequest request) {
     try {
       List<String> roleIds =
-          this.auditLogService.deserializeList(request.backwardData(), String.class);
+          this.auditLogService.deserializeList(
+              Objects.requireNonNull(request.backwardData(), "revert needs the backward data"),
+              String.class);
       this.assignRolesToUsersService.assignRolesToUsers(
           AssignRolesToUsersServiceRequest.builder()
               .assignRolesToUsersRequest(
