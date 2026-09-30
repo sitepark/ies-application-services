@@ -18,9 +18,10 @@ import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Application Service that orchestrates labels-to-entities reassignment operations with
@@ -76,8 +77,7 @@ public final class ReassignLabelsToEntitiesService {
    * @throws com.sitepark.ies.label.core.domain.exception.LabelNotFoundException if a label does not
    *     exist
    */
-  public ReassignResult reassignEntitiesFromLabels(
-      @NotNull ReassignLabelsToEntitiesServiceRequest request) {
+  public ReassignResult reassignEntitiesFromLabels(ReassignLabelsToEntitiesServiceRequest request) {
 
     this.checkAuthorization(request.reassignLabelsToEntitiesRequest());
 
@@ -119,8 +119,9 @@ public final class ReassignLabelsToEntitiesService {
         .forEach(
             entityRef -> {
               List<String> labels = unassignments.labelIds(entityRef);
-              auditLogServiceMap
-                  .get(entityRef.type())
+              Objects.requireNonNull(
+                      auditLogServiceMap.get(entityRef.type()),
+                      "no audit log service for entity type")
                   .createLog(
                       entityRef,
                       entityNames.get(entityRef),
@@ -134,8 +135,9 @@ public final class ReassignLabelsToEntitiesService {
         .forEach(
             entityRef -> {
               List<String> labels = assignments.labelIds(entityRef);
-              auditLogServiceMap
-                  .get(entityRef.type())
+              Objects.requireNonNull(
+                      auditLogServiceMap.get(entityRef.type()),
+                      "no audit log service for entity type")
                   .createLog(
                       entityRef,
                       entityNames.get(entityRef),
@@ -156,7 +158,7 @@ public final class ReassignLabelsToEntitiesService {
   }
 
   private Map<String, ApplicationAuditLogService> createAuditLogServicePerType(
-      ReassignLabelsToEntitiesResult.Reassigned result, String auditParentId) {
+      ReassignLabelsToEntitiesResult.Reassigned result, @Nullable String auditParentId) {
 
     List<EntityRef> entityRefs = new ArrayList<>();
     entityRefs.addAll(result.assignments().entityRefs());

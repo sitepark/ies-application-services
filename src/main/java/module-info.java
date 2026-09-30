@@ -1,3 +1,5 @@
+import org.jspecify.annotations.NullMarked;
+
 /**
  * Application Services module for orchestrating operations across multiple bounded contexts.
  *
@@ -15,6 +17,7 @@
  * <p><b>Note:</b> This is the Application Layer in Clean Architecture. It does NOT contain business
  * logic - it only coordinates use cases that already contain the business logic.
  */
+@NullMarked
 module com.sitepark.ies.application {
   exports com.sitepark.ies.application.user;
   exports com.sitepark.ies.application.label;
@@ -22,6 +25,7 @@ module com.sitepark.ies.application {
   exports com.sitepark.ies.application.value;
   exports com.sitepark.ies.application.privilege;
 
+  requires static org.jspecify;
   requires com.google.guice;
   requires com.sitepark.ies.userrepository.core;
   requires com.sitepark.ies.security.core;
@@ -29,8 +33,6 @@ module com.sitepark.ies.application {
   requires com.sitepark.ies.sharedkernel;
   requires jakarta.inject;
   requires org.apache.logging.log4j;
-  requires static com.github.spotbugs.annotations;
-  requires static org.jetbrains.annotations;
   requires java.desktop;
   requires com.fasterxml.jackson.databind;
   requires com.sitepark.ies.audit.core;

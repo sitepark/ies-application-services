@@ -9,7 +9,7 @@ import com.sitepark.ies.label.core.usecase.CreateLabelResult;
 import com.sitepark.ies.label.core.usecase.CreateLabelUseCase;
 import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import jakarta.inject.Inject;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Application Service that orchestrates label creation operations with cross-cutting concerns.
@@ -56,7 +56,7 @@ public final class CreateLabelService {
    * @throws com.sitepark.ies.sharedkernel.anchor.AnchorAlreadyExistsException if anchor already
    *     exists
    */
-  public String createLabel(@NotNull CreateLabelServiceRequest request) {
+  public String createLabel(CreateLabelServiceRequest request) {
 
     CreateLabelResult result = this.createLabelUseCase.createLabel(request.createLabelRequest());
     this.createAuditLogs(result, request.auditParentId());
@@ -64,12 +64,13 @@ public final class CreateLabelService {
     return result.labelId();
   }
 
-  protected void createAuditLogs(CreateLabelResult result, String auditLogParentId) {
+  void createAuditLogs(CreateLabelResult result, @Nullable String auditLogParentId) {
     createAuditLogForLabelUpdate(result, auditLogParentId);
     createAuditLogsForScopeReassignment(result, auditLogParentId);
   }
 
-  private void createAuditLogForLabelUpdate(CreateLabelResult result, String auditLogParentId) {
+  private void createAuditLogForLabelUpdate(
+      CreateLabelResult result, @Nullable String auditLogParentId) {
 
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(result.timestamp(), auditLogParentId);
@@ -83,7 +84,8 @@ public final class CreateLabelService {
         result.snapshot());
   }
 
-  private void createAuditLogsForScopeReassignment(CreateLabelResult result, String auditParentId) {
+  private void createAuditLogsForScopeReassignment(
+      CreateLabelResult result, @Nullable String auditParentId) {
 
     if (!(result.scopeAssignmentResult() instanceof AssignScopesToLabelsResult.Assigned assign)) {
       return;

@@ -14,8 +14,9 @@ import com.sitepark.ies.sharedkernel.security.AccessDeniedException;
 import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Application Service that orchestrates entity-to-label assignment operations with cross-cutting
@@ -73,7 +74,7 @@ public final class AssignLabelsToEntitiesService {
    * @throws com.sitepark.ies.label.core.domain.exception.LabelNotFoundException if a label does not
    *     exist
    */
-  public int assignLabelsToEntities(@NotNull AssignLabelsToEntitiesServiceRequest request) {
+  public int assignLabelsToEntities(AssignLabelsToEntitiesServiceRequest request) {
 
     this.checkAuthorization(request.assignEntitiesToLabelsRequest());
 
@@ -97,7 +98,8 @@ public final class AssignLabelsToEntitiesService {
     }
   }
 
-  private void createAuditLogs(AssignLabelsToEntitiesResult.Assigned result, String auditParentId) {
+  private void createAuditLogs(
+      AssignLabelsToEntitiesResult.Assigned result, @Nullable String auditParentId) {
 
     Map<EntityRef, String> entityNames = resolveEntityNames(result);
 
@@ -115,8 +117,9 @@ public final class AssignLabelsToEntitiesService {
         .forEach(
             entityRef -> {
               List<String> labelIds = assignments.labelIds(entityRef);
-              auditLogServiceMap
-                  .get(entityRef.type())
+              Objects.requireNonNull(
+                      auditLogServiceMap.get(entityRef.type()),
+                      "no audit log service for entity type")
                   .createLog(
                       entityRef,
                       entityNames.get(entityRef),

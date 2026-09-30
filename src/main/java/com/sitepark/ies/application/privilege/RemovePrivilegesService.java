@@ -15,7 +15,6 @@ import java.time.Clock;
 import java.time.Instant;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Application Service that orchestrates privilege removal operations with cross-cutting concerns.
@@ -72,7 +71,7 @@ public final class RemovePrivilegesService {
    * @throws com.sitepark.ies.sharedkernel.anchor.AnchorNotFoundException if an anchor does not
    *     exist
    */
-  public void removePrivileges(@NotNull RemovePrivilegesServiceRequest request) {
+  public void removePrivileges(RemovePrivilegesServiceRequest request) {
 
     if (request.isEmpty()) {
       return;

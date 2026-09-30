@@ -4,7 +4,6 @@ import com.sitepark.ies.application.value.UpsertResult;
 import com.sitepark.ies.label.core.usecase.UpsertLabelResult;
 import com.sitepark.ies.label.core.usecase.UpsertLabelUseCase;
 import jakarta.inject.Inject;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Application Service that orchestrates label update operations with cross-cutting concerns.
@@ -36,7 +35,7 @@ public final class UpsertLabelService {
     this.updateLabelService = updateLabelService;
   }
 
-  public UpsertResult upsertLabel(@NotNull UpsertLabelServiceRequest request) {
+  public UpsertResult upsertLabel(UpsertLabelServiceRequest request) {
 
     UpsertLabelResult result = this.upsertLabelUseCase.upsertLabel(request.upsertLabelRequest());
 

@@ -10,18 +10,16 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Consumer;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @JsonDeserialize(builder = CreateRoleServiceRequest.Builder.class)
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName"})
 public final class CreateRoleServiceRequest {
 
-  @NotNull
   private final com.sitepark.ies.userrepository.core.usecase.role.CreateRoleRequest
       createRoleRequest;
 
-  @NotNull private final List<Identifier> labelIdentifiers;
+  private final List<Identifier> labelIdentifiers;
   @Nullable private final String auditParentId;
 
   private CreateRoleServiceRequest(Builder builder) {
@@ -42,7 +40,7 @@ public final class CreateRoleServiceRequest {
     return this.labelIdentifiers;
   }
 
-  public String auditParentId() {
+  public @Nullable String auditParentId() {
     return this.auditParentId;
   }
 
@@ -77,11 +75,12 @@ public final class CreateRoleServiceRequest {
   }
 
   @JsonPOJOBuilder(withPrefix = "")
+  @SuppressWarnings("NullAway.Init")
   public static final class Builder {
 
     private com.sitepark.ies.userrepository.core.usecase.role.CreateRoleRequest createRoleRequest;
     private final Set<Identifier> labelIdentifiers = new TreeSet<>();
-    private String auditParentId;
+    private @Nullable String auditParentId;
 
     private Builder() {}
 
@@ -105,7 +104,7 @@ public final class CreateRoleServiceRequest {
       return this;
     }
 
-    public Builder auditParentId(String auditParentId) {
+    public Builder auditParentId(@Nullable String auditParentId) {
       this.auditParentId = auditParentId;
       return this;
     }

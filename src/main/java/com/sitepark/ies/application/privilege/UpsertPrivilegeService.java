@@ -9,7 +9,7 @@ import com.sitepark.ies.userrepository.core.domain.entity.Privilege;
 import com.sitepark.ies.userrepository.core.usecase.privilege.UpsertPrivilegeResult;
 import com.sitepark.ies.userrepository.core.usecase.privilege.UpsertPrivilegeUseCase;
 import jakarta.inject.Inject;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Application Service that orchestrates privilege update operations with cross-cutting concerns.
@@ -44,7 +44,7 @@ public final class UpsertPrivilegeService {
     this.reassignLabelsToEntitiesService = reassignLabelsToEntitiesService;
   }
 
-  public UpsertResult upsertPrivilege(@NotNull UpsertPrivilegeServiceRequest request) {
+  public UpsertResult upsertPrivilege(UpsertPrivilegeServiceRequest request) {
 
     UpsertPrivilegeResult result =
         this.upsertPrivilegeUseCase.upsertPrivilege(request.upsertPrivilegeRequest());
@@ -71,7 +71,7 @@ public final class UpsertPrivilegeService {
     return upsertResult;
   }
 
-  private void createAuditLogs(UpsertPrivilegeResult result, String auditParentId) {
+  private void createAuditLogs(UpsertPrivilegeResult result, @Nullable String auditParentId) {
     if (result instanceof UpsertPrivilegeResult.Updated updated) {
       if (updated.updatePrivilegeResult().hasAnyChanges()) {
         this.updatePrivilegeService.createAuditLogs(updated.updatePrivilegeResult(), auditParentId);

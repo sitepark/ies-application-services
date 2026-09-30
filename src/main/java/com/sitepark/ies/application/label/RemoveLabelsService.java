@@ -15,7 +15,6 @@ import java.time.Clock;
 import java.time.Instant;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Application Service that orchestrates label removal operations with cross-cutting concerns.
@@ -70,7 +69,7 @@ public final class RemoveLabelsService {
    * @throws com.sitepark.ies.sharedkernel.anchor.AnchorNotFoundException if an anchor does not
    *     exist
    */
-  public int removeLabels(@NotNull RemoveLabelsServiceRequest request) {
+  public int removeLabels(RemoveLabelsServiceRequest request) {
 
     if (request.identifiers().isEmpty()) {
       return 0;

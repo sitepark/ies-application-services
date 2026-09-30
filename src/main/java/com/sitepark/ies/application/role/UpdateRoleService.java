@@ -15,8 +15,7 @@ import com.sitepark.ies.userrepository.core.usecase.role.UpdateRoleUseCase;
 import jakarta.inject.Inject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Application Service that orchestrates role update operations with cross-cutting concerns.
@@ -77,7 +76,7 @@ public final class UpdateRoleService {
    * @throws com.sitepark.ies.sharedkernel.anchor.AnchorAlreadyExistsException if anchor already
    *     exists for a different role
    */
-  public String updateRole(@NotNull UpdateRoleServiceRequest request) {
+  public String updateRole(UpdateRoleServiceRequest request) {
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("Updating role with ID '{}'", request.updateRoleRequest().role().id());
@@ -108,12 +107,13 @@ public final class UpdateRoleService {
     return result.roleId();
   }
 
-  protected void createAuditLogs(UpdateRoleResult result, String auditParentId) {
+  void createAuditLogs(UpdateRoleResult result, @Nullable String auditParentId) {
     this.createAuditLogForRoleUpdate(result, auditParentId);
     this.createAuditLogsForPrivilegeReassignment(result, auditParentId);
   }
 
-  private void createAuditLogForRoleUpdate(UpdateRoleResult result, String auditParentId) {
+  private void createAuditLogForRoleUpdate(
+      UpdateRoleResult result, @Nullable String auditParentId) {
 
     if (!result.hasRoleChanges()) {
       return;

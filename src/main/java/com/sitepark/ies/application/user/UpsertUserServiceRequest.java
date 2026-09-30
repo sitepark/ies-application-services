@@ -11,15 +11,14 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Consumer;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @JsonDeserialize(builder = UpsertUserServiceRequest.Builder.class)
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName"})
 public final class UpsertUserServiceRequest {
 
-  @NotNull private final UpsertUserRequest upsertUserRequest;
-  @NotNull private final Updatable<List<Identifier>> labelIdentifiers;
+  private final UpsertUserRequest upsertUserRequest;
+  private final Updatable<List<Identifier>> labelIdentifiers;
   @Nullable private final String auditParentId;
 
   private UpsertUserServiceRequest(Builder builder) {
@@ -44,7 +43,7 @@ public final class UpsertUserServiceRequest {
     return this.labelIdentifiers;
   }
 
-  public String auditParentId() {
+  public @Nullable String auditParentId() {
     return this.auditParentId;
   }
 
@@ -79,11 +78,12 @@ public final class UpsertUserServiceRequest {
   }
 
   @JsonPOJOBuilder(withPrefix = "")
+  @SuppressWarnings("NullAway.Init")
   public static final class Builder {
 
     private UpsertUserRequest upsertUserRequest;
-    private Set<Identifier> labelIdentifiers;
-    private String auditParentId;
+    private @Nullable Set<Identifier> labelIdentifiers;
+    private @Nullable String auditParentId;
 
     private Builder() {}
 
@@ -110,7 +110,7 @@ public final class UpsertUserServiceRequest {
       return this;
     }
 
-    public Builder auditParentId(String auditParentId) {
+    public Builder auditParentId(@Nullable String auditParentId) {
       this.auditParentId = auditParentId;
       return this;
     }

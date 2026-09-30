@@ -4,14 +4,13 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sitepark.ies.label.core.usecase.UpdateLabelRequest;
 import java.util.Objects;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @JsonDeserialize(builder = UpdateLabelServiceRequest.Builder.class)
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName"})
 public final class UpdateLabelServiceRequest {
 
-  @NotNull private final UpdateLabelRequest updateLabelRequest;
+  private final UpdateLabelRequest updateLabelRequest;
   @Nullable private final String auditParentId;
 
   private UpdateLabelServiceRequest(Builder builder) {
@@ -28,7 +27,7 @@ public final class UpdateLabelServiceRequest {
     return this.updateLabelRequest;
   }
 
-  public String auditParentId() {
+  public @Nullable String auditParentId() {
     return this.auditParentId;
   }
 
@@ -60,11 +59,12 @@ public final class UpdateLabelServiceRequest {
   }
 
   @JsonPOJOBuilder(withPrefix = "")
+  @SuppressWarnings("NullAway.Init")
   public static final class Builder {
 
     private UpdateLabelRequest updateLabelRequest;
 
-    private String auditParentId;
+    private @Nullable String auditParentId;
 
     private Builder() {}
 
@@ -77,7 +77,7 @@ public final class UpdateLabelServiceRequest {
       return this;
     }
 
-    public Builder auditParentId(String auditParentId) {
+    public Builder auditParentId(@Nullable String auditParentId) {
       this.auditParentId = auditParentId;
       return this;
     }

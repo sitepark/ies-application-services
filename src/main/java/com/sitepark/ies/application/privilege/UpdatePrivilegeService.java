@@ -24,7 +24,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Application Service that orchestrates privilege update operations with cross-cutting concerns.
@@ -85,7 +85,7 @@ public final class UpdatePrivilegeService {
    * @throws com.sitepark.ies.sharedkernel.anchor.AnchorAlreadyExistsException if anchor already
    *     exists for a different privilege
    */
-  public String updatePrivilege(@NotNull UpdatePrivilegeServiceRequest request) {
+  public String updatePrivilege(UpdatePrivilegeServiceRequest request) {
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug(
@@ -119,13 +119,13 @@ public final class UpdatePrivilegeService {
     return result.privilegeId();
   }
 
-  protected void createAuditLogs(UpdatePrivilegeResult result, String auditParentId) {
+  void createAuditLogs(UpdatePrivilegeResult result, @Nullable String auditParentId) {
     this.createAuditLogForPrivilegeUpdate(result, auditParentId);
     this.createAuditLogsForRoleReassignment(result, auditParentId);
   }
 
   private void createAuditLogForPrivilegeUpdate(
-      UpdatePrivilegeResult result, String auditParentId) {
+      UpdatePrivilegeResult result, @Nullable String auditParentId) {
 
     if (!result.hasPrivilegeChanges()) {
       return;
@@ -144,7 +144,7 @@ public final class UpdatePrivilegeService {
   }
 
   private void createAuditLogsForRoleReassignment(
-      UpdatePrivilegeResult result, String auditParentId) {
+      UpdatePrivilegeResult result, @Nullable String auditParentId) {
 
     ReassignRolesToPrivilegesResult.Reassigned reassigned =
         result.roleReassignmentResult() instanceof ReassignRolesToPrivilegesResult.Reassigned r

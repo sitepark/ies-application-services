@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Request object for creating a user with optional password.
@@ -39,8 +39,7 @@ public final class CreateUserWithPasswordRequest {
     return user;
   }
 
-  @Nullable
-  public String password() {
+  public @Nullable String password() {
     return password;
   }
 
@@ -52,8 +51,7 @@ public final class CreateUserWithPasswordRequest {
     return labelIdentifiers;
   }
 
-  @Nullable
-  public String auditParentId() {
+  public @Nullable String auditParentId() {
     return auditParentId;
   }
 
@@ -94,13 +92,14 @@ public final class CreateUserWithPasswordRequest {
         + '}';
   }
 
+  @SuppressWarnings("NullAway.Init")
   public static final class Builder {
 
     private User user;
-    private String password;
+    private @Nullable String password;
     private final List<Identifier> roleIdentifiers = new ArrayList<>();
     private final List<Identifier> labelIdentifiers = new ArrayList<>();
-    private String auditParentId;
+    private @Nullable String auditParentId;
 
     private Builder() {}
 
@@ -109,7 +108,7 @@ public final class CreateUserWithPasswordRequest {
       return this;
     }
 
-    public Builder password(String password) {
+    public Builder password(@Nullable String password) {
       this.password = password;
       return this;
     }
@@ -130,7 +129,7 @@ public final class CreateUserWithPasswordRequest {
       return this;
     }
 
-    public Builder auditParentId(String auditParentId) {
+    public Builder auditParentId(@Nullable String auditParentId) {
       this.auditParentId = auditParentId;
       return this;
     }

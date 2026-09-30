@@ -10,7 +10,7 @@ import com.sitepark.ies.audit.core.usecase.CreateAuditLogUseCase;
 import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import java.io.IOException;
 import java.time.Instant;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
 public class ApplicationAuditLogService {
@@ -33,38 +33,59 @@ public class ApplicationAuditLogService {
     this.parentId = parentId;
   }
 
-  public String parentId() {
+  public @Nullable String parentId() {
     return this.parentId;
   }
 
-  public void updateParentId(String parentId) {
+  public void updateParentId(@Nullable String parentId) {
     this.parentId = parentId;
   }
 
-  public String createBatchLog(Class<?> type, AuditBatchLogAction action) {
-    AuditLogTarget target = AuditLogTarget.of(type, null, null);
+  // audit-core does not annotate the optional values of AuditLogTarget and CreateAuditLogRequest
+  // (id, name, data, parent id) as @Nullable yet
+  @SuppressWarnings("NullAway")
+  public String createBatchLog(@Nullable Class<?> type, AuditBatchLogAction action) {
+    // A batch log may span several types; then it has no type (EntityRef.toTypeString rejects null)
+    String typeString = type == null ? null : EntityRef.toTypeString(type);
+    AuditLogTarget target = new AuditLogTarget(typeString, null, null);
     return this.createAuditLogUseCase.createAuditLog(
         new CreateAuditLogRequest(target, action.name(), null, null, timestamp, parentId));
   }
 
   public String createLog(
-      EntityRef entityRef, AuditLogAction action, Object backwardData, Object forwardData) {
-    AuditLogTarget target = this.toTarget(entityRef);
-    return this.createLog(target, action, backwardData, forwardData);
+      EntityRef entityRef,
+      AuditLogAction action,
+      @Nullable Object backwardData,
+      @Nullable Object forwardData) {
+    return this.createLog(
+        entityRef,
+        this.multiEntityNameResolver.resolveName(entityRef),
+        action,
+        backwardData,
+        forwardData);
   }
 
+  // audit-core does not annotate the optional values of AuditLogTarget and CreateAuditLogRequest
+  // (id, name, data, parent id) as @Nullable yet
+  @SuppressWarnings("NullAway")
   public String createLog(
       EntityRef entityRef,
-      String entityName,
+      @Nullable String entityName,
       AuditLogAction action,
-      Object backwardData,
-      Object forwardData) {
+      @Nullable Object backwardData,
+      @Nullable Object forwardData) {
     AuditLogTarget target = new AuditLogTarget(entityRef.type(), entityRef.id(), entityName);
     return this.createLog(target, action, backwardData, forwardData);
   }
 
+  // audit-core does not annotate the optional values of AuditLogTarget and CreateAuditLogRequest
+  // (id, name, data, parent id) as @Nullable yet
+  @SuppressWarnings("NullAway")
   public String createLog(
-      AuditLogTarget target, AuditLogAction action, Object backwardData, Object forwardData) {
+      AuditLogTarget target,
+      AuditLogAction action,
+      @Nullable Object backwardData,
+      @Nullable Object forwardData) {
 
     return this.createAuditLogUseCase.createAuditLog(
         new CreateAuditLogRequest(
@@ -76,22 +97,17 @@ public class ApplicationAuditLogService {
             this.parentId));
   }
 
-  private String serialize(AuditLogTarget target, Object o) {
+  private @Nullable String serialize(AuditLogTarget target, @Nullable Object o) {
     if (o == null) {
       return null;
     }
-    if (o instanceof String) {
-      return (String) o;
+    if (o instanceof String string) {
+      return string;
     }
     try {
       return this.auditLogService.serialize(o);
     } catch (IOException e) {
       throw new CreateAuditLogEntryFailedException(target, e);
     }
-  }
-
-  private AuditLogTarget toTarget(EntityRef entityRef) {
-    return new AuditLogTarget(
-        entityRef.type(), entityRef.id(), this.multiEntityNameResolver.resolveName(entityRef));
   }
 }

@@ -9,14 +9,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Consumer;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @JsonDeserialize(builder = RemoveLabelsServiceRequest.Builder.class)
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName"})
 public final class RemoveLabelsServiceRequest {
 
-  @NotNull private final List<Identifier> identifiers;
+  private final List<Identifier> identifiers;
   @Nullable private final String auditParentId;
 
   private RemoveLabelsServiceRequest(Builder builder) {
@@ -32,7 +31,7 @@ public final class RemoveLabelsServiceRequest {
     return this.identifiers;
   }
 
-  public String auditParentId() {
+  public @Nullable String auditParentId() {
     return this.auditParentId;
   }
 
@@ -64,11 +63,12 @@ public final class RemoveLabelsServiceRequest {
   }
 
   @JsonPOJOBuilder(withPrefix = "")
+  @SuppressWarnings("NullAway.Init")
   public static final class Builder {
 
     private final Set<Identifier> identifiers = new TreeSet<>();
 
-    private String auditParentId;
+    private @Nullable String auditParentId;
 
     private Builder() {}
 
@@ -84,7 +84,7 @@ public final class RemoveLabelsServiceRequest {
       return this;
     }
 
-    public Builder auditParentId(String auditParentId) {
+    public Builder auditParentId(@Nullable String auditParentId) {
       this.auditParentId = auditParentId;
       return this;
     }

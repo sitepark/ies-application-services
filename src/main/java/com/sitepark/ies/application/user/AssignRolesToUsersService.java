@@ -13,8 +13,7 @@ import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Application Service that orchestrates role assignment operations with cross-cutting concerns.
@@ -70,7 +69,7 @@ public final class AssignRolesToUsersService {
    * @throws com.sitepark.ies.userrepository.core.domain.exception.RoleNotFoundException if a role
    *     does not exist
    */
-  public int assignRolesToUsers(@NotNull AssignRolesToUsersServiceRequest request) {
+  public int assignRolesToUsers(AssignRolesToUsersServiceRequest request) {
 
     AssignRolesToUsersResult result =
         this.assignRolesToUsersUseCase.assignRolesToUsers(request.assignRolesToUsersRequest());

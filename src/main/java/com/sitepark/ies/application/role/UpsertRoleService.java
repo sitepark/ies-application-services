@@ -9,7 +9,7 @@ import com.sitepark.ies.userrepository.core.domain.entity.Role;
 import com.sitepark.ies.userrepository.core.usecase.role.UpsertRoleResult;
 import com.sitepark.ies.userrepository.core.usecase.role.UpsertRoleUseCase;
 import jakarta.inject.Inject;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Application Service that orchestrates role update operations with cross-cutting concerns.
@@ -44,7 +44,7 @@ public final class UpsertRoleService {
     this.reassignLabelsToEntitiesService = reassignLabelsToEntitiesService;
   }
 
-  public UpsertResult upsertRole(@NotNull UpsertRoleServiceRequest request) {
+  public UpsertResult upsertRole(UpsertRoleServiceRequest request) {
 
     UpsertRoleResult result = this.upsertRoleUseCase.upsertRole(request.upsertRoleRequest());
     this.createAuditLogs(result, request.auditParentId());
@@ -69,7 +69,7 @@ public final class UpsertRoleService {
     return upsertResult;
   }
 
-  private void createAuditLogs(UpsertRoleResult result, String auditParentId) {
+  private void createAuditLogs(UpsertRoleResult result, @Nullable String auditParentId) {
     if (result instanceof UpsertRoleResult.Updated updated) {
       if (updated.updateRoleResult().hasAnyChanges()) {
         this.updateRoleService.createAuditLogs(updated.updateRoleResult(), auditParentId);

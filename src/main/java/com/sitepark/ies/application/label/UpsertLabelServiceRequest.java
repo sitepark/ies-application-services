@@ -4,14 +4,13 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sitepark.ies.label.core.usecase.UpsertLabelRequest;
 import java.util.Objects;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @JsonDeserialize(builder = UpsertLabelServiceRequest.Builder.class)
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName"})
 public final class UpsertLabelServiceRequest {
 
-  @NotNull private final UpsertLabelRequest upsertLabelRequest;
+  private final UpsertLabelRequest upsertLabelRequest;
   @Nullable private final String auditParentId;
 
   private UpsertLabelServiceRequest(Builder builder) {
@@ -28,7 +27,7 @@ public final class UpsertLabelServiceRequest {
     return this.upsertLabelRequest;
   }
 
-  public String auditParentId() {
+  public @Nullable String auditParentId() {
     return this.auditParentId;
   }
 
@@ -60,11 +59,12 @@ public final class UpsertLabelServiceRequest {
   }
 
   @JsonPOJOBuilder(withPrefix = "")
+  @SuppressWarnings("NullAway.Init")
   public static final class Builder {
 
     private UpsertLabelRequest upsertLabelRequest;
 
-    private String auditParentId;
+    private @Nullable String auditParentId;
 
     private Builder() {}
 
@@ -77,7 +77,7 @@ public final class UpsertLabelServiceRequest {
       return this;
     }
 
-    public Builder auditParentId(String auditParentId) {
+    public Builder auditParentId(@Nullable String auditParentId) {
       this.auditParentId = auditParentId;
       return this;
     }

@@ -13,8 +13,7 @@ import com.sitepark.ies.userrepository.core.usecase.role.AssignPrivilegesToRoles
 import com.sitepark.ies.userrepository.core.usecase.role.CreateRoleResult;
 import com.sitepark.ies.userrepository.core.usecase.role.CreateRoleUseCase;
 import jakarta.inject.Inject;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public final class CreateRoleService {
 
@@ -32,7 +31,7 @@ public final class CreateRoleService {
     this.auditLogServiceFactory = auditLogServiceFactory;
   }
 
-  public String createRole(@NotNull CreateRoleServiceRequest request) {
+  public String createRole(CreateRoleServiceRequest request) {
 
     CreateRoleResult result = this.createRoleUseCase.createRole(request.createRoleRequest());
 
@@ -56,12 +55,12 @@ public final class CreateRoleService {
     return result.roleId();
   }
 
-  protected void createAuditLogs(CreateRoleResult result, String auditParentId) {
+  void createAuditLogs(CreateRoleResult result, @Nullable String auditParentId) {
     this.createCreationAuditLog(result, auditParentId);
     this.createPrivilegeAssignmentAuditLogs(result, auditParentId);
   }
 
-  private void createCreationAuditLog(CreateRoleResult result, String auditParentId) {
+  private void createCreationAuditLog(CreateRoleResult result, @Nullable String auditParentId) {
 
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(result.timestamp(), auditParentId);

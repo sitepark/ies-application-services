@@ -42,9 +42,6 @@ mvn spotless:apply
 # Check code formatting
 mvn spotless:check
 
-# Run SpotBugs analysis
-mvn spotbugs:check
-
 # Run PMD analysis
 mvn pmd:check
 
@@ -195,20 +192,20 @@ When adding new packages, remember to export them in `module-info.java`.
 
 ## Technology Stack
 
-- **Java**: 21 (LTS)
+- **Java**: 25
 - **Build Tool**: Maven 3.8+
 - **DI Framework**: Jakarta Inject (JSR-330)
 - **Testing**: JUnit 5, Mockito
 - **Logging**: Log4j2
-- **Code Quality**: Spotless, SpotBugs, PMD, JaCoCo
+- **Code Quality**: Spotless, Error Prone, NullAway, PMD, JaCoCo
 
 ## Code Quality Requirements
 
 All code must pass:
 1. **Spotless** formatting (Google Java Style)
-2. **SpotBugs** static analysis
+2. **Error Prone** and **NullAway** (JSpecify mode) run during compilation; `-Werror` turns every warning into an error. Code is `@NullMarked`; nullable points use `org.jspecify.annotations.Nullable`
 3. **PMD** rule checks (see `pmd-ruleset.xml`)
-4. **JaCoCo** coverage checks (currently set to 0% minimum)
+4. **JaCoCo** coverage checks (minimum 85% line, 80% branch)
 5. **Compiler** warnings (zero warnings policy)
 
 ## Project-Specific Patterns

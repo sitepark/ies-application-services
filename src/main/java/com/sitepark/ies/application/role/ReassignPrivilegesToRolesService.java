@@ -18,8 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public final class ReassignPrivilegesToRolesService {
 
@@ -37,8 +36,7 @@ public final class ReassignPrivilegesToRolesService {
     this.auditLogServiceFactory = auditLogServiceFactory;
   }
 
-  public ReassignResult reassignPrivilegesToRoles(
-      @NotNull ReassignPrivilegesToRolesServiceRequest request) {
+  public ReassignResult reassignPrivilegesToRoles(ReassignPrivilegesToRolesServiceRequest request) {
 
     ReassignPrivilegesToRolesResult result =
         this.reassignPrivilegesToRolesUseCase.reassignPrivilegesToRoles(

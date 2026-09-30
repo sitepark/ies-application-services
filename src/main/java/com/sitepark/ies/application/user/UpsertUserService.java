@@ -9,7 +9,7 @@ import com.sitepark.ies.userrepository.core.domain.entity.User;
 import com.sitepark.ies.userrepository.core.usecase.user.UpsertUserResult;
 import com.sitepark.ies.userrepository.core.usecase.user.UpsertUserUseCase;
 import jakarta.inject.Inject;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Application Service that orchestrates user update operations with cross-cutting concerns.
@@ -44,7 +44,7 @@ public final class UpsertUserService {
     this.reassignLabelsToEntitiesService = reassignLabelsToEntitiesService;
   }
 
-  public UpsertResult upsertUser(@NotNull UpsertUserServiceRequest request) {
+  public UpsertResult upsertUser(UpsertUserServiceRequest request) {
 
     UpsertUserResult result = this.upsertUserUseCase.upsertUser(request.upsertUserRequest());
     this.createAuditLogs(result, request.auditParentId());
@@ -68,7 +68,7 @@ public final class UpsertUserService {
     return upsertResult;
   }
 
-  private void createAuditLogs(UpsertUserResult result, String auditParentId) {
+  private void createAuditLogs(UpsertUserResult result, @Nullable String auditParentId) {
     if (result instanceof UpsertUserResult.Updated updated) {
       if (updated.updateUserResult().hasAnyChanges()) {
         this.updateUserService.createAuditLogs(updated.updateUserResult(), auditParentId);

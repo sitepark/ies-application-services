@@ -11,18 +11,16 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Consumer;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @JsonDeserialize(builder = UpdateRoleServiceRequest.Builder.class)
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName"})
 public final class UpdateRoleServiceRequest {
 
-  @NotNull
   private final com.sitepark.ies.userrepository.core.usecase.role.UpdateRoleRequest
       updateRoleRequest;
 
-  @NotNull private final Updatable<List<Identifier>> labelIdentifiers;
+  private final Updatable<List<Identifier>> labelIdentifiers;
   @Nullable private final String auditParentId;
 
   private UpdateRoleServiceRequest(Builder builder) {
@@ -46,7 +44,7 @@ public final class UpdateRoleServiceRequest {
     return this.labelIdentifiers;
   }
 
-  public String auditParentId() {
+  public @Nullable String auditParentId() {
     return this.auditParentId;
   }
 
@@ -81,11 +79,12 @@ public final class UpdateRoleServiceRequest {
   }
 
   @JsonPOJOBuilder(withPrefix = "")
+  @SuppressWarnings("NullAway.Init")
   public static final class Builder {
 
     private com.sitepark.ies.userrepository.core.usecase.role.UpdateRoleRequest updateRoleRequest;
-    private Set<Identifier> labelIdentifiers;
-    private String auditParentId;
+    private @Nullable Set<Identifier> labelIdentifiers;
+    private @Nullable String auditParentId;
 
     private Builder() {}
 
@@ -111,7 +110,7 @@ public final class UpdateRoleServiceRequest {
       return this;
     }
 
-    public Builder auditParentId(String auditParentId) {
+    public Builder auditParentId(@Nullable String auditParentId) {
       this.auditParentId = auditParentId;
       return this;
     }

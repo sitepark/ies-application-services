@@ -11,15 +11,14 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Consumer;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @JsonDeserialize(builder = CreatePrivilegeServiceRequest.Builder.class)
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName"})
 public final class CreatePrivilegeServiceRequest {
 
-  @NotNull private final CreatePrivilegeRequest createPrivilegeRequest;
-  @NotNull private final List<Identifier> labelIdentifiers;
+  private final CreatePrivilegeRequest createPrivilegeRequest;
+  private final List<Identifier> labelIdentifiers;
   @Nullable private final String auditParentId;
 
   private CreatePrivilegeServiceRequest(Builder builder) {
@@ -41,7 +40,7 @@ public final class CreatePrivilegeServiceRequest {
     return this.labelIdentifiers;
   }
 
-  public String auditParentId() {
+  public @Nullable String auditParentId() {
     return this.auditParentId;
   }
 
@@ -76,12 +75,13 @@ public final class CreatePrivilegeServiceRequest {
   }
 
   @JsonPOJOBuilder(withPrefix = "")
+  @SuppressWarnings("NullAway.Init")
   public static final class Builder {
 
     private com.sitepark.ies.userrepository.core.usecase.privilege.CreatePrivilegeRequest
         createPrivilegeRequest;
     private final Set<Identifier> labelIdentifiers = new TreeSet<>();
-    private String auditParentId;
+    private @Nullable String auditParentId;
 
     private Builder() {}
 
@@ -106,7 +106,7 @@ public final class CreatePrivilegeServiceRequest {
       return this;
     }
 
-    public Builder auditParentId(String auditParentId) {
+    public Builder auditParentId(@Nullable String auditParentId) {
       this.auditParentId = auditParentId;
       return this;
     }

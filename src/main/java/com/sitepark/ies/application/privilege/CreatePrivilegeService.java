@@ -13,8 +13,7 @@ import com.sitepark.ies.userrepository.core.usecase.privilege.CreatePrivilegeRes
 import com.sitepark.ies.userrepository.core.usecase.privilege.CreatePrivilegeUseCase;
 import com.sitepark.ies.userrepository.core.usecase.role.AssignPrivilegesToRolesResult;
 import jakarta.inject.Inject;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Application Service that orchestrates privilege creation operations with cross-cutting concerns.
@@ -66,7 +65,7 @@ public final class CreatePrivilegeService {
    * @throws com.sitepark.ies.sharedkernel.anchor.AnchorAlreadyExistsException if anchor already
    *     exists
    */
-  public String createPrivilege(@NotNull CreatePrivilegeServiceRequest request) {
+  public String createPrivilege(CreatePrivilegeServiceRequest request) {
 
     CreatePrivilegeResult result =
         this.createPrivilegeUseCase.createPrivilege(request.createPrivilegeRequest());
@@ -92,12 +91,13 @@ public final class CreatePrivilegeService {
     return result.privilegeId();
   }
 
-  protected void createAuditLogs(CreatePrivilegeResult result, String auditParentId) {
+  void createAuditLogs(CreatePrivilegeResult result, @Nullable String auditParentId) {
     this.createCreationAuditLog(result, auditParentId);
     this.createPrivilegeCreationAuditLog(result, auditParentId);
   }
 
-  private void createCreationAuditLog(CreatePrivilegeResult result, String auditParentId) {
+  private void createCreationAuditLog(
+      CreatePrivilegeResult result, @Nullable String auditParentId) {
 
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(result.timestamp(), auditParentId);
