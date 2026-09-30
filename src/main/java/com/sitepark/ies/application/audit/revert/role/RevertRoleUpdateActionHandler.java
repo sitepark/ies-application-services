@@ -12,6 +12,7 @@ import com.sitepark.ies.userrepository.core.domain.entity.Role;
 import com.sitepark.ies.userrepository.core.port.RoleRepository;
 import com.sitepark.ies.userrepository.core.usecase.role.UpdateRoleRequest;
 import jakarta.inject.Inject;
+import java.util.Objects;
 
 public class RevertRoleUpdateActionHandler implements RevertEntityActionHandler {
 
@@ -31,10 +32,12 @@ public class RevertRoleUpdateActionHandler implements RevertEntityActionHandler 
 
   @Override
   public void revert(RevertRequest request) {
-    PatchDocument patch = this.patchService.parsePatch(request.backwardData());
+    PatchDocument patch =
+        this.patchService.parsePatch(
+            Objects.requireNonNull(request.backwardData(), "revert needs the backward data"));
     Role role =
         this.repository
-            .get(request.target().id())
+            .get(Objects.requireNonNull(request.target().id(), "revert target has an id"))
             .orElseThrow(
                 () ->
                     new RevertFailedException(request, "Role not found: " + request.target().id()));

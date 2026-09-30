@@ -12,6 +12,7 @@ import com.sitepark.ies.userrepository.core.domain.entity.User;
 import com.sitepark.ies.userrepository.core.port.UserRepository;
 import com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest;
 import jakarta.inject.Inject;
+import java.util.Objects;
 
 public class RevertUpdateUserActionHandler implements RevertEntityActionHandler {
 
@@ -31,10 +32,12 @@ public class RevertUpdateUserActionHandler implements RevertEntityActionHandler 
 
   @Override
   public void revert(RevertRequest request) {
-    PatchDocument patch = this.patchService.parsePatch(request.backwardData());
+    PatchDocument patch =
+        this.patchService.parsePatch(
+            Objects.requireNonNull(request.backwardData(), "revert needs the backward data"));
     User user =
         this.repository
-            .get(request.target().id())
+            .get(Objects.requireNonNull(request.target().id(), "revert target has an id"))
             .orElseThrow(
                 () ->
                     new RevertFailedException(request, "User not found: " + request.target().id()));

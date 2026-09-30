@@ -15,6 +15,8 @@ import com.sitepark.ies.label.core.usecase.RestoreLabelResult;
 import com.sitepark.ies.label.core.usecase.RestoreLabelUseCase;
 import jakarta.inject.Inject;
 import java.io.IOException;
+import java.util.Objects;
+import org.jspecify.annotations.Nullable;
 
 public class RevertLabelRemoveActionHandler implements RevertEntityActionHandler {
 
@@ -36,7 +38,9 @@ public class RevertLabelRemoveActionHandler implements RevertEntityActionHandler
   public void revert(RevertRequest request) {
     try {
       LabelSnapshot restoreData =
-          this.auditLogService.deserialize(request.backwardData(), LabelSnapshot.class);
+          this.auditLogService.deserialize(
+              Objects.requireNonNull(request.backwardData(), "revert needs the backward data"),
+              LabelSnapshot.class);
       RestoreLabelResult result =
           this.restoreLabelUseCase.restoreLabel(new RestoreLabelRequest(restoreData, null));
       if (result instanceof RestoreLabelResult.Restored restored) {
@@ -47,10 +51,8 @@ public class RevertLabelRemoveActionHandler implements RevertEntityActionHandler
     }
   }
 
-  // audit-core does not annotate the optional values of AuditLogTarget and CreateAuditLogRequest
-  // (here the name) as @Nullable yet
-  @SuppressWarnings("NullAway")
-  private void createRestoreAuditLog(RestoreLabelResult.Restored restored, String auditParentId) {
+  private void createRestoreAuditLog(
+      RestoreLabelResult.Restored restored, @Nullable String auditParentId) {
 
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(restored.timestamp(), auditParentId);

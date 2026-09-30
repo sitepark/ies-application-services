@@ -15,6 +15,8 @@ import com.sitepark.ies.userrepository.core.usecase.privilege.RestorePrivilegeRe
 import com.sitepark.ies.userrepository.core.usecase.privilege.RestorePrivilegeUseCase;
 import jakarta.inject.Inject;
 import java.io.IOException;
+import java.util.Objects;
+import org.jspecify.annotations.Nullable;
 
 public class RevertPrivilegeRemoveActionHandler implements RevertEntityActionHandler {
 
@@ -36,7 +38,9 @@ public class RevertPrivilegeRemoveActionHandler implements RevertEntityActionHan
   public void revert(RevertRequest request) {
     try {
       PrivilegeSnapshot restoreData =
-          this.auditLogService.deserialize(request.backwardData(), PrivilegeSnapshot.class);
+          this.auditLogService.deserialize(
+              Objects.requireNonNull(request.backwardData(), "revert needs the backward data"),
+              PrivilegeSnapshot.class);
       RestorePrivilegeResult result =
           this.restorePrivilegeUseCase.restorePrivilege(new RestorePrivilegeRequest(restoreData));
       if (result instanceof RestorePrivilegeResult.Restored restored) {
@@ -48,7 +52,7 @@ public class RevertPrivilegeRemoveActionHandler implements RevertEntityActionHan
   }
 
   private void createRestoreAuditLog(
-      RestorePrivilegeResult.Restored restored, String auditParentId) {
+      RestorePrivilegeResult.Restored restored, @Nullable String auditParentId) {
 
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(restored.timestamp(), auditParentId);

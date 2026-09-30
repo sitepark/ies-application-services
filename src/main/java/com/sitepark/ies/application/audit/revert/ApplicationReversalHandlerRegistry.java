@@ -8,6 +8,7 @@ import jakarta.inject.Inject;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import org.jspecify.annotations.Nullable;
 
 public class ApplicationReversalHandlerRegistry implements ReversalHandlerRegistry {
 
@@ -27,7 +28,7 @@ public class ApplicationReversalHandlerRegistry implements ReversalHandlerRegist
   }
 
   @Override
-  public ReverseActionHandler getHandler(String entityType) {
+  public ReverseActionHandler getHandler(@Nullable String entityType) {
     ReverseActionHandler h = handler.get(entityType != null ? entityType : ALL_ENTITIES);
     if (h == null) {
       throw new IllegalArgumentException(

@@ -20,6 +20,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import org.jspecify.annotations.Nullable;
 
 public class RevertPrivilegeBatchRemoveActionHandler implements RevertEntityActionHandler {
 
@@ -77,7 +78,7 @@ public class RevertPrivilegeBatchRemoveActionHandler implements RevertEntityActi
   }
 
   private ApplicationAuditLogService createRevertBatchRemoveLog(
-      Instant timestamp, String auditParentId) {
+      Instant timestamp, @Nullable String auditParentId) {
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(timestamp, auditParentId);
     String batchId =

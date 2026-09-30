@@ -12,6 +12,7 @@ import com.sitepark.ies.userrepository.core.domain.entity.Privilege;
 import com.sitepark.ies.userrepository.core.port.PrivilegeRepository;
 import com.sitepark.ies.userrepository.core.usecase.privilege.UpdatePrivilegeRequest;
 import jakarta.inject.Inject;
+import java.util.Objects;
 
 public class RevertPrivilegeUpdateActionHandler implements RevertEntityActionHandler {
 
@@ -31,10 +32,12 @@ public class RevertPrivilegeUpdateActionHandler implements RevertEntityActionHan
 
   @Override
   public void revert(RevertRequest request) {
-    PatchDocument patch = this.patchService.parsePatch(request.backwardData());
+    PatchDocument patch =
+        this.patchService.parsePatch(
+            Objects.requireNonNull(request.backwardData(), "revert needs the backward data"));
     Privilege privilege =
         this.repository
-            .get(request.target().id())
+            .get(Objects.requireNonNull(request.target().id(), "revert target has an id"))
             .orElseThrow(
                 () ->
                     new RevertFailedException(

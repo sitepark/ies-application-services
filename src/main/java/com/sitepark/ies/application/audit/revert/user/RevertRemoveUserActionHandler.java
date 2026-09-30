@@ -15,6 +15,8 @@ import com.sitepark.ies.userrepository.core.usecase.user.RestoreUserResult;
 import com.sitepark.ies.userrepository.core.usecase.user.RestoreUserUseCase;
 import jakarta.inject.Inject;
 import java.io.IOException;
+import java.util.Objects;
+import org.jspecify.annotations.Nullable;
 
 public class RevertRemoveUserActionHandler implements RevertEntityActionHandler {
 
@@ -36,7 +38,9 @@ public class RevertRemoveUserActionHandler implements RevertEntityActionHandler 
   public void revert(RevertRequest request) {
     try {
       UserSnapshot restoreData =
-          this.auditLogService.deserialize(request.backwardData(), UserSnapshot.class);
+          this.auditLogService.deserialize(
+              Objects.requireNonNull(request.backwardData(), "revert needs the backward data"),
+              UserSnapshot.class);
 
       RestoreUserResult result =
           this.restoreUserUseCase.restoreUser(new RestoreUserRequest(restoreData));
@@ -50,7 +54,8 @@ public class RevertRemoveUserActionHandler implements RevertEntityActionHandler 
     }
   }
 
-  private void createRestoreAuditLog(RestoreUserResult.Restored restored, String auditParentId) {
+  private void createRestoreAuditLog(
+      RestoreUserResult.Restored restored, @Nullable String auditParentId) {
 
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(restored.timestamp(), auditParentId);

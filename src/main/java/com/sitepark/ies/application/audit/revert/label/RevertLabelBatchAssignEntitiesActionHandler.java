@@ -17,7 +17,9 @@ import java.io.IOException;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import org.jspecify.annotations.Nullable;
 
 public class RevertLabelBatchAssignEntitiesActionHandler implements RevertEntityActionHandler {
 
@@ -59,8 +61,14 @@ public class RevertLabelBatchAssignEntitiesActionHandler implements RevertEntity
           continue;
         }
         AuditLog auditLog = auditLogOpt.get();
-        entityRef = EntityRef.of(auditLog.entityType(), auditLog.entityId());
-        labelIds = this.auditLogService.deserializeList(auditLog.backwardData(), String.class);
+        entityRef =
+            EntityRef.of(
+                Objects.requireNonNull(auditLog.entityType(), "child log has an entity type"),
+                Objects.requireNonNull(auditLog.entityId(), "child log has an entity id"));
+        labelIds =
+            this.auditLogService.deserializeList(
+                Objects.requireNonNull(auditLog.backwardData(), "child log has backward data"),
+                String.class);
       } catch (IOException e) {
         throw new RevertFailedException(request, "Failed to deserialize labelIds", e);
       }
@@ -78,7 +86,7 @@ public class RevertLabelBatchAssignEntitiesActionHandler implements RevertEntity
   }
 
   private ApplicationAuditLogService createRevertBatchAssignLabelsToEntitiesLog(
-      Instant timestamp, String auditParentId) {
+      Instant timestamp, @Nullable String auditParentId) {
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(timestamp, auditParentId);
     String batchId =

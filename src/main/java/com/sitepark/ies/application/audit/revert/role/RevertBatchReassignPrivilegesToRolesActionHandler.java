@@ -21,7 +21,9 @@ import java.io.IOException;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import org.jspecify.annotations.Nullable;
 
 public class RevertBatchReassignPrivilegesToRolesActionHandler
     implements RevertEntityActionHandler {
@@ -66,7 +68,10 @@ public class RevertBatchReassignPrivilegesToRolesActionHandler
           continue;
         }
         auditLog = auditLogOpt.get();
-        privilegeIds = this.auditLogService.deserializeList(auditLog.backwardData(), String.class);
+        privilegeIds =
+            this.auditLogService.deserializeList(
+                Objects.requireNonNull(auditLog.backwardData(), "child log has backward data"),
+                String.class);
       } catch (IOException e) {
         throw new RevertFailedException(request, "Failed to deserialize privilegeIds", e);
       }
@@ -98,7 +103,7 @@ public class RevertBatchReassignPrivilegesToRolesActionHandler
   }
 
   private ApplicationAuditLogService createRevertBatchAssignRolesLog(
-      Instant timestamp, String auditParentId) {
+      Instant timestamp, @Nullable String auditParentId) {
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(timestamp, auditParentId);
     String batchId =

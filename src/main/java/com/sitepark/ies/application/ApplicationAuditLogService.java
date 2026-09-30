@@ -41,9 +41,6 @@ public class ApplicationAuditLogService {
     this.parentId = parentId;
   }
 
-  // audit-core does not annotate the optional values of AuditLogTarget and CreateAuditLogRequest
-  // (id, name, data, parent id) as @Nullable yet
-  @SuppressWarnings("NullAway")
   public String createBatchLog(@Nullable Class<?> type, AuditBatchLogAction action) {
     // A batch log may span several types; then it has no type (EntityRef.toTypeString rejects null)
     String typeString = type == null ? null : EntityRef.toTypeString(type);
@@ -65,9 +62,6 @@ public class ApplicationAuditLogService {
         forwardData);
   }
 
-  // audit-core does not annotate the optional values of AuditLogTarget and CreateAuditLogRequest
-  // (id, name, data, parent id) as @Nullable yet
-  @SuppressWarnings("NullAway")
   public String createLog(
       EntityRef entityRef,
       @Nullable String entityName,
@@ -78,9 +72,6 @@ public class ApplicationAuditLogService {
     return this.createLog(target, action, backwardData, forwardData);
   }
 
-  // audit-core does not annotate the optional values of AuditLogTarget and CreateAuditLogRequest
-  // (id, name, data, parent id) as @Nullable yet
-  @SuppressWarnings("NullAway")
   public String createLog(
       AuditLogTarget target,
       AuditLogAction action,
