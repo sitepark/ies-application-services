@@ -26,7 +26,6 @@ module com.sitepark.ies.application {
   exports com.sitepark.ies.application.privilege;
 
   requires static org.jspecify;
-  requires com.google.guice;
   requires com.sitepark.ies.userrepository.core;
   requires com.sitepark.ies.security.core;
   requires com.sitepark.ies.label.core;
