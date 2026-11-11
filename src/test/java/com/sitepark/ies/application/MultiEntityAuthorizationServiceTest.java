@@ -9,13 +9,17 @@ import static org.mockito.Mockito.when;
 
 import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import com.sitepark.ies.sharedkernel.security.EntityAuthorizationService;
-import com.sitepark.ies.userrepository.core.domain.entity.Role;
-import com.sitepark.ies.userrepository.core.domain.entity.User;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class MultiEntityAuthorizationServiceTest {
+
+  /** Stands for an entity type of another core; only its name matters. */
+  private static final class Role {}
+
+  /** Stands for an entity type of another core; only its name matters. */
+  private static final class User {}
 
   private EntityAuthorizationService userAuthService;
   private MultiEntityAuthorizationService authService;
