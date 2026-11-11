@@ -4,11 +4,11 @@ import static java.util.stream.Stream.concat;
 
 import com.sitepark.ies.application.ApplicationAuditLogService;
 import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
-import com.sitepark.ies.application.MultiEntityNameResolver;
 import com.sitepark.ies.application.audit.AuditBatchLogAction;
 import com.sitepark.ies.application.audit.AuditLogAction;
 import com.sitepark.ies.application.label.ReassignLabelsToEntitiesService;
 import com.sitepark.ies.application.label.ReassignLabelsToEntitiesServiceRequest;
+import com.sitepark.ies.application.userrepository.UserRepositoryNameResolver;
 import com.sitepark.ies.label.core.usecase.ReassignLabelsToEntitiesRequest;
 import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import com.sitepark.ies.userrepository.core.domain.entity.Privilege;
@@ -48,18 +48,18 @@ public final class UpdatePrivilegeService {
 
   private final UpdatePrivilegeUseCase updatePrivilegeUseCase;
   private final ReassignLabelsToEntitiesService reassignLabelsToEntitiesService;
-  private final MultiEntityNameResolver multiEntityNameResolver;
+  private final UserRepositoryNameResolver userRepositoryNameResolver;
   private final ApplicationAuditLogServiceFactory auditLogServiceFactory;
 
   @Inject
   UpdatePrivilegeService(
       UpdatePrivilegeUseCase updatePrivilegeUseCase,
       ReassignLabelsToEntitiesService reassignLabelsToEntitiesService,
-      MultiEntityNameResolver multiEntityNameResolver,
+      UserRepositoryNameResolver userRepositoryNameResolver,
       ApplicationAuditLogServiceFactory auditLogServiceFactory) {
     this.updatePrivilegeUseCase = updatePrivilegeUseCase;
     this.reassignLabelsToEntitiesService = reassignLabelsToEntitiesService;
-    this.multiEntityNameResolver = multiEntityNameResolver;
+    this.userRepositoryNameResolver = userRepositoryNameResolver;
     this.auditLogServiceFactory = auditLogServiceFactory;
   }
 
@@ -202,6 +202,6 @@ public final class UpdatePrivilegeService {
     Set<String> roleIds =
         concat(result.assignments().roleIds().stream(), result.unassignments().roleIds().stream())
             .collect(Collectors.toSet());
-    return multiEntityNameResolver.resolveRoleNames(roleIds);
+    return userRepositoryNameResolver.resolveRoleNames(roleIds);
   }
 }

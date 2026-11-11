@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.sitepark.ies.application.ApplicationAuditLogService;
 import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
-import com.sitepark.ies.application.MultiEntityNameResolver;
+import com.sitepark.ies.application.userrepository.UserRepositoryNameResolver;
 import com.sitepark.ies.userrepository.core.domain.value.UserRoleAssignment;
 import com.sitepark.ies.userrepository.core.usecase.user.UnassignRolesFromUsersRequest;
 import com.sitepark.ies.userrepository.core.usecase.user.UnassignRolesFromUsersResult;
@@ -24,7 +24,7 @@ class UnassignRolesFromUsersServiceTest {
   private UnassignRolesFromUsersUseCase unassignRolesFromUsersUseCase;
 
   @SuppressWarnings("PMD.SingularField")
-  private MultiEntityNameResolver multiEntityNameResolver;
+  private UserRepositoryNameResolver userRepositoryNameResolver;
 
   @SuppressWarnings("PMD.SingularField")
   private ApplicationAuditLogServiceFactory auditLogServiceFactory;
@@ -35,12 +35,12 @@ class UnassignRolesFromUsersServiceTest {
   @BeforeEach
   void setUp() {
     this.unassignRolesFromUsersUseCase = mock();
-    this.multiEntityNameResolver = mock();
+    this.userRepositoryNameResolver = mock();
     this.auditLogServiceFactory = mock();
     this.auditLogService = mock();
     this.service =
         new UnassignRolesFromUsersService(
-            unassignRolesFromUsersUseCase, multiEntityNameResolver, auditLogServiceFactory);
+            unassignRolesFromUsersUseCase, userRepositoryNameResolver, auditLogServiceFactory);
     when(auditLogServiceFactory.create(any(), any())).thenReturn(auditLogService);
   }
 

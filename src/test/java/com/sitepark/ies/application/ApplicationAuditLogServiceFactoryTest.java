@@ -12,8 +12,6 @@ import com.sitepark.ies.application.audit.AuditBatchLogAction;
 import com.sitepark.ies.audit.core.service.AuditLogService;
 import com.sitepark.ies.audit.core.usecase.CreateAuditLogUseCase;
 import com.sitepark.ies.sharedkernel.domain.EntityRef;
-import com.sitepark.ies.userrepository.core.domain.entity.Role;
-import com.sitepark.ies.userrepository.core.domain.entity.User;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +19,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class ApplicationAuditLogServiceFactoryTest {
+
+  /** Stands for an entity type of another core; only its name matters. */
+  private static final class Role {}
+
+  /** Stands for an entity type of another core; only its name matters. */
+  private static final class User {}
 
   private CreateAuditLogUseCase createAuditLogUseCase;
 

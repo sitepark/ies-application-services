@@ -2,11 +2,11 @@ package com.sitepark.ies.application.user;
 
 import com.sitepark.ies.application.ApplicationAuditLogService;
 import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
-import com.sitepark.ies.application.MultiEntityNameResolver;
 import com.sitepark.ies.application.audit.AuditBatchLogAction;
 import com.sitepark.ies.application.audit.AuditLogAction;
 import com.sitepark.ies.application.label.ReassignLabelsToEntitiesService;
 import com.sitepark.ies.application.label.ReassignLabelsToEntitiesServiceRequest;
+import com.sitepark.ies.application.userrepository.UserRepositoryNameResolver;
 import com.sitepark.ies.label.core.usecase.ReassignLabelsToEntitiesRequest;
 import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import com.sitepark.ies.userrepository.core.domain.entity.User;
@@ -41,18 +41,18 @@ public final class UpdateUserService {
 
   private final UpdateUserUseCase updateUserUseCase;
   private final ReassignLabelsToEntitiesService reassignLabelsToEntitiesService;
-  private final MultiEntityNameResolver multiEntityNameResolver;
+  private final UserRepositoryNameResolver userRepositoryNameResolver;
   private final ApplicationAuditLogServiceFactory auditLogServiceFactory;
 
   @Inject
   UpdateUserService(
       UpdateUserUseCase updateUserUseCase,
       ReassignLabelsToEntitiesService reassignLabelsToEntitiesService,
-      MultiEntityNameResolver multiEntityNameResolver,
+      UserRepositoryNameResolver userRepositoryNameResolver,
       ApplicationAuditLogServiceFactory auditLogServiceFactory) {
     this.updateUserUseCase = updateUserUseCase;
     this.reassignLabelsToEntitiesService = reassignLabelsToEntitiesService;
-    this.multiEntityNameResolver = multiEntityNameResolver;
+    this.userRepositoryNameResolver = userRepositoryNameResolver;
     this.auditLogServiceFactory = auditLogServiceFactory;
   }
 
@@ -146,7 +146,7 @@ public final class UpdateUserService {
     String userDisplayName =
         result.userUpdate() != null
             ? result.userUpdate().displayName()
-            : this.multiEntityNameResolver.resolveDisplayUserName(result.userId());
+            : this.userRepositoryNameResolver.resolveDisplayUserName(result.userId());
 
     ApplicationAuditLogService auditLogService =
         this.auditLogServiceFactory.create(result.timestamp(), auditParentId);

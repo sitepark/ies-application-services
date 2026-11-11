@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.sitepark.ies.application.ApplicationAuditLogService;
 import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
-import com.sitepark.ies.application.MultiEntityNameResolver;
+import com.sitepark.ies.application.userrepository.UserRepositoryNameResolver;
 import com.sitepark.ies.userrepository.core.domain.value.RolePrivilegeAssignment;
 import com.sitepark.ies.userrepository.core.usecase.role.AssignPrivilegesToRolesResult;
 import com.sitepark.ies.userrepository.core.usecase.role.AssignPrivilegesToRolesUseCase;
@@ -23,7 +23,7 @@ class AssignPrivilegesToRolesServiceTest {
   private AssignPrivilegesToRolesUseCase assignPrivilegesToRolesUseCase;
 
   @SuppressWarnings("PMD.SingularField")
-  private MultiEntityNameResolver multiEntityNameResolver;
+  private UserRepositoryNameResolver userRepositoryNameResolver;
 
   @SuppressWarnings("PMD.SingularField")
   private ApplicationAuditLogServiceFactory auditLogServiceFactory;
@@ -34,12 +34,12 @@ class AssignPrivilegesToRolesServiceTest {
   @BeforeEach
   void setUp() {
     this.assignPrivilegesToRolesUseCase = mock();
-    this.multiEntityNameResolver = mock();
+    this.userRepositoryNameResolver = mock();
     this.auditLogServiceFactory = mock();
     this.auditLogService = mock();
     this.service =
         new AssignPrivilegesToRolesService(
-            assignPrivilegesToRolesUseCase, multiEntityNameResolver, auditLogServiceFactory);
+            assignPrivilegesToRolesUseCase, userRepositoryNameResolver, auditLogServiceFactory);
     when(auditLogServiceFactory.create(any(), any())).thenReturn(auditLogService);
   }
 

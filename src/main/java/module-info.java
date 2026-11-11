@@ -19,11 +19,16 @@ import org.jspecify.annotations.NullMarked;
  */
 @NullMarked
 module com.sitepark.ies.application {
-  exports com.sitepark.ies.application.user;
+  exports com.sitepark.ies.application;
+  exports com.sitepark.ies.application.audit;
+  exports com.sitepark.ies.application.audit.revert;
+  exports com.sitepark.ies.application.audit.revert.label;
   exports com.sitepark.ies.application.label;
-  exports com.sitepark.ies.application.role;
   exports com.sitepark.ies.application.value;
+  exports com.sitepark.ies.application.user;
+  exports com.sitepark.ies.application.role;
   exports com.sitepark.ies.application.privilege;
+  exports com.sitepark.ies.application.userrepository;
 
   requires static org.jspecify;
   requires com.sitepark.ies.userrepository.core;

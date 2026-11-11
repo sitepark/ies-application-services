@@ -2,9 +2,9 @@ package com.sitepark.ies.application.user;
 
 import com.sitepark.ies.application.ApplicationAuditLogService;
 import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
-import com.sitepark.ies.application.MultiEntityNameResolver;
 import com.sitepark.ies.application.audit.AuditBatchLogAction;
 import com.sitepark.ies.application.audit.AuditLogAction;
+import com.sitepark.ies.application.userrepository.UserRepositoryNameResolver;
 import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import com.sitepark.ies.userrepository.core.domain.entity.User;
 import com.sitepark.ies.userrepository.core.usecase.user.UnassignRolesFromUsersResult;
@@ -33,16 +33,16 @@ import org.jspecify.annotations.Nullable;
 public final class UnassignRolesFromUsersService {
 
   private final UnassignRolesFromUsersUseCase unassignRolesFromUsersUseCase;
-  private final MultiEntityNameResolver multiEntityNameResolver;
+  private final UserRepositoryNameResolver userRepositoryNameResolver;
   private final ApplicationAuditLogServiceFactory auditLogServiceFactory;
 
   @Inject
   UnassignRolesFromUsersService(
       UnassignRolesFromUsersUseCase unassignRolesFromUsersUseCase,
-      MultiEntityNameResolver multiEntityNameResolver,
+      UserRepositoryNameResolver userRepositoryNameResolver,
       ApplicationAuditLogServiceFactory auditLogServiceFactory) {
     this.unassignRolesFromUsersUseCase = unassignRolesFromUsersUseCase;
-    this.multiEntityNameResolver = multiEntityNameResolver;
+    this.userRepositoryNameResolver = userRepositoryNameResolver;
     this.auditLogServiceFactory = auditLogServiceFactory;
   }
 
@@ -114,7 +114,7 @@ public final class UnassignRolesFromUsersService {
 
   private Map<String, String> resolveUserDisplayNames(
       UnassignRolesFromUsersResult.Unassigned result) {
-    return multiEntityNameResolver.resolveDisplayUserNames(
+    return userRepositoryNameResolver.resolveDisplayUserNames(
         Set.copyOf(result.unassignments().userIds()));
   }
 }

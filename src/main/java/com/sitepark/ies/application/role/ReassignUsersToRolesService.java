@@ -4,9 +4,9 @@ import static java.util.stream.Stream.concat;
 
 import com.sitepark.ies.application.ApplicationAuditLogService;
 import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
-import com.sitepark.ies.application.MultiEntityNameResolver;
 import com.sitepark.ies.application.audit.AuditBatchLogAction;
 import com.sitepark.ies.application.audit.AuditLogAction;
+import com.sitepark.ies.application.userrepository.UserRepositoryNameResolver;
 import com.sitepark.ies.application.value.ReassignResult;
 import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import com.sitepark.ies.userrepository.core.domain.entity.User;
@@ -22,16 +22,16 @@ import org.jspecify.annotations.Nullable;
 public final class ReassignUsersToRolesService {
 
   private final ReassignUsersToRolesUseCase reassignUsersToRolesUseCase;
-  private final MultiEntityNameResolver multiEntityNameResolver;
+  private final UserRepositoryNameResolver userRepositoryNameResolver;
   private final ApplicationAuditLogServiceFactory auditLogServiceFactory;
 
   @Inject
   ReassignUsersToRolesService(
       ReassignUsersToRolesUseCase reassignUsersToRolesUseCase,
-      MultiEntityNameResolver multiEntityNameResolver,
+      UserRepositoryNameResolver userRepositoryNameResolver,
       ApplicationAuditLogServiceFactory auditLogServiceFactory) {
     this.reassignUsersToRolesUseCase = reassignUsersToRolesUseCase;
-    this.multiEntityNameResolver = multiEntityNameResolver;
+    this.userRepositoryNameResolver = userRepositoryNameResolver;
     this.auditLogServiceFactory = auditLogServiceFactory;
   }
 
@@ -101,6 +101,6 @@ public final class ReassignUsersToRolesService {
     Set<String> userIds =
         concat(result.assignments().userIds().stream(), result.unassignments().userIds().stream())
             .collect(Collectors.toSet());
-    return multiEntityNameResolver.resolveDisplayUserNames(userIds);
+    return userRepositoryNameResolver.resolveDisplayUserNames(userIds);
   }
 }

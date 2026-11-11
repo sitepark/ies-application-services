@@ -2,9 +2,9 @@ package com.sitepark.ies.application.role;
 
 import com.sitepark.ies.application.ApplicationAuditLogService;
 import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
-import com.sitepark.ies.application.MultiEntityNameResolver;
 import com.sitepark.ies.application.audit.AuditBatchLogAction;
 import com.sitepark.ies.application.audit.AuditLogAction;
+import com.sitepark.ies.application.userrepository.UserRepositoryNameResolver;
 import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import com.sitepark.ies.userrepository.core.domain.entity.Role;
 import com.sitepark.ies.userrepository.core.usecase.role.UnassignPrivilegesFromRolesResult;
@@ -34,16 +34,16 @@ import org.jspecify.annotations.Nullable;
 public final class UnassignPrivilegesFromRolesService {
 
   private final UnassignPrivilegesFromRolesUseCase unassignPrivilegesFromRolesUseCase;
-  private final MultiEntityNameResolver multiEntityNameResolver;
+  private final UserRepositoryNameResolver userRepositoryNameResolver;
   private final ApplicationAuditLogServiceFactory auditLogServiceFactory;
 
   @Inject
   UnassignPrivilegesFromRolesService(
       UnassignPrivilegesFromRolesUseCase unassignPrivilegesFromRolesUseCase,
-      MultiEntityNameResolver multiEntityNameResolver,
+      UserRepositoryNameResolver userRepositoryNameResolver,
       ApplicationAuditLogServiceFactory auditLogServiceFactory) {
     this.unassignPrivilegesFromRolesUseCase = unassignPrivilegesFromRolesUseCase;
-    this.multiEntityNameResolver = multiEntityNameResolver;
+    this.userRepositoryNameResolver = userRepositoryNameResolver;
     this.auditLogServiceFactory = auditLogServiceFactory;
   }
 
@@ -115,6 +115,7 @@ public final class UnassignPrivilegesFromRolesService {
 
   private Map<String, String> resolveRoleNames(
       UnassignPrivilegesFromRolesResult.Unassigned result) {
-    return multiEntityNameResolver.resolveRoleNames(Set.copyOf(result.unassignments().roleIds()));
+    return userRepositoryNameResolver.resolveRoleNames(
+        Set.copyOf(result.unassignments().roleIds()));
   }
 }

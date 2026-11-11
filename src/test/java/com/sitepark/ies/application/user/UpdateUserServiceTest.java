@@ -9,8 +9,8 @@ import static org.mockito.Mockito.when;
 
 import com.sitepark.ies.application.ApplicationAuditLogService;
 import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
-import com.sitepark.ies.application.MultiEntityNameResolver;
 import com.sitepark.ies.application.label.ReassignLabelsToEntitiesService;
+import com.sitepark.ies.application.userrepository.UserRepositoryNameResolver;
 import com.sitepark.ies.sharedkernel.patch.PatchDocument;
 import com.sitepark.ies.userrepository.core.domain.entity.User;
 import com.sitepark.ies.userrepository.core.domain.value.UserRoleAssignment;
@@ -28,7 +28,7 @@ class UpdateUserServiceTest {
 
   private ReassignLabelsToEntitiesService reassignLabelsToEntitiesService;
 
-  private MultiEntityNameResolver multiEntityNameResolver;
+  private UserRepositoryNameResolver userRepositoryNameResolver;
 
   @SuppressWarnings("PMD.SingularField")
   private ApplicationAuditLogServiceFactory auditLogServiceFactory;
@@ -41,14 +41,14 @@ class UpdateUserServiceTest {
   void setUp() {
     this.updateUserUseCase = mock();
     this.reassignLabelsToEntitiesService = mock();
-    this.multiEntityNameResolver = mock();
+    this.userRepositoryNameResolver = mock();
     this.auditLogServiceFactory = mock();
     this.auditLogService = mock();
     this.service =
         new UpdateUserService(
             updateUserUseCase,
             reassignLabelsToEntitiesService,
-            multiEntityNameResolver,
+            userRepositoryNameResolver,
             auditLogServiceFactory);
     when(auditLogServiceFactory.create(any(), any())).thenReturn(auditLogService);
   }
@@ -291,7 +291,7 @@ class UpdateUserServiceTest {
     when(updateUserUseCase.updateUser(
             any(com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest.class)))
         .thenReturn(result);
-    when(multiEntityNameResolver.resolveDisplayUserName(any())).thenReturn("Test User");
+    when(userRepositoryNameResolver.resolveDisplayUserName(any())).thenReturn("Test User");
 
     UpdateUserServiceRequest request =
         UpdateUserServiceRequest.builder()
@@ -323,7 +323,7 @@ class UpdateUserServiceTest {
     when(updateUserUseCase.updateUser(
             any(com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest.class)))
         .thenReturn(result);
-    when(multiEntityNameResolver.resolveDisplayUserName(any())).thenReturn("Test User");
+    when(userRepositoryNameResolver.resolveDisplayUserName(any())).thenReturn("Test User");
 
     UpdateUserServiceRequest request =
         UpdateUserServiceRequest.builder()
@@ -356,7 +356,7 @@ class UpdateUserServiceTest {
     when(updateUserUseCase.updateUser(
             any(com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest.class)))
         .thenReturn(result);
-    when(multiEntityNameResolver.resolveDisplayUserName(any())).thenReturn("Test User");
+    when(userRepositoryNameResolver.resolveDisplayUserName(any())).thenReturn("Test User");
     when(auditLogService.createBatchLog(any(), any())).thenReturn("batch-id");
 
     UpdateUserServiceRequest request =
@@ -389,7 +389,7 @@ class UpdateUserServiceTest {
     when(updateUserUseCase.updateUser(
             any(com.sitepark.ies.userrepository.core.usecase.user.UpdateUserRequest.class)))
         .thenReturn(result);
-    when(multiEntityNameResolver.resolveDisplayUserName(any())).thenReturn("Test User");
+    when(userRepositoryNameResolver.resolveDisplayUserName(any())).thenReturn("Test User");
 
     UpdateUserServiceRequest request =
         UpdateUserServiceRequest.builder()
@@ -401,7 +401,7 @@ class UpdateUserServiceTest {
 
     service.updateUser(request);
 
-    verify(multiEntityNameResolver).resolveDisplayUserName(any());
+    verify(userRepositoryNameResolver).resolveDisplayUserName(any());
   }
 
   @Test
@@ -438,6 +438,6 @@ class UpdateUserServiceTest {
 
     service.updateUser(request);
 
-    verify(multiEntityNameResolver, never()).resolveDisplayUserName(any());
+    verify(userRepositoryNameResolver, never()).resolveDisplayUserName(any());
   }
 }

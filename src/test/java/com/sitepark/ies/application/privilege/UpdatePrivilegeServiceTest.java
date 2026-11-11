@@ -9,8 +9,8 @@ import static org.mockito.Mockito.when;
 
 import com.sitepark.ies.application.ApplicationAuditLogService;
 import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
-import com.sitepark.ies.application.MultiEntityNameResolver;
 import com.sitepark.ies.application.label.ReassignLabelsToEntitiesService;
+import com.sitepark.ies.application.userrepository.UserRepositoryNameResolver;
 import com.sitepark.ies.sharedkernel.patch.PatchDocument;
 import com.sitepark.ies.userrepository.core.domain.entity.Privilege;
 import com.sitepark.ies.userrepository.core.domain.value.PrivilegeRoleAssignment;
@@ -26,7 +26,7 @@ class UpdatePrivilegeServiceTest {
 
   private UpdatePrivilegeUseCase updatePrivilegeUseCase;
 
-  private MultiEntityNameResolver multiEntityNameResolver;
+  private UserRepositoryNameResolver userRepositoryNameResolver;
 
   @SuppressWarnings("PMD.SingularField")
   private ApplicationAuditLogServiceFactory auditLogServiceFactory;
@@ -41,14 +41,14 @@ class UpdatePrivilegeServiceTest {
   void setUp() {
     this.updatePrivilegeUseCase = mock();
     this.reassignLabelsToEntitiesService = mock();
-    this.multiEntityNameResolver = mock();
+    this.userRepositoryNameResolver = mock();
     this.auditLogServiceFactory = mock();
     this.auditLogService = mock();
     this.service =
         new UpdatePrivilegeService(
             updatePrivilegeUseCase,
             reassignLabelsToEntitiesService,
-            multiEntityNameResolver,
+            userRepositoryNameResolver,
             auditLogServiceFactory);
     when(auditLogServiceFactory.create(any(), any())).thenReturn(auditLogService);
   }
@@ -305,7 +305,8 @@ class UpdatePrivilegeServiceTest {
                 com.sitepark.ies.userrepository.core.usecase.privilege.UpdatePrivilegeRequest
                     .class)))
         .thenReturn(result);
-    when(multiEntityNameResolver.resolveRoleNames(any())).thenReturn(Map.of("role-1", "RoleOne"));
+    when(userRepositoryNameResolver.resolveRoleNames(any()))
+        .thenReturn(Map.of("role-1", "RoleOne"));
 
     UpdatePrivilegeServiceRequest request =
         UpdatePrivilegeServiceRequest.builder()
@@ -340,7 +341,8 @@ class UpdatePrivilegeServiceTest {
                 com.sitepark.ies.userrepository.core.usecase.privilege.UpdatePrivilegeRequest
                     .class)))
         .thenReturn(result);
-    when(multiEntityNameResolver.resolveRoleNames(any())).thenReturn(Map.of("role-1", "RoleOne"));
+    when(userRepositoryNameResolver.resolveRoleNames(any()))
+        .thenReturn(Map.of("role-1", "RoleOne"));
 
     UpdatePrivilegeServiceRequest request =
         UpdatePrivilegeServiceRequest.builder()
@@ -353,7 +355,7 @@ class UpdatePrivilegeServiceTest {
 
     service.updatePrivilege(request);
 
-    verify(multiEntityNameResolver).resolveRoleNames(any());
+    verify(userRepositoryNameResolver).resolveRoleNames(any());
   }
 
   @Test
@@ -375,7 +377,8 @@ class UpdatePrivilegeServiceTest {
                 com.sitepark.ies.userrepository.core.usecase.privilege.UpdatePrivilegeRequest
                     .class)))
         .thenReturn(result);
-    when(multiEntityNameResolver.resolveRoleNames(any())).thenReturn(Map.of("role-1", "RoleOne"));
+    when(userRepositoryNameResolver.resolveRoleNames(any()))
+        .thenReturn(Map.of("role-1", "RoleOne"));
 
     UpdatePrivilegeServiceRequest request =
         UpdatePrivilegeServiceRequest.builder()

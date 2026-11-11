@@ -14,13 +14,15 @@ import com.sitepark.ies.audit.core.domain.exception.CreateAuditLogEntryFailedExc
 import com.sitepark.ies.audit.core.service.AuditLogService;
 import com.sitepark.ies.audit.core.usecase.CreateAuditLogUseCase;
 import com.sitepark.ies.sharedkernel.domain.EntityRef;
-import com.sitepark.ies.userrepository.core.domain.entity.User;
 import java.io.IOException;
 import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class ApplicationAuditLogServiceTest {
+
+  /** Stands for an entity type of another core; only its name matters. */
+  private static final class User {}
 
   private CreateAuditLogUseCase createAuditLogUseCase;
   private AuditLogService auditLogService;

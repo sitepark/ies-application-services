@@ -2,9 +2,9 @@ package com.sitepark.ies.application.role;
 
 import com.sitepark.ies.application.ApplicationAuditLogService;
 import com.sitepark.ies.application.ApplicationAuditLogServiceFactory;
-import com.sitepark.ies.application.MultiEntityNameResolver;
 import com.sitepark.ies.application.audit.AuditBatchLogAction;
 import com.sitepark.ies.application.audit.AuditLogAction;
+import com.sitepark.ies.application.userrepository.UserRepositoryNameResolver;
 import com.sitepark.ies.sharedkernel.domain.EntityRef;
 import com.sitepark.ies.userrepository.core.domain.entity.Role;
 import com.sitepark.ies.userrepository.core.usecase.role.AssignPrivilegesToRolesResult;
@@ -34,16 +34,16 @@ import org.jspecify.annotations.Nullable;
 public final class AssignPrivilegesToRolesService {
 
   private final AssignPrivilegesToRolesUseCase assignPrivilegesToRolesUseCase;
-  private final MultiEntityNameResolver multiEntityNameResolver;
+  private final UserRepositoryNameResolver userRepositoryNameResolver;
   private final ApplicationAuditLogServiceFactory auditLogServiceFactory;
 
   @Inject
   AssignPrivilegesToRolesService(
       AssignPrivilegesToRolesUseCase assignPrivilegesToRolesUseCase,
-      MultiEntityNameResolver multiEntityNameResolver,
+      UserRepositoryNameResolver userRepositoryNameResolver,
       ApplicationAuditLogServiceFactory auditLogServiceFactory) {
     this.assignPrivilegesToRolesUseCase = assignPrivilegesToRolesUseCase;
-    this.multiEntityNameResolver = multiEntityNameResolver;
+    this.userRepositoryNameResolver = userRepositoryNameResolver;
     this.auditLogServiceFactory = auditLogServiceFactory;
   }
 
@@ -115,6 +115,6 @@ public final class AssignPrivilegesToRolesService {
   }
 
   private Map<String, String> resolveRoleNames(AssignPrivilegesToRolesResult.Assigned result) {
-    return multiEntityNameResolver.resolveRoleNames(Set.copyOf(result.assignments().roleIds()));
+    return userRepositoryNameResolver.resolveRoleNames(Set.copyOf(result.assignments().roleIds()));
   }
 }

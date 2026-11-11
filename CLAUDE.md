@@ -84,6 +84,15 @@ Domain Layer (userrepository-core, security-core, audit-core)
 - `ies-userrepository-rest-extension` - REST API layer (if exists)
 - Any other presentation layer requiring cross-context workflows
 
+### Entity Names
+
+The audit log stores the name of each entity. `MultiEntityNameResolver` delegates to the
+`EntityNameResolver` of each entity type, injected as `Set<EntityNameResolver>`:
+`LabelNameResolver` for labels, `UserNameResolver`, `RoleNameResolver` and
+`PrivilegeNameResolver` (package `userrepository`) for the user management. A new entity type
+adds its own `EntityNameResolver`. The assignment services look up user and role names by id via
+`UserRepositoryNameResolver`.
+
 ### Package Structure
 
 ```
