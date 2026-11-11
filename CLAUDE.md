@@ -8,6 +8,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Key Principle**: Application Services coordinate use cases from different bounded contexts but contain NO business logic. They are thin orchestration layers.
 
+## Branches
+
+| Branch | Version | Content | Used by |
+|---|---|---|---|
+| `main` | 1.x | labels, audit log, values, multi-entity services; no dependency on `ies-userrepository-core` or `ies-security-core` | IES 4 |
+| `feature/ies-5` | 2.x | everything of `main` plus users, roles and privileges (packages `user`, `role`, `privilege`, `userrepository`, `audit.revert.{user,role,privilege}`) | IES 5 with the new user management |
+
+Changes are made on `main` and merged into `feature/ies-5`, like `feature/ies-4` → `feature/ies-5` in the IES. Work on the user management only on `feature/ies-5`.
+
+
 ## Build and Development Commands
 
 ### Build and Compile
@@ -68,30 +78,29 @@ Presentation Layer (GraphQL, REST, CLI)
          ↓
    Application Layer (THIS MODULE) ← Orchestrates workflows
          ↓
-Domain Layer (userrepository-core, security-core, audit-core)
+Domain Layer (label-core, audit-core; on feature/ies-5 also userrepository-core, security-core)
 ```
 
 ### Module Dependencies
 
 **This module depends on:**
-- `ies-userrepository-core` - User management domain and use cases
-- `ies-security-core` - Security, authentication, password management
-- `ies-audit-core` - Audit logging (optional)
+- `ies-label-core` - Labels
+- `ies-audit-core` - Audit logging
+- on `feature/ies-5` also `ies-userrepository-core` (user management) and `ies-security-core` (passwords)
 - `ies-shared-kernel` - Shared domain primitives and base types
 
 **This module is used by:**
-- `ies-userrepository-graphql-extension` - GraphQL API layer
-- `ies-userrepository-rest-extension` - REST API layer (if exists)
+- the label and audit GraphQL extensions of the IES
+- on `feature/ies-5` the userrepository GraphQL and REST extensions
 - Any other presentation layer requiring cross-context workflows
 
 ### Entity Names
 
 The audit log stores the name of each entity. `MultiEntityNameResolver` delegates to the
-`EntityNameResolver` of each entity type, injected as `Set<EntityNameResolver>`:
-`LabelNameResolver` for labels, `UserNameResolver`, `RoleNameResolver` and
-`PrivilegeNameResolver` (package `userrepository`) for the user management. A new entity type
-adds its own `EntityNameResolver`. The assignment services look up user and role names by id via
-`UserRepositoryNameResolver`.
+`EntityNameResolver` of each entity type, injected as `Set<EntityNameResolver>`. `main` provides
+`LabelNameResolver`; `feature/ies-5` adds `UserNameResolver`, `RoleNameResolver` and
+`PrivilegeNameResolver` (package `userrepository`). A new entity type adds its own
+`EntityNameResolver`.
 
 ### Package Structure
 
@@ -186,14 +195,17 @@ This project uses Java Platform Module System (JPMS). The module descriptor is i
 
 ```java
 module com.sitepark.ies.application {
-  exports com.sitepark.ies.application.user;
+  exports com.sitepark.ies.application;
+  exports com.sitepark.ies.application.audit;
+  exports com.sitepark.ies.application.audit.revert;
+  exports com.sitepark.ies.application.audit.revert.label;
+  exports com.sitepark.ies.application.label;
+  exports com.sitepark.ies.application.value;
 
-  requires com.sitepark.ies.userrepository.core;
-  requires com.sitepark.ies.security.core;
+  requires com.sitepark.ies.label.core;
+  requires com.sitepark.ies.audit.core;
   requires com.sitepark.ies.sharedkernel;
-  requires jakarta.inject;
-  requires org.apache.logging.log4j;
-  requires static org.jetbrains.annotations;
+  ...
 }
 ```
 

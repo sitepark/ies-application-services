@@ -5,6 +5,16 @@
 
 This module contains the **Application Layer** of the IES system, following Clean Architecture and Domain-Driven Design principles.
 
+## Branches
+
+| Branch | Version | Content | Used by |
+|---|---|---|---|
+| `main` | 1.x | labels, audit log, values, multi-entity services; no dependency on `ies-userrepository-core` or `ies-security-core` | IES 4 |
+| `feature/ies-5` | 2.x | everything of `main` plus users, roles and privileges (packages `user`, `role`, `privilege`, `userrepository`, `audit.revert.{user,role,privilege}`) | IES 5 with the new user management |
+
+Changes are made on `main` and merged into `feature/ies-5`, like `feature/ies-4` → `feature/ies-5` in the IES. Work on the user management only on `feature/ies-5`.
+
+
 ## Purpose
 
 The Application Services layer orchestrates operations across multiple **Bounded Contexts** to implement complex business workflows. It acts as a coordination layer between the presentation layer (controllers) and the domain layer (use cases).
@@ -12,7 +22,7 @@ The Application Services layer orchestrates operations across multiple **Bounded
 ### Key Responsibilities
 
 - **Use Case Orchestration**: Combines multiple use cases from different bounded contexts into a single transaction
-- **Cross-Context Coordination**: Coordinates operations between `userrepository-core`, `security-core`, and other core modules
+- **Cross-Context Coordination**: Coordinates operations between `label-core`, `audit-core` and other core modules (on `feature/ies-5` also `userrepository-core` and `security-core`)
 - **Workflow Management**: Implements complex multi-step business processes
 - **Code Reusability**: Provides convenient APIs that can be shared across different presentation layers (GraphQL, REST, CLI)
 
@@ -67,6 +77,8 @@ graph TD
 - It contains **business logic** → That belongs in use cases or entities
 
 ## Example: User Creation with Password
+
+> The user management exists only on `feature/ies-5`; the example illustrates the pattern.
 
 ### The Problem
 
@@ -217,9 +229,9 @@ graph TB
 
 **This module depends on:**
 
-- **ies-userrepository-core** - User management domain
-- **ies-security-core** - Security and authentication domain
-- **ies-audit-core** - Audit logging (optional)
+- **ies-label-core** - Labels
+- **ies-audit-core** - Audit logging
+- on `feature/ies-5` also **ies-userrepository-core** and **ies-security-core**
 - **ies-shared-kernel** - Shared domain primitives
 
 **This module is used by:**
