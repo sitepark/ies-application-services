@@ -1,12 +1,9 @@
 package com.sitepark.ies.application.label;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sitepark.ies.label.core.usecase.UpdateLabelRequest;
 import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 
-@JsonDeserialize(builder = UpdateLabelServiceRequest.Builder.class)
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName"})
 public final class UpdateLabelServiceRequest {
 
@@ -58,7 +55,6 @@ public final class UpdateLabelServiceRequest {
         + '}';
   }
 
-  @JsonPOJOBuilder(withPrefix = "")
   @SuppressWarnings("NullAway.Init")
   public static final class Builder {
 
