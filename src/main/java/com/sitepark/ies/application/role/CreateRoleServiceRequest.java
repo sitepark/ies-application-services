@@ -1,7 +1,5 @@
 package com.sitepark.ies.application.role;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sitepark.ies.application.user.CreateUserServiceRequest.Builder;
 import com.sitepark.ies.sharedkernel.base.Identifier;
 import com.sitepark.ies.sharedkernel.base.IdentifierListBuilder;
@@ -12,7 +10,6 @@ import java.util.TreeSet;
 import java.util.function.Consumer;
 import org.jspecify.annotations.Nullable;
 
-@JsonDeserialize(builder = CreateRoleServiceRequest.Builder.class)
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName"})
 public final class CreateRoleServiceRequest {
 
@@ -74,7 +71,6 @@ public final class CreateRoleServiceRequest {
         + '}';
   }
 
-  @JsonPOJOBuilder(withPrefix = "")
   @SuppressWarnings("NullAway.Init")
   public static final class Builder {
 

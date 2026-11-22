@@ -1,12 +1,9 @@
 package com.sitepark.ies.application.role;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sitepark.ies.userrepository.core.usecase.role.ReassignPrivilegesToRolesRequest;
 import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 
-@JsonDeserialize(builder = ReassignPrivilegesToRolesServiceRequest.Builder.class)
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName"})
 public final class ReassignPrivilegesToRolesServiceRequest {
 
@@ -63,7 +60,6 @@ public final class ReassignPrivilegesToRolesServiceRequest {
         + '}';
   }
 
-  @JsonPOJOBuilder(withPrefix = "")
   @SuppressWarnings("NullAway.Init")
   public static final class Builder {
 
