@@ -38,6 +38,5 @@ module com.sitepark.ies.application {
   requires jakarta.inject;
   requires org.apache.logging.log4j;
   requires java.desktop;
-  requires com.fasterxml.jackson.databind;
   requires com.sitepark.ies.audit.core;
 }
