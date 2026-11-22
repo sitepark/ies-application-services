@@ -1,7 +1,5 @@
 package com.sitepark.ies.application.privilege;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sitepark.ies.sharedkernel.base.Identifier;
 import com.sitepark.ies.sharedkernel.base.IdentifierListBuilder;
 import com.sitepark.ies.sharedkernel.base.Updatable;
@@ -13,7 +11,6 @@ import java.util.TreeSet;
 import java.util.function.Consumer;
 import org.jspecify.annotations.Nullable;
 
-@JsonDeserialize(builder = UpdatePrivilegeServiceRequest.Builder.class)
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName"})
 public final class UpdatePrivilegeServiceRequest {
 
@@ -77,7 +74,6 @@ public final class UpdatePrivilegeServiceRequest {
         + '}';
   }
 
-  @JsonPOJOBuilder(withPrefix = "")
   @SuppressWarnings("NullAway.Init")
   public static final class Builder {
 

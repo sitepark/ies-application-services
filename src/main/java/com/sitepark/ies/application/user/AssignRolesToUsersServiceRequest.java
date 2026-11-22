@@ -1,11 +1,8 @@
 package com.sitepark.ies.application.user;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 
-@JsonDeserialize(builder = AssignRolesToUsersServiceRequest.Builder.class)
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName"})
 public final class AssignRolesToUsersServiceRequest {
 
@@ -63,7 +60,6 @@ public final class AssignRolesToUsersServiceRequest {
         + '}';
   }
 
-  @JsonPOJOBuilder(withPrefix = "")
   @SuppressWarnings("NullAway.Init")
   public static final class Builder {
 

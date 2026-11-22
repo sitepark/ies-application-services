@@ -1,12 +1,9 @@
 package com.sitepark.ies.application.label;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sitepark.ies.label.core.usecase.ReassignLabelsToEntitiesRequest;
 import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 
-@JsonDeserialize(builder = ReassignLabelsToEntitiesServiceRequest.Builder.class)
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName"})
 public final class ReassignLabelsToEntitiesServiceRequest {
 
@@ -59,7 +56,6 @@ public final class ReassignLabelsToEntitiesServiceRequest {
         + '}';
   }
 
-  @JsonPOJOBuilder(withPrefix = "")
   @SuppressWarnings("NullAway.Init")
   public static final class Builder {
 
